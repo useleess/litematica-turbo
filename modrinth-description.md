@@ -24,6 +24,8 @@ Litematica config menu → **Turbo** tab. Build thread count, empty-space skippi
 If a Litematica update ever breaks one of Turbo's patches, Turbo switches itself off for that session (Litematica works exactly as normal) and tells you in chat - it does not crash your game.
 
 ## Versions
-Fabric, Minecraft 1.16.4 - 26.3 (one file per version, pick the one for your Minecraft version). Requires Litematica (and its MaLiLib). Client only - not needed on servers.
+One file per Minecraft version - pick the one for your Minecraft version and loader. Client only - not needed on servers.
+- **Fabric**, Minecraft 1.16.4 - 26.3: requires Litematica (and its MaLiLib).
+- **Forge** (1.16.5 - 1.20.1) and **NeoForge** (1.20.4 - 26.2): requires [Forgematica](https://modrinth.com/mod/forgematica) (and its MaFgLib).
 
 Beta: please report any problem with your Minecraft and Litematica version.
