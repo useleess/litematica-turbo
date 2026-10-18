@@ -1,0 +1,39 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "All-Rights-Reserved"
+
+[[mods]]
+modId = "litematica_turbo"
+version = "${version}"
+displayName = "Litematica Turbo"
+authors = "Useleess"
+description = '''
+Faster schematic rendering for Forgematica (Litematica): multithreaded chunk builds, skips empty space, no render-thread rebuild stutter, smooth placement moving.
+'''
+
+[[mixins]]
+config = "litematica_turbo.mixins.json"
+
+[[mixins]]
+config = "litematica_turbo.neoforge.mixins.json"
+
+[[dependencies.litematica_turbo]]
+modId = "neoforge"
+type = "required"
+versionRange = "[26.2,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.litematica_turbo]]
+modId = "minecraft"
+type = "required"
+versionRange = "[26.2]"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.litematica_turbo]]
+modId = "${forgematica_mod_id}"
+type = "required"
+versionRange = "*"
+ordering = "AFTER"
+side = "CLIENT"

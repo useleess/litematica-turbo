@@ -1,0 +1,26 @@
+{
+  "required": false,
+  "plugin": "com.litematicaturbo.mc1214.TurboMixinGuard",
+  "minVersion": "0.8",
+  "package": "com.litematicaturbo.mc1214.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "BlockModelRendererSchematicMixin",
+    "ChunkCacheSchematicAccessor",
+    "ChunkRenderDispatcherLitematicaMixin",
+    "ChunkRendererSchematicVboMixin",
+    "ChunkRenderWorkerLitematicaMixin",
+    "ChunkRenderDispatcherSchematicAccessor",
+    "ChunkRenderTaskSchematicInvoker",
+    "ChunkRendererSchematicVboInvoker",
+    "GuiConfigsMixin",
+    "GuiConfigsTabListenerMixin",
+    "SchematicPlacementManagerMixin",
+    "SchematicPlacementMixin",
+    "SchematicPlacingUtilsMixin",
+    "WorldRendererSchematicMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

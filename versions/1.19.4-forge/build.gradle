@@ -1,0 +1,5 @@
+plugins {
+    id 'dev.architectury.loom'
+}
+
+apply from: rootProject.file('version.gradle')

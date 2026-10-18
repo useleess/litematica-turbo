@@ -1,0 +1,6 @@
+plugins {
+    // 26.x is not obfuscated: no remapping, Mojang names
+    id 'dev.architectury.loom-no-remap'
+}
+
+apply from: rootProject.file('version.gradle')

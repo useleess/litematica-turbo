@@ -1,0 +1,12 @@
+{
+  "config.name.turboenabled": "Turbo enabled",
+  "config.name.turbobuildthreads": "Build threads",
+  "config.name.turboskipemptysections": "Skip empty sections",
+  "config.name.turboasyncnearrebuilds": "Background near rebuilds",
+  "config.name.turboghostmove": "Smooth placement moving",
+  "config.name.turboghostsettlems": "Rebuild delay after moving (ms)",
+  "config.name.turbocatchupauto": "Automatic catch-up",
+  "config.name.turbocatchupbudgetms": "Catch-up budget (ms per tick)",
+  "config.name.turboshowstats": "Show F3 stats",
+  "litematica_turbo.gui.button.config_gui.turbo": "Turbo"
+}

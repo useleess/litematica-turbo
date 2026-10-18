@@ -1,0 +1,22 @@
+pluginManagement {
+    repositories {
+        maven { url = 'https://maven.fabricmc.net/' }
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'litematica-turbo'
+
+// Every Fabric version from 1.16 up. 1.12.2 (Ornithe) is a separate build in versions/1.12.2.
+// Build just some of them with -Pmc=1.20.4,1.21.4 (each one downloads and sets up its Minecraft).
+def allVersions = ['1.16.5', '1.17.1', '1.18.2', '1.19.4', '1.20.1', '1.20.4',
+                   '1.21', '1.21.4', '1.21.10', '1.21.11', '26.2', '26.3']
+def only = providers.gradleProperty('mc').orNull
+
+include 'core'
+
+for (String mc : allVersions) {
+    if ((only == null || only.split(',').contains(mc)) && file("versions/$mc/build.gradle").exists()) {
+        include "versions:$mc"
+    }
+}

@@ -1,0 +1,17 @@
+# build output / IDE
+build/
+bin/
+out/
+.gradle/
+.idea/
+*.iml
+run/
+forge/.deps/
+# logs and local test output
+*.log
+final-check.txt
+# jars (except the Gradle wrapper and the yarn patch used by the build)
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+!forge/gradle/wrapper/gradle-wrapper.jar
+!forge/yarn-patches/*.jar

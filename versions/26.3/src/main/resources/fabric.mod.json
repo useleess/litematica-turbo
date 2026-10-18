@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "litematica_turbo",
+  "name": "Litematica Turbo",
+  "version": "${version}",
+  "description": "Faster schematic rendering for Litematica: multithreaded chunk builds, skips empty space, no render-thread rebuild stutter.",
+  "authors": ["Useleess"],
+  "license": "All-Rights-Reserved",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["com.litematicaturbo.mc263.LitematicaTurbo"]
+  },
+  "mixins": ["litematica_turbo.mixins.json"],
+  "depends": {
+    "minecraft": "26.3",
+    "fabricloader": ">=0.18.0",
+    "litematica": ">=0.29.0 <0.30"
+  }
+}

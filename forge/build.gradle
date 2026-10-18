@@ -1,0 +1,4 @@
+plugins {
+    id 'dev.architectury.loom' version '1.17.493' apply false
+    id 'dev.architectury.loom-no-remap' version '1.17.493' apply false
+}

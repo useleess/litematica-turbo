@@ -1,0 +1,107 @@
+// Shared setup of every versions/<mc> project; the project applies its Loom plugin first.
+// Per-version values come from versions/<mc>/gradle.properties.
+
+def remap = plugins.hasPlugin('net.fabricmc.fabric-loom-remap')
+int javaRelease = Integer.parseInt(project.java_release)
+
+base {
+    archivesName = "${rootProject.mod_id}-fabric-${project.minecraft_version}"
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion(javaRelease)
+    targetCompatibility = JavaVersion.toVersion(javaRelease)
+    // Compiles and runs the dev client with this JDK (from org.gradle.java.installations.paths)
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(project.java_toolchain)
+    }
+}
+
+repositories {
+    exclusiveContent {
+        forRepository { maven { url = 'https://api.modrinth.com/maven' } }
+        filter { includeGroup 'maven.modrinth' }
+    }
+    exclusiveContent {
+        forRepository { maven { url = 'https://maven.fallenbreath.me/releases' } }
+        filter { includeGroup 'me.fallenbreath' }
+    }
+}
+
+// The version-independent core is compiled straight into every version jar.
+sourceSets.main.java.srcDir rootProject.file('core/src/main/java')
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
+
+    // Not transitive: some old mod poms drag in their own (older) fabric-loader
+    if (remap) {
+        if (project.hasProperty('yarn_mappings')) {
+            mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+        } else {
+            mappings loom.officialMojangMappings() // Mojang names, like 26.x
+        }
+        modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+        modImplementation("maven.modrinth:malilib:${project.malilib_version}") { transitive = false }
+        modImplementation("maven.modrinth:litematica:${project.litematica_version}") { transitive = false }
+        // Only for the dev client (malilib needs it); not a dependency of the mod
+        modLocalRuntime("net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}") { exclude group: "net.fabricmc", module: "fabric-loader" }
+        // Litematica 0.26+ nests it, but the dev client needs it on the classpath for its mixin plugin
+        if (project.hasProperty('conditionalmixin_version')) {
+            modLocalRuntime("me.fallenbreath:conditional-mixin-fabric:${project.conditionalmixin_version}") { transitive = false }
+        }
+    } else {
+        implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+        implementation("maven.modrinth:malilib:${project.malilib_version}") { transitive = false }
+        implementation("maven.modrinth:litematica:${project.litematica_version}") { transitive = false }
+        localRuntime("net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}") { exclude group: "net.fabricmc", module: "fabric-loader" }
+        if (project.hasProperty('conditionalmixin_version')) {
+            localRuntime("me.fallenbreath:conditional-mixin-fabric:${project.conditionalmixin_version}") { transitive = false }
+        }
+    }
+}
+
+processResources {
+    def props = ['version': rootProject.mod_version]
+    inputs.properties props
+    filesMatching('fabric.mod.json') {
+        expand props
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = javaRelease
+}
+
+// Dev checks (see README):
+//   audit: -Paudit            loads every patched class, quits (exit code 1 on a failed mixin)
+//   bench: -PbenchSchematic=<file in run/>   joins run/saves/bench, places it, writes run/turbo-bench.txt
+//   -Pstock   runs the bench with Turbo switched off (A/B)
+loom {
+    runs {
+        client {
+            if (project.hasProperty('audit')) {
+                vmArg '-Dlitematicaturbo.audit=true'
+            }
+            if (project.hasProperty('benchSchematic')) {
+                programArgs '--quickPlaySingleplayer', 'bench'
+                vmArg "-Dlitematicaturbo.bench=${project.benchSchematic}"
+            }
+            if (project.hasProperty('shots')) {
+                // gallery screenshots: -Pshots (with -PbenchSchematic), full HD window
+                vmArg '-Dlitematicaturbo.shots=true'
+                programArgs '--width', '1920', '--height', '1080'
+            }
+            if (project.hasProperty('benchProfile')) {
+                vmArg '-Dlitematicaturbo.benchProfile=true'
+            }
+            if (project.hasProperty('stock')) {
+                vmArg '-Dlitematicaturbo.stock=true'
+            }
+            if (project.hasProperty('jfr')) {
+                vmArg "-XX:StartFlightRecording=filename=${project.jfr},settings=profile"
+            }
+        }
+    }
+}

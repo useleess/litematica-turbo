@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "com.litematicaturbo.mc262.neoforge.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "ForgematicaSamplerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

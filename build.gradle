@@ -1,0 +1,18 @@
+plugins {
+    // -remap: obfuscated Minecraft (1.21.11 and older); plain: unobfuscated (26.1 and newer)
+    id 'net.fabricmc.fabric-loom-remap' version '1.18.4' apply false
+    id 'net.fabricmc.fabric-loom' version '1.18.4' apply false
+}
+
+subprojects {
+    group = rootProject.maven_group
+    version = rootProject.mod_version
+
+    repositories {
+        mavenCentral()
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        it.options.encoding = 'UTF-8'
+    }
+}

@@ -1,0 +1,243 @@
+// Shared setup of every versions/<mc>-forge / -neoforge project (Architectury Loom).
+// The project applies 'dev.architectury.loom' first; values come from its gradle.properties:
+//   loom.platform = forge | neoforge
+//   fabric_source = the Fabric version folder whose code (mixins, settings tab, bench) is reused
+//   minecraft_version, yarn_mappings, forge_version | neoforge_version,
+//   forgematica_version, mafglib_version (Modrinth version ids), java_release, java_toolchain,
+//   forgematica_mod_id (optional, default forgematica; Forgematica for 1.17.1 calls itself litematica),
+//   pack_format (optional: resource pack format of that MC version, for the generated pack.mcmeta),
+//   forgematica_url / mafglib_url (optional: direct jar URL when Modrinth's primary file is wrong),
+//   dev_call_fixes (optional: owner.oldName(desc)=newName,... rewrites calls in the dev Minecraft jar; see below),
+//   extra_mods (optional: more Modrinth deps as slug:versionId,slug:versionId)
+//   No yarn_mappings = Mojang names (1.21.11+). yarn_patch (optional, NeoForge): Architectury yarn conflict patch.
+
+def turboProps = new Properties()
+file('../../gradle.properties').withInputStream { turboProps.load(it) }
+def modVersion = turboProps.getProperty('mod_version').trim()
+def neo = project.property('loom.platform') == 'neoforge'
+def fabricSource = file("../${project.fabric_source}")
+int javaRelease = Integer.parseInt(project.java_release)
+// 26.x is unobfuscated: project applies dev.architectury.loom-no-remap, no mappings, plain implementation deps
+def remap = !plugins.hasPlugin('dev.architectury.loom-no-remap')
+def modDep = remap ? 'modImplementation' : 'implementation'
+
+group = turboProps.getProperty('maven_group').trim()
+version = modVersion
+
+base {
+    archivesName = "litematica_turbo-${neo ? 'neoforge' : 'forge'}-${project.minecraft_version}"
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion(javaRelease)
+    targetCompatibility = JavaVersion.toVersion(javaRelease)
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(project.java_toolchain)
+    }
+}
+
+repositories {
+    mavenCentral()
+    exclusiveContent {
+        forRepository { maven { url = 'https://api.modrinth.com/maven' } }
+        filter { includeGroup 'maven.modrinth' }
+    }
+    maven { url = 'https://maven.neoforged.net/releases/' }
+    maven { url = 'https://maven.architectury.dev/' }
+}
+
+// Shared code: core + the Fabric version's sources and assets, minus its Fabric entry point
+sourceSets.main.java.srcDirs += [file('../../core/src/main/java'), new File(fabricSource, 'src/main/java')]
+sourceSets.main.java.exclude '**/LitematicaTurbo.java'
+sourceSets.main.resources.srcDirs += [new File(fabricSource, 'src/main/resources')]
+sourceSets.main.resources.exclude 'fabric.mod.json'
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    if (project.hasProperty('yarn_patch')) {
+        // Architectury's fix for yarn names that clash with methods NeoForge adds
+        mappings loom.layered {
+            it.mappings("net.fabricmc:yarn:${project.yarn_mappings}:v2")
+            def patch = project.yarn_patch
+            // a .jar name = our own patch in forge/yarn-patches (same format), for versions Architectury has none for
+            it.mappings(patch.endsWith('.jar') ? rootProject.file("yarn-patches/$patch") : "dev.architectury:yarn-mappings-patch-neoforge:$patch")
+        }
+    } else if (project.hasProperty('yarn_mappings')) {
+        mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    } else if (remap) {
+        mappings loom.officialMojangMappings()
+    }
+
+    if (neo) {
+        neoForge "net.neoforged:neoforge:${project.neoforge_version}"
+    } else {
+        forge "net.minecraftforge:forge:${project.forge_version}"
+    }
+
+    // Modrinth marks the sources jar as primary for some releases: <slug>_url = the real jar, fetched directly
+    // Their nested jars (MaFgLib ships Fabric API networking etc.) load in a real install but not in the dev
+    // client, so they are extracted and added to the dev runtime only.
+    def nestedDir = rootProject.file(".deps/nested/${project.name}")
+    def addNested = { File modJar ->
+        nestedDir.mkdirs()
+        new java.util.zip.ZipFile(modJar).withCloseable { zip ->
+            zip.entries().findAll { e -> e.name ==~ /META-INF\/(jars|jarjar)\/[^\/]+\.jar/ && !e.name.contains('conditional-mixin-fabric') }.each { e ->
+                def out = new File(nestedDir, e.name.tokenize('/').last())
+                if (!out.exists()) {
+                    zip.getInputStream(e).withCloseable { i -> out.withOutputStream { it << i } }
+                }
+                add(remap ? 'modLocalRuntime' : 'localRuntime', files(out))
+            }
+        }
+    }
+    def modrinthMod = { String slug ->
+        def url = project.findProperty("${slug}_url")
+        if (url) {
+            def jar = rootProject.file(".deps/${url.tokenize('/').last()}")
+            if (!jar.exists()) {
+                jar.parentFile.mkdirs()
+                new URL(url).withInputStream { i -> jar.withOutputStream { it << i } }
+            }
+            add(modDep, files(jar))
+            addNested(jar)
+        } else {
+            def coord = "maven.modrinth:${slug}:${project.property("${slug}_version")}"
+            add(modDep, coord) { transitive = false }
+            // plain download (resolving a configuration here would lock Loom's repositories)
+            def id = project.property("${slug}_version")
+            def copy = rootProject.file(".deps/${slug}-${id}.jar")
+            if (!copy.exists()) {
+                copy.parentFile.mkdirs()
+                new URL("https://api.modrinth.com/maven/maven/modrinth/${slug}/${id}/${slug}-${id}.jar").withInputStream { i -> copy.withOutputStream { it << i } }
+            }
+            addNested(copy)
+        }
+    }
+    modrinthMod('mafglib')
+    modrinthMod('forgematica')
+    (project.findProperty('extra_mods') ?: '').split(',').findAll { it }.each {
+        def (slug, id) = it.trim().split(':')
+        add(modDep, "maven.modrinth:${slug}:${id}") { transitive = false }
+    }
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
+}
+
+loom {
+    if (neo == false) {
+        forge {
+            mixinConfigs = ['litematica_turbo.mixins.json']
+        }
+    }
+
+    runs {
+        client {
+            if (project.hasProperty('audit')) {
+                vmArg '-Dlitematicaturbo.audit=true'
+            }
+            if (project.hasProperty('benchSchematic')) {
+                programArgs '--quickPlaySingleplayer', 'bench'
+                vmArg "-Dlitematicaturbo.bench=${project.benchSchematic}"
+            }
+            if (project.hasProperty('stock')) {
+                vmArg '-Dlitematicaturbo.stock=true'
+            }
+            if (project.hasProperty('benchProfile')) {
+                vmArg '-Dlitematicaturbo.benchProfile=true'
+            }
+        }
+    }
+}
+
+// Forge/NeoForge load every mod jar as a resource pack and warn without a pack.mcmeta
+def packMetaDir = layout.buildDirectory.dir('generated/packmeta')
+def generatePackMeta = tasks.register('generatePackMeta') {
+    def packFormat = project.findProperty('pack_format')
+    inputs.property 'packFormat', packFormat
+    outputs.dir packMetaDir
+    doLast {
+        def f = packMetaDir.get().file('pack.mcmeta').asFile
+        f.parentFile.mkdirs()
+        f.text = """{
+  "pack": {
+    "description": "Litematica Turbo resources",
+    "pack_format": ${packFormat}
+  }
+}
+"""
+    }
+}
+if (project.hasProperty('pack_format')) {
+    sourceSets.main.resources.srcDir(files(packMetaDir).builtBy(generatePackMeta))
+}
+
+processResources {
+    def props = ['version': modVersion,
+                 'forgematica_mod_id': project.findProperty('forgematica_mod_id') ?: 'forgematica']
+    inputs.properties props
+    filesMatching(['META-INF/mods.toml', 'META-INF/neoforge.mods.toml']) {
+        expand props
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = 'UTF-8'
+    it.options.release = javaRelease
+}
+
+// Run the game on the target's toolchain JDK, not Gradle's (old Forge cannot read JDK 21 classes)
+tasks.withType(JavaExec).configureEach {
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(project.java_toolchain)
+    }
+}
+
+// Forge 1.16.5 patches rename vanilla TransformationMatrix.inverse/compose (inverseVanilla/composeVanilla) and
+// provide them again through IForgeTransformationMatrix under their MCP names. The remapper cannot resolve the
+// vanilla calls to the SRG names, so they stay unmapped and the dev client crashes while baking models.
+// Real installs run SRG names and are not affected. Rewrites those calls in the dev Minecraft jar before a run.
+if (project.hasProperty('dev_call_fixes')) {
+    def fixes = [:]
+    project.dev_call_fixes.split(',').findAll { it.trim() }.each { fixes[it.split('=')[0].trim()] = it.split('=')[1].trim() }
+    tasks.withType(JavaExec).configureEach { run ->
+        run.doFirst {
+            def mcJar = run.classpath.files.find { it.name.contains('-minecraft-merged-') && it.name.endsWith('.jar') }
+            if (mcJar == null) {
+                return
+            }
+            // ASM comes with Loom; it is not on this script's compile classpath, so load it from Loom's loader
+            def asm = plugins.findPlugin(remap ? 'dev.architectury.loom' : 'dev.architectury.loom-no-remap').class.classLoader
+            def remapper = asm.loadClass('org.objectweb.asm.commons.SimpleRemapper').newInstance(fixes)
+            def oldNames = fixes.keySet().collect { it.substring(it.indexOf('.') + 1, it.indexOf('(')) }
+            def tmp = new File(mcJar.path + '.fixing')
+            int changed = 0
+            new java.util.zip.ZipFile(mcJar).withCloseable { zip ->
+                tmp.withOutputStream { os ->
+                    def out = new java.util.zip.ZipOutputStream(os)
+                    zip.entries().each { e ->
+                        byte[] data = zip.getInputStream(e).bytes
+                        if (e.name.endsWith('.class') && oldNames.any { new String(data, 'ISO-8859-1').contains(it) }) {
+                            def reader = asm.loadClass('org.objectweb.asm.ClassReader').newInstance(data)
+                            def writer = asm.loadClass('org.objectweb.asm.ClassWriter').newInstance(0)
+                            reader.accept(asm.loadClass('org.objectweb.asm.commons.ClassRemapper').newInstance(writer, remapper), 0)
+                            byte[] fixed = writer.toByteArray()
+                            if (!Arrays.equals(fixed, data)) {
+                                data = fixed
+                                changed++
+                            }
+                        }
+                        out.putNextEntry(new java.util.zip.ZipEntry(e.name))
+                        out.write(data)
+                        out.closeEntry()
+                    }
+                    out.finish()
+                }
+            }
+            if (changed > 0) {
+                java.nio.file.Files.move(tmp.toPath(), mcJar.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+                logger.lifecycle("dev_call_fixes: rewrote calls in ${changed} classes of ${mcJar.name}")
+            } else {
+                tmp.delete()
+            }
+        }
+    }
+}
