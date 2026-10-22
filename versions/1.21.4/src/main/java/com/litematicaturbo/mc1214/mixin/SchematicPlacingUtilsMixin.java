@@ -1,28 +1,20 @@
 package com.litematicaturbo.mc1214.mixin;
 
-import java.util.Map;
+import com.llamalad7.mixinextras.sugar.Local;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
-import net.minecraft.world.tick.OrderedTick;
 
 import fi.dy.masa.litematica.schematic.container.LitematicaBlockStateContainer;
-import fi.dy.masa.litematica.schematic.placement.SchematicPlacement;
-import fi.dy.masa.litematica.schematic.placement.SubRegionPlacement;
-import fi.dy.masa.litematica.util.PasteLayerBehavior;
-import fi.dy.masa.litematica.util.ReplaceBehavior;
 import fi.dy.masa.litematica.util.SchematicPlacingUtils;
 import fi.dy.masa.litematica.world.ChunkSchematic;
 import fi.dy.masa.litematica.world.WorldSchematic;
@@ -50,14 +42,10 @@ public abstract class SchematicPlacingUtilsMixin
     @Unique
     private static final ThreadLocal<ChunkSchematic> TURBO_CHUNK = new ThreadLocal<>();
 
+    // Only the arguments it needs (as locals): Litematica 0.21.3 added a parameter, this fits both
     @Inject(method = "placeBlocksWithinChunk", at = @At("HEAD"))
-    private static void turbo$checkEmptyChunk(World world, ChunkPos chunkPos, String regionName,
-                                              LitematicaBlockStateContainer container, Map<BlockPos, NbtCompound> blockEntityMap,
-                                              BlockPos origin, SchematicPlacement schematicPlacement, SubRegionPlacement placement,
-                                              Map<BlockPos, OrderedTick<Block>> scheduledBlockTicks,
-                                              Map<BlockPos, OrderedTick<Fluid>> scheduledFluidTicks,
-                                              ReplaceBehavior replace, PasteLayerBehavior layerBehavior, boolean notifyNeighbors,
-                                              CallbackInfoReturnable<Boolean> cir)
+    private static void turbo$checkEmptyChunk(CallbackInfoReturnable<Boolean> cir,
+                                              @Local(argsOnly = true) World world, @Local(argsOnly = true) ChunkPos chunkPos)
     {
         ChunkSchematic chunk = null;
 

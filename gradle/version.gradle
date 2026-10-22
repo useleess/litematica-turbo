@@ -43,8 +43,17 @@ dependencies {
             mappings loom.officialMojangMappings() // Mojang names, like 26.x
         }
         modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-        modImplementation("maven.modrinth:malilib:${project.malilib_version}") { transitive = false }
-        modImplementation("maven.modrinth:litematica:${project.litematica_version}") { transitive = false }
+        // -Plitematica_runtime=<id> (+ optional -Pmalilib_runtime): compile as usual, but run the dev
+        // client with that (older) release, to check Turbo against every Litematica its range allows
+        if (project.hasProperty('litematica_runtime')) {
+            modCompileOnly("maven.modrinth:malilib:${project.malilib_version}") { transitive = false }
+            modCompileOnly("maven.modrinth:litematica:${project.litematica_version}") { transitive = false }
+            modLocalRuntime("maven.modrinth:malilib:${project.findProperty('malilib_runtime') ?: project.malilib_version}") { transitive = false }
+            modLocalRuntime("maven.modrinth:litematica:${project.litematica_runtime}") { transitive = false }
+        } else {
+            modImplementation("maven.modrinth:malilib:${project.malilib_version}") { transitive = false }
+            modImplementation("maven.modrinth:litematica:${project.litematica_version}") { transitive = false }
+        }
         // Only for the dev client (malilib needs it); not a dependency of the mod
         modLocalRuntime("net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}") { exclude group: "net.fabricmc", module: "fabric-loader" }
         // Litematica 0.26+ nests it, but the dev client needs it on the classpath for its mixin plugin
@@ -53,8 +62,15 @@ dependencies {
         }
     } else {
         implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-        implementation("maven.modrinth:malilib:${project.malilib_version}") { transitive = false }
-        implementation("maven.modrinth:litematica:${project.litematica_version}") { transitive = false }
+        if (project.hasProperty('litematica_runtime')) {
+            compileOnly("maven.modrinth:malilib:${project.malilib_version}") { transitive = false }
+            compileOnly("maven.modrinth:litematica:${project.litematica_version}") { transitive = false }
+            localRuntime("maven.modrinth:malilib:${project.findProperty('malilib_runtime') ?: project.malilib_version}") { transitive = false }
+            localRuntime("maven.modrinth:litematica:${project.litematica_runtime}") { transitive = false }
+        } else {
+            implementation("maven.modrinth:malilib:${project.malilib_version}") { transitive = false }
+            implementation("maven.modrinth:litematica:${project.litematica_version}") { transitive = false }
+        }
         localRuntime("net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}") { exclude group: "net.fabricmc", module: "fabric-loader" }
         if (project.hasProperty('conditionalmixin_version')) {
             localRuntime("me.fallenbreath:conditional-mixin-fabric:${project.conditionalmixin_version}") { transitive = false }
