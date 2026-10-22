@@ -6,6 +6,7 @@
   "description": "Faster schematic rendering for Litematica: multithreaded chunk builds, skips empty space, no render-thread rebuild stutter.",
   "authors": ["Useleess"],
   "license": "All-Rights-Reserved",
+  "icon": "assets/litematica_turbo/icon.png",
   "environment": "client",
   "entrypoints": {
     "client": ["com.litematicaturbo.mc1182.LitematicaTurbo"]

@@ -28,6 +28,8 @@ public final class TurboMixinGuard implements IMixinConfigPlugin
     private static final Map<String, String> TARGETS = new ConcurrentHashMap<>();
     /** Mixin class -> problem; empty string while it applied cleanly. */
     private static final Map<String, String> RESULTS = new ConcurrentHashMap<>();
+    /** Problems of settings-menu patches: these only hide the Turbo tab, Turbo keeps running. */
+    private static final List<String> OPTIONAL_FAILURES = new ArrayList<>();
 
     @Override
     public void onLoad(String mixinPackage)
@@ -43,7 +45,8 @@ public final class TurboMixinGuard implements IMixinConfigPlugin
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName)
     {
-        TARGETS.put(mixinClassName, targetClassName);
+        // Mixin may hand over internal names (a/b/C) depending on the loader version
+        TARGETS.put(mixinClassName, targetClassName.replace('/', '.'));
         return true;
     }
 
@@ -152,15 +155,17 @@ public final class TurboMixinGuard implements IMixinConfigPlugin
 
     /**
      * Loads every patched class (which applies the mixins) and returns what did not apply.
-     * Empty when everything is fine.
+     * Empty when everything is fine. Settings-menu problems go to {@link #optionalFailures} instead.
      */
     public static List<String> verify(ClassLoader loader)
     {
         List<String> failures = new ArrayList<>();
+        OPTIONAL_FAILURES.clear();
 
         for (Map.Entry<String, String> entry : TARGETS.entrySet())
         {
             String target = entry.getValue();
+            List<String> list = isOptional(entry.getKey()) ? OPTIONAL_FAILURES : failures;
 
             try
             {
@@ -168,7 +173,7 @@ public final class TurboMixinGuard implements IMixinConfigPlugin
             }
             catch (Throwable t)
             {
-                failures.add(target + ": could not load: " + t);
+                list.add(target + ": could not load: " + t);
                 continue;
             }
 
@@ -176,11 +181,11 @@ public final class TurboMixinGuard implements IMixinConfigPlugin
 
             if (result == null)
             {
-                failures.add(shortName(entry.getKey()) + ": not applied to " + target);
+                list.add(shortName(entry.getKey()) + ": not applied to " + target);
             }
             else if (result.isEmpty() == false)
             {
-                failures.add(shortName(entry.getKey()) + ": injection points not found:" + result);
+                list.add(shortName(entry.getKey()) + ": injection points not found:" + result);
             }
         }
 
@@ -190,6 +195,22 @@ public final class TurboMixinGuard implements IMixinConfigPlugin
         }
 
         return failures;
+    }
+
+    public static List<String> optionalFailures()
+    {
+        return OPTIONAL_FAILURES;
+    }
+
+    /** False when a settings-menu patch did not fit: the Turbo tab is then left out. */
+    public static boolean settingsTabOk()
+    {
+        return OPTIONAL_FAILURES.isEmpty();
+    }
+
+    private static boolean isOptional(String mixinClassName)
+    {
+        return shortName(mixinClassName).startsWith("GuiConfigs");
     }
 
     public static int mixinCount()

@@ -14,6 +14,7 @@ import fi.dy.masa.malilib.gui.button.ButtonGeneric;
 import fi.dy.masa.malilib.util.StringUtils;
 import fi.dy.masa.litematica.gui.GuiConfigs;
 
+import com.litematicaturbo.mc263.TurboMixinGuard;
 import com.litematicaturbo.mc263.TurboSettingsTab;
 
 /** Adds a "Turbo" tab after Litematica's own tabs in its config menu. */
@@ -45,7 +46,7 @@ public abstract class GuiConfigsMixin extends GuiConfigsBase
     @Inject(method = "initGui", at = @At("TAIL"))
     private void turbo$addTab(CallbackInfo ci)
     {
-        if (this.turbo$nextTabX <= 0)
+        if (this.turbo$nextTabX <= 0 || TurboMixinGuard.settingsTabOk() == false)
         {
             return; // Litematica opened its render layer screen instead
         }

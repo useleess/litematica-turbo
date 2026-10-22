@@ -43,6 +43,11 @@ public final class TurboStartup
             LOGGER.error("Litematica Turbo is OFF for this session: {}", TurboConfig.incompatibility());
         }
 
+        for (String failure : TurboMixinGuard.optionalFailures())
+        {
+            LOGGER.warn("Settings tab patch did not apply (Turbo tab hidden, Turbo stays on): {}", failure);
+        }
+
         TurboSettingsTab.init();
         TickHandler.getInstance().registerClientTickHandler(TurboSettingsTab.INSTANCE);
         TurboBench.startIfRequested();
@@ -50,8 +55,9 @@ public final class TurboStartup
         // Dev check (-Dlitematicaturbo.audit=true): every patch applied? Then quit.
         if (Boolean.getBoolean("litematicaturbo.audit"))
         {
-            LOGGER.info("AUDIT {} mixins, failures: {}", TurboMixinGuard.mixinCount(), failures.size());
-            System.exit(failures.isEmpty() ? 0 : 1);
+            int failed = failures.size() + TurboMixinGuard.optionalFailures().size();
+            LOGGER.info("AUDIT {} mixins, failures: {}", TurboMixinGuard.mixinCount(), failed);
+            System.exit(failed == 0 ? 0 : 1);
         }
     }
 }

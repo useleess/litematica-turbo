@@ -7,6 +7,7 @@ clientSideOnly = true
 modId = "litematica_turbo"
 version = "${version}"
 displayName = "Litematica Turbo"
+logoFile = "assets/litematica_turbo/icon.png"
 authors = "Useleess"
 description = '''
 Faster schematic rendering for Forgematica (Litematica): multithreaded chunk builds, skips empty space, no render-thread rebuild stutter, smooth placement moving.
