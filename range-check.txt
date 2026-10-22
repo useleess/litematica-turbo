@@ -59,3 +59,121 @@
 == 26.3 litematica >=0.29.0 <0.30
   0.29.0 (fEqsesPK) + malilib 0.30.1: OK
   0.29.1 (ZqV316KY) + malilib 0.30.2: OK
+== 1.16.5 litematica *
+  0.0.0-dev.20210917.192300 (odLw7Aly) + malilib 0.10.0-dev.21+arne.8: OK
+  bench with 0.0.0-dev.20210917.192300:
+    == 1.16.5
+    == stock | threads=0 skipEmptySections=false asyncNearRebuilds=false | main_storage_v5.litematic
+    initial build                time   1.66s | avg    93 fps | worst frame  420.8 ms | frames >50ms    8 | builds  1269 (avg  16.23 ms) | render-thread build time        0 ms
+    scrolling placement 6s       time   6.42s | avg    12 fps | worst frame  467.1 ms | frames >50ms   24 | builds  7271 (avg   1.89 ms) | render-thread build time        0 ms
+    == turbo | threads=6 skipEmptySections=true asyncNearRebuilds=true | main_storage_v5.litematic
+    initial build                time   0.58s | avg   307 fps | worst frame  115.3 ms | frames >50ms    6 | builds  1307 (avg   1.13 ms) | render-thread build time        0 ms
+    scrolling placement 6s       time   6.00s | avg   541 fps | worst frame   41.3 ms | frames >50ms    0 | builds  1224 (avg   0.81 ms) | render-thread build time        0 ms
+== 1.17.1 litematica >=0.9.0 <0.10
+  0.9.0 (FExyLuF1) + malilib 0.10.0-dev.26: OK
+  bench with 0.9.0:
+    == 1.17.1
+    == stock | threads=0 skipEmptySections=false asyncNearRebuilds=false | main_storage_v5.litematic
+    initial build                time   1.88s | avg    27 fps | worst frame  899.4 ms | frames >50ms    6 | builds  1185 (avg   1.12 ms) | render-thread build time     1325 ms
+    scrolling placement 6s       time   9.72s | avg     5 fps | worst frame  840.6 ms | frames >50ms   14 | builds  3752 (avg   1.00 ms) | render-thread build time     3757 ms
+    == turbo | threads=6 skipEmptySections=true asyncNearRebuilds=true | main_storage_v5.litematic
+    initial build                time   1.24s | avg   116 fps | worst frame  120.5 ms | frames >50ms    5 | builds  1212 (avg   1.50 ms) | render-thread build time        0 ms
+    scrolling placement 6s       time   6.00s | avg   195 fps | worst frame   86.3 ms | frames >50ms    1 | builds     0 (avg   0.00 ms) | render-thread build time        0 ms
+== 1.18.2 litematica >=0.11.0 <0.12
+  0.11.0 (rK0i4Zim) + malilib 0.12.1: OK
+  0.11.7 (pF33JBAV) + malilib 0.12.3-alpha.1: OK
+  bench with 0.11.0:
+    == 1.18.2
+    == stock | threads=0 skipEmptySections=false asyncNearRebuilds=false | main_storage.litematic
+    initial build                time   2.53s | avg    57 fps | worst frame  973.6 ms | frames >50ms    6 | builds  1130 (avg   1.13 ms) | render-thread build time     1277 ms
+    scrolling placement 6s       time   9.85s | avg     5 fps | worst frame  862.0 ms | frames >50ms   14 | builds  3520 (avg   0.93 ms) | render-thread build time     3257 ms
+    == turbo | threads=6 skipEmptySections=true asyncNearRebuilds=true | main_storage.litematic
+    initial build                time   1.20s | avg   136 fps | worst frame  127.2 ms | frames >50ms    5 | builds  1166 (avg   1.65 ms) | render-thread build time        0 ms
+    scrolling placement 6s       time   6.00s | avg   203 fps | worst frame   89.2 ms | frames >50ms    1 | builds     0 (avg   0.00 ms) | render-thread build time        0 ms
+== 1.19.4 litematica >=0.14.0 <0.15
+  0.14.2 (ntxgv6pr) + malilib 0.15.4: OK
+  0.14.7 (mbgJSGVz) + malilib 0.15.4: OK
+  bench with 0.14.2:
+    == 1.19.4
+    == stock | threads=0 skipEmptySections=false asyncNearRebuilds=false | main_storage.litematic
+    initial build                time   2.94s | avg    25 fps | worst frame 1484.4 ms | frames >50ms    6 | builds   129 (avg  18.68 ms) | render-thread build time     2410 ms
+    scrolling placement 6s       time  15.96s | avg     3 fps | worst frame 1573.5 ms | frames >50ms   13 | builds   656 (avg  13.96 ms) | render-thread build time     9156 ms
+    == turbo | threads=6 skipEmptySections=true asyncNearRebuilds=true | main_storage.litematic
+    initial build                time   1.01s | avg   137 fps | worst frame  135.5 ms | frames >50ms    5 | builds   129 (avg  31.24 ms) | render-thread build time        0 ms
+    scrolling placement 6s       time   6.00s | avg   216 fps | worst frame   21.4 ms | frames >50ms    0 | builds     0 (avg   0.00 ms) | render-thread build time        0 ms
+== 1.20.1 litematica >=0.15.0 <0.16
+  0.15.0 (z1nVFDQH) + malilib 0.16.3: OK
+  0.15.4 (1ZTpW1lr) + malilib 0.16.3: OK
+  bench with 0.15.0:
+    == 1.20.1
+    == stock | threads=0 skipEmptySections=false asyncNearRebuilds=false | main_storage.litematic
+    initial build                time   2.54s | avg    42 fps | worst frame 1015.5 ms | frames >50ms    6 | builds   129 (avg  13.74 ms) | render-thread build time     1773 ms
+    scrolling placement 6s       time  11.37s | avg     5 fps | worst frame 1011.0 ms | frames >50ms   14 | builds   408 (avg  11.72 ms) | render-thread build time     4781 ms
+    == turbo | threads=6 skipEmptySections=true asyncNearRebuilds=true | main_storage.litematic
+    initial build                time   0.85s | avg   191 fps | worst frame  132.3 ms | frames >50ms    6 | builds   130 (avg  17.42 ms) | render-thread build time        0 ms
+    scrolling placement 6s       time   6.00s | avg   309 fps | worst frame   10.1 ms | frames >50ms    0 | builds     0 (avg   0.00 ms) | render-thread build time        0 ms
+== 1.20.4 litematica >=0.17.0 <0.18
+  0.17.0 (SmhgF4Pd) + malilib 0.18.4-alpha.1: OK
+  0.17.4 (RfB4COWa) + malilib 0.18.4-alpha.1: OK
+  bench with 0.17.0:
+    == 1.20.4
+    == stock | threads=0 skipEmptySections=false asyncNearRebuilds=false | main_storage.litematic
+    initial build                time   3.09s | avg    65 fps | worst frame 1317.4 ms | frames >50ms    6 | builds   129 (avg  14.25 ms) | render-thread build time     1838 ms
+    scrolling placement 6s       time  10.54s | avg     6 fps | worst frame  919.7 ms | frames >50ms   14 | builds   420 (avg   9.46 ms) | render-thread build time     3973 ms
+    == turbo | threads=6 skipEmptySections=true asyncNearRebuilds=true | main_storage.litematic
+    initial build                time   0.81s | avg   171 fps | worst frame  127.2 ms | frames >50ms    6 | builds   131 (avg  15.43 ms) | render-thread build time        0 ms
+    scrolling placement 6s       time   6.00s | avg   298 fps | worst frame   11.2 ms | frames >50ms    0 | builds     0 (avg   0.00 ms) | render-thread build time        0 ms
+== 1.21 litematica >=0.19.61 <0.20
+  0.19.61 (o7i8oi1Z) + malilib 0.21.10: OK
+  bench with 0.19.61:
+    == 1.21
+    == stock | threads=0 skipEmptySections=false asyncNearRebuilds=false | main_storage.litematic
+    initial build                time   1.86s | avg    42 fps | worst frame 1008.6 ms | frames >50ms    5 | builds   128 (avg  10.10 ms) | render-thread build time     1293 ms
+    scrolling placement 6s       time  10.59s | avg     5 fps | worst frame  925.2 ms | frames >50ms   14 | builds   566 (avg   7.05 ms) | render-thread build time     3990 ms
+    == turbo | threads=6 skipEmptySections=false asyncNearRebuilds=true | main_storage.litematic
+    initial build                time   0.87s | avg   162 fps | worst frame  174.4 ms | frames >50ms    4 | builds   137 (avg  19.75 ms) | render-thread build time        0 ms
+    scrolling placement 6s       time   6.00s | avg   203 fps | worst frame   15.2 ms | frames >50ms    0 | builds     0 (avg   0.00 ms) | render-thread build time        0 ms
+== 1.21.10 litematica >=0.24.0 <0.25
+  0.24.8 (g2Be4qSQ) + malilib 0.26.8: OK
+  0.24.9 (c91sTAlP) + malilib 0.26.8: OK
+  bench with 0.24.8:
+    == 1.21.10
+    == stock | threads=0 skipEmptySections=false asyncNearRebuilds=false | main_storage.litematic
+    initial build                time   1.78s | avg    37 fps | worst frame  719.0 ms | frames >50ms    5 | builds   138 (avg   8.71 ms) | render-thread build time     1202 ms
+    scrolling placement 6s       time  10.02s | avg     5 fps | worst frame  866.3 ms | frames >50ms   14 | builds   554 (avg   6.21 ms) | render-thread build time     3440 ms
+    == turbo | threads=6 skipEmptySections=true asyncNearRebuilds=true | main_storage.litematic
+    initial build                time   0.70s | avg   189 fps | worst frame  118.6 ms | frames >50ms    4 | builds   139 (avg   9.54 ms) | render-thread build time        0 ms
+    scrolling placement 6s       time   6.00s | avg   240 fps | worst frame    7.9 ms | frames >50ms    0 | builds     1 (avg   0.71 ms) | render-thread build time        0 ms
+== 1.21.11 litematica >=0.26.0 <0.27
+  0.26.11 (R9maucI8) + malilib 0.27.16: OK
+  0.26.16 (mengBR9D) + malilib 0.27.20: OK
+  bench with 0.26.11:
+    == 1.21.11
+    == stock | threads=0 skipEmptySections=false asyncNearRebuilds=false | main_storage.litematic
+    initial build                time   1.65s | avg    62 fps | worst frame  429.8 ms | frames >50ms    9 | builds   161 (avg   9.31 ms) | render-thread build time     1499 ms
+    scrolling placement 6s       time   9.66s | avg     5 fps | worst frame  934.0 ms | frames >50ms   13 | builds  1422 (avg   5.96 ms) | render-thread build time     8473 ms
+    == turbo | threads=6 skipEmptySections=true asyncNearRebuilds=true | main_storage.litematic
+    initial build                time   1.19s | avg   300 fps | worst frame   24.4 ms | frames >50ms    0 | builds   187 (avg   6.24 ms) | render-thread build time        0 ms
+    scrolling placement 6s       time   6.00s | avg   164 fps | worst frame   16.6 ms | frames >50ms    0 | builds     0 (avg   0.00 ms) | render-thread build time        0 ms
+== 26.2 litematica >=0.28.0 <0.29
+  0.28.3 (Yxyi6tlv) + malilib 0.29.3: OK
+  0.28.8 (CuniXtbo) + malilib 0.29.6: OK
+  bench with 0.28.3:
+    == 26.2
+    == stock | threads=0 skipEmptySections=false asyncNearRebuilds=false | main_storage.litematic
+    initial build                time   0.89s | avg    50 fps | worst frame  677.2 ms | frames >50ms    6 | builds   145 (avg   8.06 ms) | render-thread build time     1169 ms
+    scrolling placement 6s       time   9.02s | avg     6 fps | worst frame  915.9 ms | frames >50ms   13 | builds  1257 (avg   6.28 ms) | render-thread build time     7898 ms
+    == turbo | threads=6 skipEmptySections=true asyncNearRebuilds=true | main_storage.litematic
+    initial build                time   0.29s | avg   166 fps | worst frame   29.5 ms | frames >50ms    0 | builds   141 (avg  10.49 ms) | render-thread build time        0 ms
+    scrolling placement 6s       time   6.00s | avg   154 fps | worst frame   13.5 ms | frames >50ms    0 | builds     0 (avg   0.00 ms) | render-thread build time        0 ms
+== 26.3 litematica >=0.29.0 <0.30
+  0.29.0 (fEqsesPK) + malilib 0.30.1: OK
+  0.29.1 (ZqV316KY) + malilib 0.30.2: OK
+  bench with 0.29.0:
+    == 26.3
+    == stock | threads=0 skipEmptySections=false asyncNearRebuilds=false | main_storage.litematic
+    initial build                time   0.96s | avg    47 fps | worst frame  743.8 ms | frames >50ms    6 | builds   156 (avg   7.79 ms) | render-thread build time     1216 ms
+    scrolling placement 6s       time   9.70s | avg     5 fps | worst frame  992.2 ms | frames >50ms   14 | builds  1432 (avg   6.00 ms) | render-thread build time     8596 ms
+    == turbo | threads=6 skipEmptySections=true asyncNearRebuilds=true | main_storage.litematic
+    initial build                time   0.34s | avg   166 fps | worst frame   29.8 ms | frames >50ms    0 | builds   157 (avg   9.23 ms) | render-thread build time        0 ms
+    scrolling placement 6s       time   6.00s | avg   153 fps | worst frame   21.9 ms | frames >50ms    0 | builds     0 (avg   0.00 ms) | render-thread build time        0 ms

@@ -1,6 +1,9 @@
 """Dev check: run the mixin audit against older Litematica releases inside each version's allowed range.
 
-usage: python range-check.py [mc ...]     (default: every Fabric version)
+usage: python range-check.py [--bench] [mc ...]     (default: every Fabric version)
+
+--bench: also run bench.sh (stock vs Turbo) with the oldest release that passes the audit; the audit
+only proves the patches fit, not that the game runs.
 
 Per version it lists the Litematica releases for that Minecraft version on Modrinth that fit the
 "litematica" range in fabric.mod.json, pairs each with the MaLiLib released closest before it, and
@@ -72,8 +75,16 @@ def audit(mc, lite, mali):
     return False, "NO RESULT", err
 
 
+def bench(mc, lite, mali):
+    args = f"-Plitematica_runtime={lite['id']} -Pmalilib_runtime={mali['id']}"
+    out = subprocess.run(["sh", "./bench.sh", mc], cwd=ROOT, env=dict(os.environ, BENCH_ARGS=args),
+                         capture_output=True, text=True, errors="replace").stdout
+    return [l for l in out.splitlines() if "problems" in l or l.startswith(("==", "initial", "scrolling"))]
+
+
 def main():
-    versions = sys.argv[1:] or sorted(d for d in os.listdir(os.path.join(ROOT, "versions"))
+    do_bench = "--bench" in sys.argv
+    versions = [a for a in sys.argv[1:] if a != "--bench"] or sorted(d for d in os.listdir(os.path.join(ROOT, "versions"))
                                       if "forge" not in d and os.path.exists(os.path.join(ROOT, "versions", d, "gradle.properties")))
     report = open(os.path.join(ROOT, "range-check.txt"), "a")
     for mc in versions:
@@ -86,6 +97,7 @@ def main():
         print(f"{mc} ({rng}): {len(lites)} Litematica releases", flush=True)
         report.write(f"== {mc} litematica {rng}\n")
         tested = set()
+        passed = []
 
         def run(v):
             tested.add(v["id"])
@@ -97,6 +109,8 @@ def main():
             for d in detail:
                 report.write(f"      {d}\n")
             report.flush()
+            if ok:
+                passed.append((v, before[-1]))
             return ok
 
         # oldest first; when it fails, binary search for the first release that passes
@@ -112,6 +126,13 @@ def main():
                 report.write(f"  -> first passing: {lites[hi]['version_number']}\n")
         if lites and lites[-1]["id"] not in tested:
             run(lites[-1])
+        if do_bench and passed:
+            v, m = min(passed, key=lambda p: p[0]["date_published"])
+            report.write(f"  bench with {v['version_number']}:\n")
+            for line in bench(mc, v, m):
+                print("    " + line, flush=True)
+                report.write("    " + line + "\n")
+            report.flush()
 
 
 main()
