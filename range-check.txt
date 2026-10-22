@@ -1,0 +1,61 @@
+== 1.16.5 litematica *
+  0.0.0-dev.20210917.192300 (odLw7Aly) + malilib 0.10.0-dev.21+arne.8: OK
+== 1.17.1 litematica >=0.9.0 <0.10
+  0.9.0 (FExyLuF1) + malilib 0.10.0-dev.26: OK
+== 1.18.2 litematica >=0.11.0 <0.12
+  0.11.0 (rK0i4Zim) + malilib 0.12.1: OK
+  0.11.7 (pF33JBAV) + malilib 0.12.3-alpha.1: OK
+== 1.19.4 litematica >=0.14.0 <0.15
+  0.14.2 (ntxgv6pr) + malilib 0.15.4: OK
+  0.14.7 (mbgJSGVz) + malilib 0.15.4: OK
+== 1.20.1 litematica >=0.15.0 <0.16
+  0.15.0 (z1nVFDQH) + malilib 0.16.3: OK
+  0.15.4 (1ZTpW1lr) + malilib 0.16.3: OK
+== 1.20.4 litematica >=0.17.0 <0.18
+  0.17.0 (SmhgF4Pd) + malilib 0.18.4-alpha.1: OK
+  0.17.4 (RfB4COWa) + malilib 0.18.4-alpha.1: OK
+== 1.21 litematica >=0.19.0 <0.20
+  0.19.50 (5kAmiBye) + malilib 0.21.0: 5/15 failed
+      ChunkRenderWorkerLitematicaMixin: injection points not found: turbo$workerProfiler (0/1) turbo$rebuildChunk (0/1) turbo$resortTransparency (0/1)
+      ChunkRenderDispatcherLitematicaMixin: not applied to fi.dy.masa.litematica.render.schematic.ChunkRenderDispatcherLitematica
+      SchematicPlacingUtilsMixin: not applied to fi.dy.masa.litematica.util.SchematicPlacingUtils
+      WorldRendererSchematicMixin: not applied to fi.dy.masa.litematica.render.schematic.WorldRendererSchematic
+      ChunkRendererSchematicVboInvoker: not applied to fi.dy.masa.litematica.render.schematic.ChunkRendererSchematicVbo
+  0.19.61 (o7i8oi1Z) + malilib 0.21.10: OK
+  0.19.54 (C5KeSWtU) + malilib 0.21.5: 5/15 failed
+      ChunkRenderWorkerLitematicaMixin: injection points not found: turbo$workerProfiler (0/1) turbo$rebuildChunk (0/1) turbo$resortTransparency (0/1)
+      ChunkRenderDispatcherLitematicaMixin: not applied to fi.dy.masa.litematica.render.schematic.ChunkRenderDispatcherLitematica
+      SchematicPlacingUtilsMixin: not applied to fi.dy.masa.litematica.util.SchematicPlacingUtils
+      WorldRendererSchematicMixin: not applied to fi.dy.masa.litematica.render.schematic.WorldRendererSchematic
+      ChunkRendererSchematicVboInvoker: not applied to fi.dy.masa.litematica.render.schematic.ChunkRendererSchematicVbo
+  0.19.56-do-not-use (872iPuih) + malilib 0.21.7: 5/15 failed
+      ChunkRenderWorkerLitematicaMixin: injection points not found: turbo$workerProfiler (0/1) turbo$rebuildChunk (0/1) turbo$resortTransparency (0/1)
+      ChunkRenderDispatcherLitematicaMixin: not applied to fi.dy.masa.litematica.render.schematic.ChunkRenderDispatcherLitematica
+      SchematicPlacingUtilsMixin: not applied to fi.dy.masa.litematica.util.SchematicPlacingUtils
+      WorldRendererSchematicMixin: not applied to fi.dy.masa.litematica.render.schematic.WorldRendererSchematic
+      ChunkRendererSchematicVboInvoker: not applied to fi.dy.masa.litematica.render.schematic.ChunkRendererSchematicVbo
+  0.19.57 (5R2k9EAZ) + malilib 0.21.7: 5/15 failed
+      ChunkRenderWorkerLitematicaMixin: injection points not found: turbo$workerProfiler (0/1) turbo$rebuildChunk (0/1) turbo$resortTransparency (0/1)
+      ChunkRenderDispatcherLitematicaMixin: not applied to fi.dy.masa.litematica.render.schematic.ChunkRenderDispatcherLitematica
+      SchematicPlacingUtilsMixin: not applied to fi.dy.masa.litematica.util.SchematicPlacingUtils
+      WorldRendererSchematicMixin: not applied to fi.dy.masa.litematica.render.schematic.WorldRendererSchematic
+      ChunkRendererSchematicVboInvoker: not applied to fi.dy.masa.litematica.render.schematic.ChunkRendererSchematicVbo
+  0.19.58 (K4RVeB0Z) + malilib 0.21.8: 5/15 failed
+      ChunkRenderWorkerLitematicaMixin: injection points not found: turbo$workerProfiler (0/1) turbo$rebuildChunk (0/1) turbo$resortTransparency (0/1)
+      ChunkRenderDispatcherLitematicaMixin: not applied to fi.dy.masa.litematica.render.schematic.ChunkRenderDispatcherLitematica
+      SchematicPlacingUtilsMixin: not applied to fi.dy.masa.litematica.util.SchematicPlacingUtils
+      WorldRendererSchematicMixin: not applied to fi.dy.masa.litematica.render.schematic.WorldRendererSchematic
+      ChunkRendererSchematicVboInvoker: not applied to fi.dy.masa.litematica.render.schematic.ChunkRendererSchematicVbo
+  -> first passing: 0.19.61
+== 1.21.10 litematica >=0.24.0 <0.25
+  0.24.8 (g2Be4qSQ) + malilib 0.26.8: OK
+  0.24.9 (c91sTAlP) + malilib 0.26.8: OK
+== 1.21.11 litematica >=0.26.0 <0.27
+  0.26.11 (R9maucI8) + malilib 0.27.16: OK
+  0.26.16 (mengBR9D) + malilib 0.27.20: OK
+== 26.2 litematica >=0.28.0 <0.29
+  0.28.3 (Yxyi6tlv) + malilib 0.29.3: OK
+  0.28.8 (CuniXtbo) + malilib 0.29.6: OK
+== 26.3 litematica >=0.29.0 <0.30
+  0.29.0 (fEqsesPK) + malilib 0.30.1: OK
+  0.29.1 (ZqV316KY) + malilib 0.30.2: OK

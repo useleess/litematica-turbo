@@ -162,9 +162,9 @@ public abstract class ChunkRendererSchematicVboMixin implements TurboRenderer
 
     /**
      * Build code sets the shader (no effect on the built buffers); that is render-thread only
-     * state, so only make the call on the render thread.
+     * state, so only make the call on the render thread. (renderOverlay: Litematica before 0.21.7)
      */
-    @Redirect(method = { "resortTransparency", "preRenderOverlay" }, expect = 2,
+    @Redirect(method = { "resortTransparency", "preRenderOverlay", "renderOverlay" }, expect = 2,
               at = @At(value = "INVOKE", remap = true,
                        target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShader(Lnet/minecraft/client/gl/ShaderProgramKey;)Lnet/minecraft/client/gl/ShaderProgram;"))
     private ShaderProgram turbo$setShaderOnRenderThread(ShaderProgramKey shader)

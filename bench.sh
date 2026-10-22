@@ -1,6 +1,7 @@
 #!/bin/sh
 # Dev check: A/B benchmark (stock Litematica, then Turbo) for the given versions.
 # Needs versions/<mc>/run/saves/bench (make-bench-world.sh). usage: ./bench.sh 1.20.1 1.21.4 ...
+# Extra Gradle args via BENCH_ARGS, e.g. BENCH_ARGS="-Plitematica_runtime=<id> -Pmalilib_runtime=<id>" (older Litematica)
 cd "$(dirname "$0")"
 T="$(cd ../.. && pwd)/toolchain"
 export GRADLE_USER_HOME="$T/gradle-home"
@@ -48,7 +49,7 @@ for v in "$@"; do
     gradle_for "$v"
     for mode in stock turbo; do
         flag=""; [ $mode = stock ] && flag="-Pstock"
-        $GRADLE "$TASK" "$MC_ARG" "-PbenchSchematic=$schem" $flag --console=plain > "versions/$v/bench-$mode.log" 2>&1
+        $GRADLE "$TASK" "$MC_ARG" "-PbenchSchematic=$schem" $flag $BENCH_ARGS --console=plain > "versions/$v/bench-$mode.log" 2>&1
         grep -qE "Patch did not apply|Exception in|crashed" "versions/$v/bench-$mode.log" && echo "$v $mode: problems, see versions/$v/bench-$mode.log"
     done
     echo "== $v"
