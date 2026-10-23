@@ -12,6 +12,7 @@ re-run after a failure.
 """
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -55,16 +56,13 @@ FORGE_TARGETS = {
     '26.2-neoforge': ('neoforge', ['26.2'], None),
 }
 
-CHANGELOG = """\
-- Fixed: Turbo could switch itself off with "1 of N patches do not fit this Litematica version" even
-  though everything fit (happened with newer Fabric Loader versions, e.g. 0.20).
-- If only the Turbo settings tab cannot attach to a Litematica version, the tab is hidden and all
-  speed features stay on (before, the whole mod switched off).
-- 1.21.4: works with Litematica 0.21.2 and newer again; fixed a crash with Litematica 0.21.2 - 0.21.6.
-- 1.21 / 1.21.1: needs Litematica 0.19.61 or newer (older 0.19.x releases do not fit).
-- Mod icon added; author shown as Useleess.
-"""
-FORGE_CHANGELOG = CHANGELOG
+def changelog(version):
+    """This version's notes from CHANGELOG.md (written by discord-bot/release.py)."""
+    text = open('CHANGELOG.md', encoding='utf-8').read()
+    m = re.search(r'^## %s\b[^\n]*\n\n(.*?)(?=^## |\Z)' % re.escape(version), text, re.S | re.M)
+    if not m:
+        raise SystemExit('No notes for %s in CHANGELOG.md' % version)
+    return m.group(1).strip() + '\n'
 
 
 def mod_version():
@@ -120,6 +118,7 @@ def main():
 
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     version = mod_version()
+    notes = changelog(version)
     project = request('GET', '/project/' + args[0], token)
     existing = {v['version_number'] for v in request('GET', '/project/%s/version' % project['id'], token)}
     print('Project: %s (%s), %s; existing versions: %d' % (project['title'], project['id'], project.get('status'), len(existing)))
@@ -159,7 +158,7 @@ def main():
             'project_id': project['id'],
             'name': name,
             'version_number': number,
-            'changelog': CHANGELOG if loader == 'fabric' else FORGE_CHANGELOG,
+            'changelog': notes,
             'dependencies': [dependency],
             'game_versions': game_versions,
             'version_type': CHANNEL,
