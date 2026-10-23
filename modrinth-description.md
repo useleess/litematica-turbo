@@ -29,3 +29,5 @@ One file per Minecraft version - pick the one for your Minecraft version and loa
 - **Forge** (1.16.5 - 1.20.1) and **NeoForge** (1.20.4 - 26.2): requires [Forgematica](https://modrinth.com/mod/forgematica) (and its MaFgLib).
 
 Beta: please report any problem with your Minecraft and Litematica version.
+
+**See what's being worked on next:** [Useless Mods Workshop](https://useleess.github.io/workshop)
