@@ -2,6 +2,8 @@
 # Dev check: mixin audit for the given versions. usage: ./audit.sh 1.20.1 1.21.4 ...
 cd "$(dirname "$0")"
 T="$(cd ../.. && pwd)/toolchain"
+# at most 3 test runs on this PC at once (the shared toolchain/test-slot.sh; a 4th waits)
+[ -f "$T/test-slot.sh" ] && . "$T/test-slot.sh" && test_slot_take
 export GRADLE_USER_HOME="$T/gradle-home"
 
 # Forge / NeoForge targets (<mc>-forge, <mc>-neoforge) are built by forge/ (Architectury Loom)
