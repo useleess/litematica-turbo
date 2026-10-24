@@ -2,4 +2,6 @@
 
 Collected here until the next release, then used as the GitHub / Modrinth notes.
 
-(nothing yet - 0.4.2 released 2026-10-22)
+- Maintenance release: no gameplay changes. The Modrinth page links to the workshop site
+  (https://useleess.github.io/workshop), and releases now go through the same checked push process
+  as the other mods.
