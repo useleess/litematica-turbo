@@ -1,0 +1,45 @@
+{
+ "_comment": "Test plan (user 2026-10-25: tests are built alongside the mod). Each feature needs at least `min` DIFFERENT in-game tests passing whose id starts with `prefix` (SCOPE-TEST pass <id>). A new feature = a new line here in the same change (the release tester checks it, and refuses a line removed or a min lowered since the last release). Never lower a min or remove a line to get a push through. Client-only add-on, every Fabric / Forge / NeoForge version in versions/. Each test compares Turbo against plain Litematica in the same game where it can.",
+ "features": [
+  {
+   "prefix": "audit/",
+   "min": 10,
+   "what": "every patch applies on every version"
+  },
+  {
+   "prefix": "build/",
+   "min": 15,
+   "what": "multithreaded chunk builds give exactly the same schematic geometry as Litematica alone"
+  },
+  {
+   "prefix": "near/",
+   "min": 8,
+   "what": "chunks next to the player rebuilt in the background, same result"
+  },
+  {
+   "prefix": "move/",
+   "min": 12,
+   "what": "smooth placement moving: shown moved, rebuilt once stopped, swapped in one frame, same final result"
+  },
+  {
+   "prefix": "empty/",
+   "min": 8,
+   "what": "empty-space skipping changes nothing visible"
+  },
+  {
+   "prefix": "stats/",
+   "min": 4,
+   "what": "F3 [Litematica] line"
+  },
+  {
+   "prefix": "settings/",
+   "min": 15,
+   "what": "Turbo tab: every setting saves, loads and applies right away"
+  },
+  {
+   "prefix": "safety/",
+   "min": 8,
+   "what": "a broken patch switches Turbo off for the session with a chat message, no crash, Litematica unchanged"
+  }
+ ]
+}
