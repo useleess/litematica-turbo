@@ -86,6 +86,10 @@ public final class SelfTest
         AuditTests.register(ctx, tests);
         SettingsTests.register(ctx, tests);
         StatsTests.register(ctx, tests);
+        // the in-world groups last: they leave the title screen for a test world
+        BuildTests.register(ctx, tests);
+        NearTests.register(ctx, tests);
+        EmptyTests.register(ctx, tests);
 
         List<String> prefixes = new ArrayList<>();
 

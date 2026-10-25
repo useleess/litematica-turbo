@@ -26,7 +26,15 @@ export GRADLE_USER_HOME="$T/gradle-home"
 JDK25="$T/jdk25/jdk-25.0.4.1+1"
 JDK8="$(ls -d "$T"/jdk8/*/ | head -n 1)"
 [ "$1" = client ] && shift
-VERSIONS="$*"
+# filter=<prefix>[,<prefix>] among the arguments = FILTER (the test box runner passes arguments, not variables)
+for arg in "$@"; do
+    case "$arg" in filter=*) FILTER="${arg#filter=}"; shift_filter=1 ;; esac
+done
+VERSIONS=""
+for arg in "$@"; do
+    case "$arg" in filter=*) ;; *) VERSIONS="$VERSIONS $arg" ;; esac
+done
+VERSIONS="${VERSIONS# }"
 [ -n "$VERSIONS" ] || VERSIONS="$(ls versions)"
 LANES=${LANES:-2}
 
@@ -66,11 +74,15 @@ run_version()
     for attempt in 1 2; do
         rm -rf "$run"
         mkdir -p "$run"
-        printf 'soundCategory_master:0.0\npauseOnLostFocus:false\nonboardAccessibility:false\ntutorialStep:none\njoinedFirstServer:true\n' > "$run/options.txt"
+        printf 'soundCategory_master:0.0\npauseOnLostFocus:false\nonboardAccessibility:false\ntutorialStep:none\njoinedFirstServer:true\nrenderDistance:12\n' > "$run/options.txt"
+        # (Neo)Forge's mod-warning screen would block opening the test world
+        case "$v" in
+            *-forge|*-neoforge) mkdir -p "$run/config"; printf 'showLoadWarnings = false\n' | tee "$run/config/forge-client.toml" > "$run/config/neoforge-client.toml" ;;
+        esac
         : > "$log"
         echo "== $v: building and starting the game client (attempt $attempt, log: $dir/selftest.log)"
         # shellcheck disable=SC2086
-        (JAVA_HOME="$JDK25" timeout 1500 $gradle "$task" -Pmc="$v" -PselftestAgent="$AGENT" -PtestRunDir=run-test $filter "$JVMARGS" \
+        (JAVA_HOME="$JDK25" timeout 2700 $gradle "$task" -Pmc="$v" -PselftestAgent="$AGENT" -PtestRunDir=run-test $filter "$JVMARGS" \
             --console=plain > "$log" 2>&1) &
         pid=$!
         tail -n +1 -f "$log" --pid=$pid 2>/dev/null | sed -u -n 's/.*\(SCOPE-TEST .*\)/\1/p; s/.*\(SCOPE TESTS: .*\)/\1/p; s/.*\(SELFTEST .*\)/\1/p'

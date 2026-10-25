@@ -24,6 +24,7 @@ On the box itself (or wherever a game window may open):
 ./ingame-test.sh client 1.21.4 1.20.1-forge   # some versions
 FILTER=settings/,stats/f3 ./ingame-test.sh    # only tests whose id starts with one of these (comma separated)
 FILTER=knownbug/ ./ingame-test.sh             # only the known, not yet fixed mod bugs (left out of every other run)
+./ingame-test.sh client 1.20.1 filter=build/,near/   # filter=... as an argument: the same as FILTER, for the test box runner
 LANES=1 ./ingame-test.sh                      # one game at a time
 ```
 
@@ -79,6 +80,11 @@ the agent crashed); that version then shows `NO RESULT`.
   loader, so one compiled jar runs on every version and loader (Yarn and Mojang names alike).
 - `SelfTest` - the runner: registration, filter, known bugs, protocol.
 - `AuditTests` (`audit/`), `SettingsTests` + `TabButton` (`settings/`), `StatsTests` (`stats/`).
+- The in-world groups (they leave the title screen for a real test world, so they are registered last):
+  `BuildTests` (`build/`), `NearTests` (`near/`), `EmptyTests` (`empty/`), on top of
+  `WorldTests` (the usual captures and the comparison of two), `Fixture` (the test world, the test schematics, the
+  captures), `Game` (opening the world, the player, the block registry; yarn / Mojang names alike),
+  `Digest` (the description of a chunk build), `WorldFiles` (writes level.dat, .litematic and the NBT for them).
 
 ## What is tested
 
@@ -108,13 +114,65 @@ the agent crashed); that version then shows `NO RESULT`.
   a schematic world Litematica has no build dispatcher, so the line tests give the live renderer an idle one
   (Litematica's patched class, allocated without starting threads) for the duration of the test.
 
+### The in-world groups (`build/`, `near/`, `empty/`)
+
+The promise they test: Turbo changes WHEN and WHERE schematic chunks are built, never WHAT is shown.
+
+How a run goes (`Fixture`, built once on first use, the same for every version):
+
+1. `Game.join`: writes a minimal superflat creative level.dat into `run-test/saves/turbo-test` (`WorldFiles`,
+   1.16.5 format, every newer game upgrades it; nothing is shipped or committed) and opens it from the title screen
+   (`startIntegratedServer` before 1.19, `IntegratedServerLoader.start` / `WorldOpenFlows.openWorld` after, found by
+   return type). The script also sets render distance 12 and silences (Neo)Forge's mod-warning screen.
+2. Test schematics, written as `.litematic` files from the running game's block registry and placed with Litematica's
+   own placement manager, in chunk zones in front of the player (who looks along +Z): `N` near (3 x 3 chunks starting at the player's own chunk and going forward, since Litematica builds only chunks in the view), `A` every block state without a block entity, `B` every state with one,
+   `S` sparse (full world height, a handful of blocks at the very bottom / top / on section borders, most chunks and
+   sections empty), `T` translucent and transparent blocks, `F` fluids (every level, waterlogged), `E` blocks along
+   the chunk borders.
+3. A capture = Turbo configured one way (`TurboConfig`: master switch, `buildThreads`, `skipEmptySections`,
+   `asyncNearRebuilds`), the schematic renderers reloaded the way Turbo's own tab does (so every chunk is built again),
+   waited until every chunk of every zone has a finished build and nothing is queued for a second, then every chunk's
+   build result described by `Digest` plus Turbo's `BuildStats` counters. Reference = Turbo's master switch off
+   (plain Litematica). Captures are kept, tests only compare them.
+4. `Digest` = what the build produced, read by reflection from Litematica's chunk data: used block layers and overlay
+   types, block entities with positions, translucency sort data (a position per quad), buffer sizes, vertex-buffer
+   index counts / draw modes. Times, GPU handles and locks are left out; buffer contents are never read (a closed
+   native buffer must not be touched), so "same geometry" means same quads / vertices counts, sort positions, layers
+   and block entities, not a byte compare of the vertex data.
+
+- `build/` - plain Litematica twice agrees (`baseline-repeatable`, the digest itself is stable), the zones have
+  geometry (`geometry-exists`, else every comparison would pass on nothing), Turbo equals plain Litematica per zone
+  (`all-states-same`, `block-entities-same`, `translucent-same`, `fluids-same`, `sparse-same`, `region-edges-same`,
+  `near-set-same`, `overlay-same`), for 1 / 2 / 4 / 8 / 16 / automatic build threads (`threads-<n>-same`,
+  `threads-auto-same`), thread counts agree with each other and a parallel build twice is the same
+  (`threads-agree`, `repeat-parallel-stable`), nothing missed (`no-chunk-missed`) or built twice (`built-once`: at
+  least one build per chunk, never more than plain Litematica needed + 2), the setting is applied
+  (`thread-count-applied`), the render thread does less (`render-thread-time-drops`, skips where plain Litematica
+  already builds off the render thread).
+- `near/` - the chunks within 32 blocks of the player (`zones-are-near-and-far` checks the zones sit on the right
+  side of Litematica's own near rule) built in the background and on the render thread equal plain Litematica's
+  (`built-same-as-stock`, `async-off-same`, `far-chunks-same`); edits made in the schematic world next to the player
+  (`Fixture`'s world is edited with setBlockState + Litematica's own refresh call, then put back): `edit-shows-up`,
+  `edit-same-as-stock` (the background rebuild equals plain Litematica's rebuild of the edited world),
+  `edit-leaves-other-chunks-alone`, `edit-border-both-chunks`, `many-edits-same-as-stock`, `edit-removed-restores`,
+  and who builds it: `rebuild-off-render-thread` (near rebuilds on: the render thread built nothing),
+  `async-off-builds-on-render-thread` (off: it did).
+- `empty/` - skipping empty 16-high sections changes nothing built (`same-geometry-*`, `same-geometry-everything`,
+  also with Litematica's "extra block" overlay on: `world-extra-overlay-same`), empty chunks stay empty and the
+  extreme sections (bottom / top of the world) are kept (`empty-chunks-no-geometry`, `extreme-sections-kept`), and
+  the skipped work really is skipped: `skips-empty-sections`, `skipped-share-high`, `skip-off-skips-nothing`,
+  `master-off-skips-nothing` (the `BuildStats` section counters).
+
+A full in-world run is a few minutes per version (about 20 reloads of the schematic renderers).
+
 Every settings test puts TurboConfig, its file and the tab back the way it found them. `BuildStats` is static:
 the stats tests add to its counters, so tests compare differences, never absolute values.
 
 ## Adding a test for a new feature
 
 1. Add its line to `test-plan.json` (prefix + how many different tests must pass), in the same change.
-2. Write the tests in a `<Group>Tests` class (copy `StatsTests`): `tests.add("<group>/<name>", () -> {...})`
+2. Write the tests in a `<Group>Tests` class (copy `StatsTests`; for something that needs a real world and
+   schematics copy `EmptyTests` and use `Fixture` captures: a new test schematic = a new zone in `Fixture`): `tests.add("<group>/<name>", () -> {...})`
    with `SelfTest.check` / `SelfTest.equal`; `throw SelfTest.skip("why")` where it cannot apply on this version
    (never pass silently). Register the class in `SelfTest.run`.
 3. Compare Turbo with plain Litematica where possible: Turbo's own switches (`TurboConfig` fields, the tab's
