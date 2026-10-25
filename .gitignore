@@ -15,3 +15,7 @@ final-check.txt
 !gradle/wrapper/gradle-wrapper.jar
 !forge/gradle/wrapper/gradle-wrapper.jar
 !forge/yarn-patches/*.jar
+# in-game test runs (ingame-test.sh, audit.sh): throwaway game folders, the test agent, Gradle temp
+run-test/
+build-selftest/
+.gradle-tmp/

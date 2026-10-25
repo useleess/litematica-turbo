@@ -104,6 +104,16 @@ loom {
             if (project.hasProperty('audit')) {
                 vmArg '-Dlitematicaturbo.audit=true'
             }
+            // in-game tests (ingame-test.sh, see TESTS.md): the test agent jar, built outside every release jar
+            if (project.hasProperty('selftestAgent')) {
+                vmArg "-javaagent:${project.selftestAgent}"
+                vmArg '-Dlitematicaturbo.selftest=client'
+                vmArg "-Dlitematicaturbo.selftest.filter=${project.findProperty('selftestFilter') ?: ''}"
+            }
+            // -PtestRunDir=<folder>: a throwaway game folder for a test run (relative to the version folder)
+            if (project.hasProperty('testRunDir')) {
+                runDir project.testRunDir
+            }
             if (project.hasProperty('benchSchematic')) {
                 programArgs '--quickPlaySingleplayer', 'bench'
                 vmArg "-Dlitematicaturbo.bench=${project.benchSchematic}"
