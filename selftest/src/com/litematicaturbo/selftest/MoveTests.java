@@ -623,5 +623,22 @@ final class MoveTests
                 });
             });
         });
+
+        for (String[] turn : new String[][] {{"rotated", "setRotation", "CLOCKWISE_90"}, {"mirrored", "setMirror", "LEFT_RIGHT"}})
+        {
+            tests.add("move/" + turn[0] + "-while-moving-same-as-stock", () -> {
+                f = WorldTests.fixture(ctx);
+                guarded(ctx, () -> {
+                    Extra turnIt = run -> {
+                        PlaceTests.turn(ctx, placement, turn[1], turn[2]);
+                        ctx.ticks(2);
+                    };
+                    Run turbo = run(ctx, true, 0, new int[][] {{8, 0, 0}}, turnIt);
+                    Run stock = run(ctx, false, 0, new int[][] {{8, 0, 0}}, turnIt);
+                    SelfTest.check(turbo.activeAfterSettle == false, "the shifted view stays after the placement was " + turn[0]);
+                    sameFinal(stock, turbo);
+                });
+            });
+        }
     }
 }

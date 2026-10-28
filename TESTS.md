@@ -162,6 +162,8 @@ How a run goes (`Fixture`, built once on first use, the same for every version):
   mirrored, rotated + mirrored, and with a second placement laid over the first (`same-as-stock-*`); the gold marker
   is where the schematic has it (`marker-block-arrives`) and moves when the placement is rotated / mirrored
   (`rotation-turns-the-build`, `mirror-flips-the-build`).
+  `move/rotated-while-moving-same-as-stock` and `move/mirrored-while-moving-same-as-stock`: rotating / mirroring a
+  placement that is being moved ends the shifted view and gives plain Litematica's result.
 - `compat/` - with a Litematica display option changed (translucent blocks, fluids, layer view single / above / below)
   every chunk Turbo builds equals plain Litematica's, and the option really changes what is built; Turbo's work never
   changes any of Litematica's own options (`litematica-options-untouched`).
@@ -226,4 +228,9 @@ A test that shows a reported, not yet fixed mod bug gets an id starting with `kn
 (`SelfTest.KNOWN_BUG`): the normal run leaves it out, `FILTER=knownbug/` runs it. When the bug is fixed, move the
 test to its normal id.
 
-None so far.
+None so far. Seen once, not reproduced: `compat/layer-all-below-same-as-stock` failed in a full 1.21.4 run with the game's own
+`IllegalStateException: Missing elements in vertex` and passed in two reruns (watch it on the all-versions run).
+
+Test-box note (found 2026-10-28): a game window on the box can have its camera turned by the cursor moving while other
+windows are tiled, which emptied the view and made every later capture wait its 100 s (a 1.21.4 run ended `NO RESULT`
+after 2702 s). `Fixture.aim()` now points the player along +Z on every poll of `awaitIdle`.

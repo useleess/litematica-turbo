@@ -44,7 +44,7 @@ final class PlaceTests
 
     /** Calls placement.setter(enum constant of that name, null...), whatever the version calls the enum. */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static void turn(Ctx ctx, Object p, String setter, String constant) throws Exception
+    static void turn(Ctx ctx, Object p, String setter, String constant) throws Exception
     {
         ctx.onMain(() -> {
             for (Method m : p.getClass().getMethods())

@@ -75,6 +75,28 @@ final class CompatTests
         });
     }
 
+    private interface Stage
+    {
+        Fixture.Capture run() throws Exception;
+    }
+
+    /** Names who was building when the game threw. */
+    private static Fixture.Capture staged(String who, Stage stage) throws Exception
+    {
+        try
+        {
+            return stage.run();
+        }
+        catch (SelfTest.Fail | SelfTest.Skip e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new SelfTest.Fail("while " + who + " built: " + e);
+        }
+    }
+
     private static void layerScenario(Ctx ctx, SelfTest.Tests tests, String name, String mode)
     {
         tests.add("compat/layer-" + name + "-same-as-stock", () -> {
@@ -86,8 +108,8 @@ final class CompatTests
             {
                 setMode(ctx, mode);
                 setLayer(ctx, y);
-                Fixture.Capture stock = f.captureNew("layer-" + name + "-stock", false, 0, true, true);
-                Fixture.Capture turbo = f.captureNew("layer-" + name + "-turbo", true, 3, true, true);
+                Fixture.Capture stock = staged("plain Litematica", () -> f.captureNew("layer-" + name + "-stock", false, 0, true, true));
+                Fixture.Capture turbo = staged("Turbo", () -> f.captureNew("layer-" + name + "-turbo", true, 3, true, true));
                 WorldTests.same(stock, turbo, f.allChunks(), "layer view '" + name + "'");
                 int differing = 0;
 

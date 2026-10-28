@@ -301,6 +301,34 @@ final class Fixture
         this.zones.put(name, z);
     }
 
+    /**
+     * The player looks along +Z at the zones. Called again while waiting: on the test box the cursor of a grabbed game
+     * window is moved by other windows being tiled / started, which turned the camera and emptied the view.
+     */
+    void aim()
+    {
+        try
+        {
+            Object player = this.game.player();
+
+            for (String f : new String[] {"yaw", "prevYaw", "yRot", "yRotO", "pitch", "prevPitch", "xRot", "xRotO", "lastYaw", "lastPitch"})
+            {
+                try
+                {
+                    Ctx.field(player.getClass(), f).setFloat(player, 0.0f);
+                }
+                catch (ReflectiveOperationException | RuntimeException e)
+                {
+                    // other name or type
+                }
+            }
+        }
+        catch (ReflectiveOperationException e)
+        {
+            // looking is a convenience: the far zones are in front of a player who has not turned
+        }
+    }
+
     private void enableRendering() throws Exception
     {
         this.ctx.onMain(() -> {
@@ -318,27 +346,7 @@ final class Fixture
                 }
             }
 
-            // the player looks along +Z at the far zones
-            try
-            {
-                Object player = this.game.player();
-
-                for (String f : new String[] {"yaw", "prevYaw", "yRot", "yRotO", "pitch", "prevPitch", "xRot", "xRotO"})
-                {
-                    try
-                    {
-                        Ctx.field(player.getClass(), f).setFloat(player, 0.0f);
-                    }
-                    catch (ReflectiveOperationException | RuntimeException e)
-                    {
-                        // other name or type
-                    }
-                }
-            }
-            catch (ReflectiveOperationException e)
-            {
-                // looking is a convenience: the far zones are in front of a player who has not turned
-            }
+            this.aim();
 
             return null;
         });
@@ -891,6 +899,63 @@ final class Fixture
         });
     }
 
+    /** Why nothing is in view, for a failure message: the screen, Litematica's switches, where the player is. */
+    private String diagnosis()
+    {
+        StringBuilder out = new StringBuilder();
+
+        try
+        {
+            Object screen = this.ctx.screen();
+            out.append("screen ").append(screen == null ? "none" : screen.getClass().getName());
+        }
+        catch (Exception e)
+        {
+            out.append("screen ?");
+        }
+
+        try
+        {
+            Class<?> visuals = this.ctx.cls("fi.dy.masa.litematica.config.Configs$Visuals");
+
+            for (String option : new String[] {"ENABLE_RENDERING", "ENABLE_SCHEMATIC_RENDERING"})
+            {
+                try
+                {
+                    out.append(", ").append(option).append('=').append(Ctx.call(Ctx.getStatic(visuals, option), "getBooleanValue"));
+                }
+                catch (ReflectiveOperationException e)
+                {
+                    // not on this version
+                }
+            }
+
+            Object player = this.game.player();
+            out.append(", player ").append(player == null ? "none" : String.valueOf(Game.callAny(player, new String[] {"getBlockPos", "getPos", "blockPosition"})));
+            for (String yawName : new String[] {"yaw", "yRot"})
+            {
+                try
+                {
+                    out.append(", yaw ").append(Ctx.field(player.getClass(), yawName).getFloat(player));
+                    break;
+                }
+                catch (ReflectiveOperationException | RuntimeException e)
+                {
+                    // other name
+                }
+            }
+
+            out.append(", renderInfos ").append(((List<?>) Ctx.getField(this.worldRenderer, "renderInfos")).size());
+            out.append(", world ").append(this.worldRenderer == null ? "none" : "renderer set");
+        }
+        catch (Exception e)
+        {
+            out.append(", ").append(e);
+        }
+
+        return out.toString();
+    }
+
     /** Current chunk renderers by chunk key (only those in view and in render distance). */
     private Map<Long, List<Object>> renderersOnMain() throws Exception
     {
@@ -1008,6 +1073,7 @@ final class Fixture
             Thread.sleep(80);
             final String[] why = {""};
             boolean ok = this.ctx.onMain(() -> {
+                this.aim();
                 if (this.placementsIdle() == false)
                 {
                     why[0] = "placements still being copied";
@@ -1040,7 +1106,7 @@ final class Fixture
                             none.append(map.containsKey(q) ? "" : " " + keyX(q) + "," + keyZ(q));
                         }
 
-                        why[0] = "chunk " + keyX(k) + "," + keyZ(k) + " has no renderer (without one:" + none + "; not in view?; " + map.size() + " renderers in view, e.g. " + map.keySet().stream().limit(4).map(q -> keyX(q) + "," + keyZ(q)).collect(java.util.stream.Collectors.joining(" ")) + "; player chunk " + this.playerChunkX + "," + this.playerChunkZ + ")";
+                        why[0] = "chunk " + keyX(k) + "," + keyZ(k) + " has no renderer (without one:" + none + "; not in view?; " + map.size() + " renderers in view, e.g. " + map.keySet().stream().limit(4).map(q -> keyX(q) + "," + keyZ(q)).collect(java.util.stream.Collectors.joining(" ")) + "; player chunk " + this.playerChunkX + "," + this.playerChunkZ + (map.isEmpty() ? "; " + this.diagnosis() : "") + ")";
                         return false;
                     }
 
