@@ -23,8 +23,9 @@ import org.junit.Test;
 public class HygieneTest
 {
     private static final Pattern FIXED_POSITION = Pattern.compile(
-        "mouseClicked\s*\(\s*-?[0-9]|mouseReleased\s*\(\s*-?[0-9]|mouseDragged\s*\(\s*-?[0-9]|mouseMoved\s*\(\s*-?[0-9]"
-        + "|click(At)?\s*\(\s*-?[0-9]+\s*,\s*-?[0-9]+|java[.]awt[.]Robot|new\s+Robot\s*\(|mouseMove\s*\(|setCursorPos|glfwSetCursorPos|setWindowSize|setSize\s*\(");
+        "mouse(Clicked|Released|Dragged|Moved)\\s*\\(\\s*-?[0-9]"
+        + "|click(At)?\\s*\\(\\s*-?[0-9]+\\s*,\\s*-?[0-9]+"
+        + "|java[.]awt[.]Robot|new\\s+Robot\\s*\\(|mouseMove\\s*\\(|setCursorPos|glfwSetCursorPos|setWindowSize|setSize\\s*\\(");
 
     private static Path testsFolder()
     {
