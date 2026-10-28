@@ -757,12 +757,6 @@ final class Fixture
         });
     }
 
-    /** The first renderer of a chunk column now in view (diagnostics). */
-    Object rendererOf(long chunk) throws Exception
-    {
-        return this.renderersOnMain().get(chunk).get(0);
-    }
-
     /** Waits until nothing is queued, nothing is being built and every chunk in view is built, for about a second. */
     void awaitQuiet(String what) throws Exception
     {

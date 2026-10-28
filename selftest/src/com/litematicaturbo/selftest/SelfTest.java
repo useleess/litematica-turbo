@@ -87,6 +87,7 @@ public final class SelfTest
         SettingsTests.register(ctx, tests);
         StatsTests.register(ctx, tests);
         // the in-world groups last: they leave the title screen for a test world
+        HarnessTests.register(ctx, tests);
         BuildTests.register(ctx, tests);
         NearTests.register(ctx, tests);
         EmptyTests.register(ctx, tests);

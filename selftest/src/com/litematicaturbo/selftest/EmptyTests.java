@@ -29,47 +29,6 @@ final class EmptyTests
         }
     }
 
-    static void dump(Object o, String path, int depth, java.util.IdentityHashMap<Object, Boolean> seen) throws Exception
-    {
-        if (o == null || depth > 3 || seen.put(o, true) != null)
-        {
-            return;
-        }
-
-        for (Class<?> c = o.getClass(); c != null && c != Object.class; c = c.getSuperclass())
-        {
-            for (java.lang.reflect.Field fl : c.getDeclaredFields())
-            {
-                if (java.lang.reflect.Modifier.isStatic(fl.getModifiers()))
-                {
-                    continue;
-                }
-
-                fl.setAccessible(true);
-                Object v = fl.get(o);
-                String t = fl.getType().getSimpleName();
-                String shown = v == null ? "null" : v instanceof Number || v instanceof Boolean || v instanceof CharSequence || v instanceof Enum ? String.valueOf(v) : v.getClass().getSimpleName();
-
-                if (v instanceof java.util.Map)
-                {
-                    shown += " size " + ((java.util.Map<?, ?>) v).size() + " keys " + ((java.util.Map<?, ?>) v).keySet();
-                }
-                else if (v instanceof java.util.Collection)
-                {
-                    shown += " size " + ((java.util.Collection<?>) v).size();
-                }
-
-                Agent.OUT.println("SELFTEST info " + path + "." + fl.getName() + " : " + t + " = " + (shown.length() > 150 ? shown.substring(0, 150) : shown));
-
-                if (v != null && fl.getType().isPrimitive() == false && v instanceof Number == false && v instanceof CharSequence == false && depth < 3
-                    && (t.contains("Data") || t.contains("Cache") || t.contains("Buffer") || t.contains("Mesh") || t.contains("Vbo") || t.contains("Gpu")))
-                {
-                    dump(v, path + "." + fl.getName(), depth + 1, seen);
-                }
-            }
-        }
-    }
-
     private static Long sChunk(Fixture f, int index)
     {
         return f.chunksOf("S").toArray(new Long[0])[index];
@@ -87,18 +46,6 @@ final class EmptyTests
             Fixture.Capture on = WorldTests.turbo(f);
             WorldTests.same(on, WorldTests.noSkip(f), f.allChunks(), "skipping on vs off");
             WorldTests.same(WorldTests.stock(f), on, f.allChunks(), "plain Litematica vs skipping on");
-        });
-
-        tests.add("zzdiag/lines", () -> {
-            Fixture f = WorldTests.fixture(ctx);
-            WorldTests.turbo(f);
-            Long k = f.chunksOf("A").iterator().next();
-            ctx.onMain(() -> {
-                Object r = f.rendererOf(k);
-                Agent.OUT.println("SELFTEST info renderer " + r.getClass().getName());
-                dump(r, "r", 0, new java.util.IdentityHashMap<Object, Boolean>());
-                return null;
-            });
         });
 
         tests.add("empty/skips-empty-sections", () -> {
