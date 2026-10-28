@@ -927,32 +927,11 @@ final class Fixture
         this.reloadLikeTheTab();
 
         // Litematica 0.24 (1.21.9 / 1.21.10) forgets what updateAll() scheduled when its first frame after the reload sets
-        // up the new renderers. So the chunks are asked for again, by name, once the renderers stand: the same request on
-        // every version.
-        this.ctx.ticks(3);
-
-        boolean scheduled = this.ctx.onMain(() -> {
-            if ((Boolean) Ctx.call(this.worldRenderer, "turbo$isIdle") == false)
-            {
-                return true;
-            }
-
-            for (List<Object> column : this.renderersOnMain().values())
-            {
-                for (Object r : column)
-                {
-                    if ((Boolean) Ctx.call(r, "needsUpdate"))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        });
-
-        if (scheduled == false)
+        // up the new renderers. So there the chunks are asked for again, by name, once the renderers stand (on the other
+        // versions that would build every chunk twice and give renderers to chunks that have none).
+        if (this.plainHasNoWorkers())
         {
+            this.ctx.ticks(3);
             this.rebuildAll();
         }
     }
