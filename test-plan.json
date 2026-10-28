@@ -40,6 +40,16 @@
    "prefix": "safety/",
    "min": 8,
    "what": "a broken patch switches Turbo off for the session with a chat message, no crash, Litematica unchanged"
+  },
+  {
+   "prefix": "place/",
+   "min": 10,
+   "what": "adding a placement (also rotated / mirrored / overlapping) puts exactly the blocks plain Litematica puts into the schematic world"
+  },
+  {
+   "prefix": "compat/",
+   "min": 3,
+   "what": "Litematica's own display options (layer view, translucent, fluids) give the same picture with Turbo; Turbo never changes Litematica's options"
   }
  ]
 }

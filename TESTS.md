@@ -157,6 +157,14 @@ How a run goes (`Fixture`, built once on first use, the same for every version):
   `edit-leaves-other-chunks-alone`, `edit-border-both-chunks`, `many-edits-same-as-stock`, `edit-removed-restores`,
   and who builds it: `rebuild-off-render-thread` (near rebuilds on: the render thread built nothing),
   `async-off-builds-on-render-thread` (off: it did).
+- `place/` - a lone test placement (32 x 6 x 32, random blocks, one gold marker block) is added; the blocks in the schematic
+  world (read back around the placement's origin) are exactly plain Litematica's, unrotated, rotated 90 / 180 / 270,
+  mirrored, rotated + mirrored, and with a second placement laid over the first (`same-as-stock-*`); the gold marker
+  is where the schematic has it (`marker-block-arrives`) and moves when the placement is rotated / mirrored
+  (`rotation-turns-the-build`, `mirror-flips-the-build`).
+- `compat/` - with a Litematica display option changed (translucent blocks, fluids, layer view single / above / below)
+  every chunk Turbo builds equals plain Litematica's, and the option really changes what is built; Turbo's work never
+  changes any of Litematica's own options (`litematica-options-untouched`).
 - `empty/` - skipping empty 16-high sections changes nothing built (`same-geometry-*`, `same-geometry-everything`,
   also with Litematica's "extra block" overlay on: `world-extra-overlay-same`), empty chunks stay empty and the
   extreme sections (bottom / top of the world) are kept (`empty-chunks-no-geometry`, `extreme-sections-kept`), and
@@ -167,6 +175,35 @@ A full in-world run is a few minutes per version (about 20 reloads of the schema
 
 Every settings test puts TurboConfig, its file and the tab back the way it found them. `BuildStats` is static:
 the stats tests add to its counters, so tests compare differences, never absolute values.
+
+## Feature list (what a player gets -> its tests)
+
+For checking a rewrite feature by feature: every user-visible feature (README, Modrinth page, settings tab) and the
+test id prefixes that show it works. All of them run on every version in `versions/`. `FILTER=<prefix>` runs one row.
+
+| Feature (what the player sees / gets) | Test ids |
+|---|---|
+| Big schematics build on several background threads, picture identical to plain Litematica | `build/` (`threads-<n>-same`, `threads-auto-same`, `threads-agree`, `repeat-parallel-stable`, `no-chunk-missed`, `built-once`, `thread-count-applied`, `render-thread-time-drops`) |
+| All block kinds look the same (every state, block entities, translucent, fluids, chunk borders, overlay) | `build/all-states-same`, `block-entities-same`, `translucent-same`, `fluids-same`, `sparse-same`, `region-edges-same`, `overlay-same` |
+| No stutter standing in the schematic: nearby chunks rebuilt in the background, edits show up | `near/` |
+| Empty space skipped when building, nothing visible lost | `empty/` |
+| Adding / rotating / mirroring / overlapping placements puts the same blocks into the world, faster | `place/` |
+| Smooth placement moving: ghost shifted, rebuilt once stopped, swapped in one frame, same end result | `move/` |
+| F3 `[Litematica]` line with Turbo numbers, can be switched off | `stats/` |
+| Fail-safe: a patch that does not fit switches Turbo off with a chat message, no crash | `safety/` |
+| Settings tab in Litematica's config menu: every option saves, loads, applies at once; file format | `settings/` |
+| Every patch applies on this Litematica version (compatibility) | `audit/` |
+| Litematica's own options (translucent, fluids, layer view) still give the same picture; Turbo leaves Litematica's options alone | `compat/` |
+| Test world opens without a pop-up in the way | `harness/popup/` |
+| Known, not yet fixed mod bugs | `knownbug/` (see "Known bugs") |
+
+Untested (and why):
+- Absolute speed numbers of the Modrinth page (FPS while moving, worst frame, stutter count): they depend on the
+  PC and its GPU; the box tests the relative promise instead (`build/render-thread-time-drops`, `move/no-rebuild-per-step`,
+  `near/rebuild-off-render-thread`).
+- How the F3 line is drawn on screen (font, position): the tests read the line's text, not the pixels.
+- Forgematica / MaFgLib specific behaviour beyond what the same tests show on the Forge / NeoForge versions.
+- Dev-only tools (`bench.sh`, `audit.sh`): not player features.
 
 ## Adding a test for a new feature
 
