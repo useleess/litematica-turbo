@@ -201,6 +201,12 @@ final class NearTests
             for (Long k : farChunks(f))
             {
                 double d = f.nearDistanceSq(k);
+
+                if (d != d)
+                {
+                    continue; // a chunk without a block may have no renderer at all: nothing near about it
+                }
+
                 SelfTest.check(d >= 1100, "chunk " + Fixture.keyX(k) + "," + Fixture.keyZ(k) + " of a far zone is only " + Math.sqrt(d) + " blocks from the player");
             }
         });

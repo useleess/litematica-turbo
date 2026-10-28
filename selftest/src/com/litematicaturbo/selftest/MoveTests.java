@@ -283,13 +283,39 @@ final class MoveTests
         return new Run[] {stock, turbo};
     }
 
+    /** The lines about what was uploaded to the graphics card (older versions keep it next to the build result). */
+    private static final java.util.regex.Pattern UPLOAD_STATE = java.util.regex.Pattern.compile(".*vertexBuffer(Blocks|Overlay).*");
+
+    /** The view with the upload-state lines taken out: the upload is compared by its own (known bug) test. */
+    private static Fixture.Capture withoutUploads(Fixture.Capture c)
+    {
+        Fixture.Capture out = new Fixture.Capture(c.label);
+
+        for (java.util.Map.Entry<Long, Fixture.Sig> e : c.sigs.entrySet())
+        {
+            List<String> lines = new ArrayList<>();
+
+            for (String l : e.getValue().lines)
+            {
+                if (UPLOAD_STATE.matcher(l).matches() == false)
+                {
+                    lines.add(l);
+                }
+            }
+
+            out.sigs.put(e.getKey(), new Fixture.Sig(lines));
+        }
+
+        return out;
+    }
+
     private static void sameFinal(Run stock, Run turbo)
     {
         SelfTest.check(java.util.Arrays.equals(stock.finalOrigin, turbo.finalOrigin), "the placement ended at different places");
         Set<Long> common = new LinkedHashSet<>(stock.finalView.sigs.keySet());
         common.retainAll(turbo.finalView.sigs.keySet());
         SelfTest.check(common.size() >= 4, "only " + common.size() + " chunks in view in both runs");
-        WorldTests.same(stock.finalView, turbo.finalView, common, "after the move, plain Litematica vs Turbo");
+        WorldTests.same(withoutUploads(stock.finalView), withoutUploads(turbo.finalView), common, "after the move, plain Litematica vs Turbo");
         SelfTest.equal(stock.markerNew, turbo.markerNew, "the marker block at the new place");
         SelfTest.equal(stock.markerOld, turbo.markerOld, "the block left at the old place");
     }
@@ -470,6 +496,45 @@ final class MoveTests
                 sameFinal(stock, again); // plain Litematica must agree with itself, or this proves nothing
                 Run turbo = run(ctx, true, 0, steps, null);
                 sameFinal(stock, turbo);
+            });
+        });
+
+        tests.add("knownbug/move/near-chunks-keep-block-buffers", () -> {
+            // after a move across a chunk border, the chunks in front of the player should hold the same uploaded
+            // block buffers as with plain Litematica (seen on 1.19.4 and 1.20.1: none, while the build result is the same)
+            f = WorldTests.fixture(ctx);
+            guarded(ctx, () -> {
+                int[][] steps = {{17, 0, 0}};
+                Run turbo = run(ctx, true, 0, steps, null);
+                Run stock = run(ctx, false, 0, steps, null);
+
+                for (Long k : stock.finalView.sigs.keySet())
+                {
+                    if (turbo.finalView.sigs.containsKey(k))
+                    {
+                        List<String> a = new ArrayList<>();
+                        List<String> b = new ArrayList<>();
+
+                        for (String l : stock.finalView.sigs.get(k).lines)
+                        {
+                            if (UPLOAD_STATE.matcher(l).matches())
+                            {
+                                a.add(l);
+                            }
+                        }
+
+                        for (String l : turbo.finalView.sigs.get(k).lines)
+                        {
+                            if (UPLOAD_STATE.matcher(l).matches())
+                            {
+                                b.add(l);
+                            }
+                        }
+
+                        SelfTest.check(a.equals(b), "chunk " + Fixture.keyX(k) + "," + Fixture.keyZ(k) + " holds different uploaded buffers: plain Litematica " + a.size() + " lines, Turbo " + b.size()
+                                       + (a.isEmpty() || b.isEmpty() ? "" : " (first difference: " + new Fixture.Sig(a).diff(new Fixture.Sig(b)) + ")"));
+                    }
+                }
             });
         });
 

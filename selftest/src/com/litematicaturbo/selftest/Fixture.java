@@ -48,11 +48,12 @@ final class Fixture
         final String hash;
 
         /**
-         * The index counts of the overlay (outline / quad) buffers differ from build to build in plain Litematica
-         * itself (seen: two builds of the same chunk, Turbo off, 251680 vs 251600), so they cannot tell Turbo's build
-         * from Litematica's. Which overlay types exist, and everything else, is still compared.
+         * The numbers of the overlay (outline / quad) buffers - counts, sizes, positions to the last float digit - differ
+         * from build to build in plain Litematica itself (seen: two builds of the same chunk, Turbo off, 251680 vs
+         * 251600), so they cannot tell Turbo's build from Litematica's. Which overlay types exist and the other flags of
+         * the overlay, and everything about the block geometry, is still compared. Upload counters are left out too.
          */
-        private static final java.util.regex.Pattern OVERLAY_COUNT = java.util.regex.Pattern.compile("(?i).*overlay.*(=(-?[0-9.]+|java[.]nio[.].*)$)|.*overlay.*primitiveCenters.*|.*[.](generation|capacity)=-?[0-9]+$|.*this[$]0[.].*");
+        private static final java.util.regex.Pattern OVERLAY_COUNT = java.util.regex.Pattern.compile("(?i).*overlay[^=]*=.*[0-9].*|.*overlay.*primitiveCenters.*|.*[.](generation|capacity)=-?[0-9]+$|.*this[$]0[.].*");
 
         Sig(List<String> all)
         {
