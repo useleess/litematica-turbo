@@ -103,6 +103,12 @@ final class WorldTests
             }
         }
 
-        SelfTest.check(withGeometry > 0, what + ": no chunk has any geometry (the test would pass on anything)");
+        if (withGeometry == 0)
+        {
+            Long first = chunks.iterator().next();
+            Fixture.Sig one = c.sigs.get(first);
+            throw new SelfTest.Fail(what + ": no chunk has any geometry (the test would pass on anything); chunk " + Fixture.keyX(first) + "," + Fixture.keyZ(first) + " = "
+                                    + (one == null ? "no description" : one.lines.size() + " lines " + one.lines.subList(0, Math.min(20, one.lines.size()))));
+        }
     }
 }

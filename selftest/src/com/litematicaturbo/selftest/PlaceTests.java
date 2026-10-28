@@ -66,8 +66,9 @@ final class PlaceTests
     private static List<String> dump(Ctx ctx, int[] o) throws Exception
     {
         List<String> last = null;
+        int agree = 0;
 
-        for (int tries = 0; tries < 80; tries++)
+        for (int tries = 0; tries < 120; tries++)
         {
             List<String> now = ctx.onMain(() -> {
                 List<String> out = new ArrayList<>();
@@ -86,7 +87,9 @@ final class PlaceTests
                 return out;
             });
 
-            if (last != null && last.equals(now) && air(now) < now.size())
+            agree = last != null && last.equals(now) && air(now) < now.size() ? agree + 1 : 0;
+
+            if (agree >= 3)
             {
                 return now;
             }
@@ -205,6 +208,7 @@ final class PlaceTests
             placement2 = f.placeLone("P2");
         }
 
+        f.awaitQuiet("both placements are in the schematic world");
         List<String> d = dump(ctx, o);
         DUMPS.put(key, d);
         return d;

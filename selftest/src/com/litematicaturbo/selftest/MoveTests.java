@@ -423,6 +423,11 @@ final class MoveTests
                 Run turbo = run(ctx, true, 20, steps, null);
                 Run stock = run(ctx, false, 20, steps, null);
                 String trace = " (builds after each step: Turbo" + turbo.buildsAfterStep + ", plain Litematica" + stock.buildsAfterStep + ")";
+                if (stock.buildsWhileMoving == 0 && f.plainHasNoWorkers())
+                {
+                    throw SelfTest.skip("plain Litematica 0.24 has no build workers, so there is no plain rebuild per step to compare with" + trace);
+                }
+
                 SelfTest.check(stock.buildsWhileMoving > 0, "plain Litematica built nothing while moving, the scenario proves nothing" + trace);
                 // the first steps may build the chunks the view starts from once (older versions); after that a step costs no build at all
                 SelfTest.check(turbo.buildsWhileMoving * 2 <= stock.buildsWhileMoving, "Turbo built " + turbo.buildsWhileMoving + " chunks while moving, plain Litematica " + stock.buildsWhileMoving + trace);

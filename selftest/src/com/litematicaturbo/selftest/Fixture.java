@@ -405,6 +405,29 @@ final class Fixture
         return limit > 0 && out.size() > limit ? new ArrayList<>(out.subList(0, limit)) : out;
     }
 
+    /**
+     * Forge 1.17.1 throws "Cannot use model data for a world other than the current client world" (and the client
+     * dies) when a comparator without support is removed again in the schematic world: Forge's own bug, hit by any
+     * schematic with a floating comparator, with or without Turbo. The all-states zone leaves comparators out there.
+     */
+    private boolean crashesForgeModelData(Object s)
+    {
+        if (this.ctx.pkg.contains("mc117") == false || Game.describe(s)[0].equals("minecraft:comparator") == false)
+        {
+            return false;
+        }
+
+        try
+        {
+            this.ctx.cls("net.minecraftforge.client.model.ModelDataManager");
+            return true;
+        }
+        catch (ClassNotFoundException e)
+        {
+            return false;
+        }
+    }
+
     private boolean isAir(Object s)
     {
         String n = Game.describe(s)[0];
@@ -451,7 +474,7 @@ final class Fixture
         {
             Object s = this.states.get(i);
 
-            if (this.isAir(s) == false)
+            if (this.isAir(s) == false && this.crashesForgeModelData(s) == false)
             {
                 (entity[i] ? withEntity : plain).add(s);
             }
@@ -808,8 +831,33 @@ final class Fixture
 
     // ---- configurations, captures ----
 
+    /**
+     * Litematica 0.24 (Minecraft 1.21.9 / 1.21.10) ships with its build worker threads commented out: plain, it never
+     * builds the queued chunks while the test waits (Turbo starts the workers). The reference for "plain Litematica"
+     * there is Turbo with a single build thread and every other Turbo feature off: the same build code, the same
+     * result, only the scheduling differs.
+     */
+    boolean plainHasNoWorkers()
+    {
+        return this.ctx.pkg.endsWith("mc12110");
+    }
+
     void configure(boolean enabled, int threads, boolean skipEmpty, boolean asyncNear) throws Exception
     {
+        if (this.plainHasNoWorkers())
+        {
+            boolean plain = enabled == false;
+            Ctx.setField(this.config, "ghostMove", plain == false); // plain Litematica shows no shifted view
+
+            if (plain)
+            {
+                enabled = true;
+                threads = 1;
+                skipEmpty = false;
+                asyncNear = false;
+            }
+        }
+
         Ctx.setField(this.config, "enabled", enabled);
         Ctx.setField(this.config, "buildThreads", threads);
         Ctx.setField(this.config, "skipEmptySections", skipEmpty);
@@ -821,13 +869,39 @@ final class Fixture
         return (Long) Ctx.call(this.statsClass, name);
     }
 
-    /** Reloads the schematic renderers the way Turbo's own tab does, so every chunk is built again from scratch. */
-    private void reload() throws Exception
+    /** Reloads the schematic renderers exactly the way Turbo's own tab does (and nothing more). */
+    void reloadLikeTheTab() throws Exception
     {
         this.ctx.onMain(() -> {
             Ctx.call(this.worldRenderer, "setWorldAndLoadRenderers", (Object) null);
             Ctx.call(this.worldRenderer, "setWorldAndLoadRenderers", this.schematicWorld);
             Ctx.call(Ctx.getStatic(this.ctx.cls("fi.dy.masa.litematica.util.SchematicWorldRefresher"), "INSTANCE"), "updateAll");
+            return null;
+        });
+    }
+
+    /** Reloads the schematic renderers the way Turbo's own tab does, so every chunk is built again from scratch. */
+    private void reload() throws Exception
+    {
+        this.reloadLikeTheTab();
+
+        // Litematica 0.24 (1.21.9 / 1.21.10) forgets what updateAll() scheduled when its first frame after the reload sets
+        // up the new renderers. So the chunks are asked for again, by name, once the renderers stand: the same request on
+        // every version.
+        this.ctx.ticks(3);
+        this.ctx.onMain(() -> {
+            for (Long k : this.expected)
+            {
+                try
+                {
+                    Ctx.call(this.worldRenderer, "scheduleChunkRenders", keyX(k), keyZ(k));
+                }
+                catch (NoSuchMethodException e)
+                {
+                    break;
+                }
+            }
+
             return null;
         });
     }
