@@ -50,7 +50,13 @@ final class SafetyTests
     {
         return ctx.onMain(() -> {
             Object hud = Game.fieldOfType(ctx.client, "InGameHud", "Gui");
-            Object chat = Game.callAny(hud, new String[] {"getChatHud", "getChat"});
+            Object chat = Game.fieldOfType(hud, "ChatHud", "ChatComponent");
+
+            if (chat == null)
+            {
+                chat = Game.callAny(hud, new String[] {"getChatHud", "getChat"});
+            }
+
             StringBuilder all = new StringBuilder();
 
             for (Class<?> c = chat.getClass(); c != null; c = c.getSuperclass())

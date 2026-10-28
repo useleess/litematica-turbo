@@ -1005,7 +1005,14 @@ final class Fixture
 
                     if (column == null)
                     {
-                        why[0] = "chunk " + keyX(k) + "," + keyZ(k) + " has no renderer (not in view?; " + map.size() + " renderers in view, e.g. " + map.keySet().stream().limit(4).map(q -> keyX(q) + "," + keyZ(q)).collect(java.util.stream.Collectors.joining(" ")) + "; player chunk " + this.playerChunkX + "," + this.playerChunkZ + ")";
+                        StringBuilder none = new StringBuilder();
+
+                        for (Long q : chunks)
+                        {
+                            none.append(map.containsKey(q) ? "" : " " + keyX(q) + "," + keyZ(q));
+                        }
+
+                        why[0] = "chunk " + keyX(k) + "," + keyZ(k) + " has no renderer (without one:" + none + "; not in view?; " + map.size() + " renderers in view, e.g. " + map.keySet().stream().limit(4).map(q -> keyX(q) + "," + keyZ(q)).collect(java.util.stream.Collectors.joining(" ")) + "; player chunk " + this.playerChunkX + "," + this.playerChunkZ + ")";
                         return false;
                     }
 

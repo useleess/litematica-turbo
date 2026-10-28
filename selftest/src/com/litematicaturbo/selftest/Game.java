@@ -196,7 +196,7 @@ final class Game
 
         String name = screen.getClass().getSimpleName();
 
-        if (name.equals("BackupPromptScreen") == false && name.equals("ConfirmScreen") == false && name.equals("ConfirmLinkScreen") == false)
+        if (name.equals("BackupPromptScreen") == false && name.equals("BackupConfirmScreen") == false && name.equals("ConfirmScreen") == false && name.equals("ConfirmLinkScreen") == false)
         {
             return;
         }
