@@ -131,6 +131,19 @@ final class PlaceTests
         return n;
     }
 
+    private static int firstIndex(List<String> a, List<String> b)
+    {
+        for (int i = 0; i < a.size(); i++)
+        {
+            if (a.get(i).equals(b.get(i)) == false)
+            {
+                return i;
+            }
+        }
+
+        return 0;
+    }
+
     private static String firstDifference(List<String> a, List<String> b)
     {
         if (a.size() != b.size())
@@ -176,6 +189,11 @@ final class PlaceTests
      */
     private static List<String> placed(Ctx ctx, String label, boolean turbo, String rotation, String mirror, boolean second) throws Exception
     {
+        return placed(ctx, label, turbo, rotation, mirror, second, "P1");
+    }
+
+    private static List<String> placed(Ctx ctx, String label, boolean turbo, String rotation, String mirror, boolean second, String first) throws Exception
+    {
         String key = label + (turbo ? "/turbo" : "/stock");
         List<String> existing = DUMPS.get(key);
 
@@ -190,7 +208,7 @@ final class PlaceTests
         placement = null;
         placement2 = null;
         f.awaitQuiet("the schematic world settled before placing");
-        placement = f.placeLone("P1");
+        placement = f.placeLone(first);
         int[] o = origin(ctx, placement);
 
         if (rotation != null)
@@ -256,7 +274,19 @@ final class PlaceTests
             List<String> stock = placed(ctx, name, false, rotation, mirror, second);
             List<String> turbo = placed(ctx, name, true, rotation, mirror, second);
             SelfTest.check(stock.size() - air(stock) > 100, "the placement put almost nothing into the world (" + (stock.size() - air(stock)) + " blocks)");
-            SelfTest.check(stock.equals(turbo), "the placed blocks differ from plain Litematica: " + firstDifference(stock, turbo));
+            if (stock.equals(turbo) == false)
+            {
+                int differing = 0;
+
+                for (int i = 0; i < stock.size(); i++)
+                {
+                    differing += stock.get(i).equals(turbo.get(i)) ? 0 : 1;
+                }
+
+                List<String> first = DUMPS.get("same-as-stock-plain/stock");
+                String note = first == null ? "" : "; the first placement alone gives '" + first.get(firstIndex(stock, turbo)) + "' there";
+                throw new SelfTest.Fail("the placed blocks differ from plain Litematica: " + firstDifference(stock, turbo) + " (" + differing + " cells differ)" + note);
+            }
         }));
     }
 
@@ -268,7 +298,28 @@ final class PlaceTests
         sameAsStock(ctx, tests, "same-as-stock-rotated-270", "COUNTERCLOCKWISE_90", null, false);
         sameAsStock(ctx, tests, "same-as-stock-mirrored", null, "LEFT_RIGHT", false);
         sameAsStock(ctx, tests, "same-as-stock-rotated-and-mirrored", "CLOCKWISE_90", "FRONT_BACK", false);
-        sameAsStock(ctx, tests, "same-as-stock-two-placements-overlapping", null, null, true);
+        // Two placements over the same cells: which one ends up in a cell depends on the order the game works through them
+        // (not fixed, plain Litematica included), so the promise is that every cell holds the block of one of the two.
+        for (boolean turbo : new boolean[] {false, true})
+        {
+            tests.add("place/two-placements-overlapping-" + (turbo ? "turbo" : "plain"), () -> guarded(ctx, () -> {
+                List<String> a = placed(ctx, "same-as-stock-plain", false, null, null, false);
+                List<String> b = placed(ctx, "second-alone", false, null, null, false, "P2");
+                List<String> both = placed(ctx, "two-overlapping", turbo, null, null, true);
+                int fromFirst = 0, fromSecond = 0;
+
+                for (int i = 0; i < both.size(); i++)
+                {
+                    boolean isFirst = both.get(i).equals(a.get(i)), isSecond = both.get(i).equals(b.get(i));
+                    SelfTest.check(isFirst || isSecond, "a cell holds neither placement's block: first at (" + (i % W - 34) + "," + (i / (W * W)) + "," + ((i / W) % W - 34) + ") from the origin is '" + both.get(i) + "', the placements have '" + a.get(i) + "' and '" + b.get(i) + "'");
+                    fromFirst += isFirst && isSecond == false ? 1 : 0;
+                    fromSecond += isSecond && isFirst == false ? 1 : 0;
+                }
+
+                SelfTest.check(both.size() - air(both) > 100, "the placements put almost nothing into the world");
+                SelfTest.check(fromFirst + fromSecond > 0, "the two placements do not differ in any cell, the test proves nothing");
+            }));
+        }
 
         tests.add("place/marker-block-arrives", () -> guarded(ctx, () -> {
             List<String> d = placed(ctx, "same-as-stock-plain", true, null, null, false);

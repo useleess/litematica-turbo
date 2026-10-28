@@ -881,7 +881,7 @@ final class Fixture
     }
 
     /** Reloads the schematic renderers the way Turbo's own tab does, so every chunk is built again from scratch. */
-    private void reload() throws Exception
+    void reload() throws Exception
     {
         this.reloadLikeTheTab();
 

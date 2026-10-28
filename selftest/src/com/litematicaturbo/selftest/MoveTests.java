@@ -27,6 +27,7 @@ final class MoveTests
     private static final class Run
     {
         Fixture.Capture finalView;
+        Fixture.Capture reloadedView;
         long builds0;
         StringBuilder buildsAfterStep = new StringBuilder();
         List<Long> buildsAfterStepList = new ArrayList<>();
@@ -257,6 +258,16 @@ final class MoveTests
         }
 
         r.finalView.sigs.putAll(look);
+
+        // for the failure message only: what the same chunks look like when everything is built again from the final world
+        if (r.removed == false && extra != null)
+        {
+            f.reload();
+            f.awaitIdle("everything rebuilt from the final world", keys, null);
+            r.reloadedView = new Fixture.Capture(turbo ? "turbo-reloaded" : "stock-reloaded");
+            r.reloadedView.sigs.putAll(f.describeAll(keys));
+        }
+
         r.worldHash = r.removed ? 0 : hashRegion(ctx, r.finalOrigin);
         r.markerNew = stateAt(ctx, r.finalOrigin[0] + Fixture.MARKER[0], r.finalOrigin[1] + Fixture.MARKER[1], r.finalOrigin[2] + Fixture.MARKER[2]);
         r.markerOld = stateAt(ctx, start[0] + Fixture.MARKER[0], start[1] + Fixture.MARKER[1], start[2] + Fixture.MARKER[2]);
@@ -309,6 +320,19 @@ final class MoveTests
         return out;
     }
 
+    private static boolean same(Fixture.Capture a, Fixture.Capture b, Set<Long> chunks)
+    {
+        try
+        {
+            WorldTests.same(a, b, chunks, "x");
+            return true;
+        }
+        catch (SelfTest.Fail e)
+        {
+            return false;
+        }
+    }
+
     private static void sameFinal(Run stock, Run turbo)
     {
         SelfTest.check(java.util.Arrays.equals(stock.finalOrigin, turbo.finalOrigin), "the placement ended at different places");
@@ -316,7 +340,28 @@ final class MoveTests
         common.retainAll(turbo.finalView.sigs.keySet());
         SelfTest.check(common.size() >= 4, "only " + common.size() + " chunks in view in both runs");
         SelfTest.equal(stock.worldHash, turbo.worldHash, "the blocks of the placement in the schematic world after the move");
-        WorldTests.same(withoutUploads(stock.finalView), withoutUploads(turbo.finalView), common, "after the move, plain Litematica vs Turbo");
+        try
+        {
+            // Plain Litematica's own moved view can keep a border face that its next full rebuild drops (which of its
+            // neighbours built last), so when a full rebuild was made, that settled view is the reference
+            WorldTests.same(withoutUploads(stock.reloadedView != null ? stock.reloadedView : stock.finalView), withoutUploads(turbo.finalView), common,
+                            stock.reloadedView != null ? "after the move, plain Litematica fully rebuilt vs Turbo's moved view" : "after the move, plain Litematica vs Turbo");
+        }
+        catch (SelfTest.Fail e)
+        {
+            String which = "";
+
+            if (stock.reloadedView != null && turbo.reloadedView != null)
+            {
+                boolean stockStable = same(withoutUploads(stock.finalView), withoutUploads(stock.reloadedView), common);
+                boolean turboStable = same(withoutUploads(turbo.finalView), withoutUploads(turbo.reloadedView), common);
+                boolean reloadedEqual = same(withoutUploads(stock.reloadedView), withoutUploads(turbo.reloadedView), common);
+                which = " [plain Litematica's moved view equals its own full rebuild: " + stockStable + "; Turbo's: " + turboStable + "; the two full rebuilds equal each other: " + reloadedEqual + "]";
+            }
+
+            throw new SelfTest.Fail(e.getMessage() + which);
+        }
+
         SelfTest.equal(stock.markerNew, turbo.markerNew, "the marker block at the new place");
         SelfTest.equal(stock.markerOld, turbo.markerOld, "the block left at the old place");
     }
