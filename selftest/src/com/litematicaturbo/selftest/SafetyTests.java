@@ -73,12 +73,11 @@ final class SafetyTests
 
                         for (Field lf : line.getClass().getDeclaredFields())
                         {
-                            String type = lf.getType().getSimpleName();
-
-                            if (type.equals("Text") || type.equals("Component") || type.equals("MutableText") || type.equals("MutableComponent"))
+                            // the message text: a Text / Component field, or a plain Object in the generic line of older versions
+                            if (lf.getType().isPrimitive() == false && java.lang.reflect.Modifier.isStatic(lf.getModifiers()) == false)
                             {
                                 lf.setAccessible(true);
-                                all.append(String.valueOf(lf.get(line))).append('\n');
+                                all.append(String.valueOf(lf.get(line))).append(' ');
                             }
                         }
                     }

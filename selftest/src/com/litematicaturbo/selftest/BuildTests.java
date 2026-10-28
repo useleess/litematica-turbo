@@ -133,7 +133,10 @@ final class BuildTests
 
             for (int n : new int[] {1, 2, 3, 4, 8, 16})
             {
-                SelfTest.equal(n, WorldTests.threads(f, n).threads, "build threads started for the setting " + n);
+                int started = WorldTests.threads(f, n).threads;
+
+                // Litematica of the oldest versions starts worker threads only for a count above one: Turbo asks for two then
+                SelfTest.check(started == n || (n == 1 && started == 2), "build threads started for the setting " + n + ": " + started);
             }
 
             int automatic = WorldTests.automatic(f).threads;

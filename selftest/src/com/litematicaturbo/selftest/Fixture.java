@@ -52,7 +52,7 @@ final class Fixture
          * itself (seen: two builds of the same chunk, Turbo off, 251680 vs 251600), so they cannot tell Turbo's build
          * from Litematica's. Which overlay types exist, and everything else, is still compared.
          */
-        private static final java.util.regex.Pattern OVERLAY_COUNT = java.util.regex.Pattern.compile(".*[oO]verlay.*\\[(OUTLINE|QUAD)\\].*(drawParameters|indexCount|vertexCount|size)[^=]*=[0-9]+$");
+        private static final java.util.regex.Pattern OVERLAY_COUNT = java.util.regex.Pattern.compile("(?i).*overlay.*(pos=|lim=|cap=|vertexCount|indexCount|size|drawParameters)[^=]*=.*");
 
         Sig(List<String> all)
         {
@@ -717,6 +717,43 @@ final class Fixture
 
             return true;
         });
+    }
+
+    /** True when a chunk column has several renderers (older versions: 16-high sections in view) instead of one per column. */
+    boolean sectionRenderers() throws Exception
+    {
+        return this.ctx.onMain(() -> {
+            for (List<Object> column : this.renderersOnMain().values())
+            {
+                if (column.size() > 1)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        });
+    }
+
+    /** Waits until nothing is queued, nothing is being built and every chunk in view is built, for about a second. */
+    void awaitQuiet(String what) throws Exception
+    {
+        long deadline = System.currentTimeMillis() + 100_000L;
+        int stable = 0;
+
+        while (System.currentTimeMillis() < deadline)
+        {
+            Thread.sleep(80);
+            boolean quiet = this.ctx.onMain(() -> this.placementsIdle() && (Boolean) Ctx.call(this.worldRenderer, "turbo$isIdle")) && this.everythingBuilt();
+            stable = quiet ? stable + 1 : 0;
+
+            if (stable >= 14)
+            {
+                return;
+            }
+        }
+
+        throw new SelfTest.Fail(what + ": not quiet in 100 seconds");
     }
 
     /** The origins {x, y, z} of every chunk renderer now in view, as they are drawn. */

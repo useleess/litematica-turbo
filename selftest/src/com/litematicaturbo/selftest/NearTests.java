@@ -229,7 +229,8 @@ final class NearTests
 
             for (Long k : e.own)
             {
-                SelfTest.check(e.changed.contains(k), "the edit next to the player did not change the rebuilt chunk " + Fixture.keyX(k) + "," + Fixture.keyZ(k));
+                SelfTest.check(e.changed.contains(k), "the edit next to the player did not change the rebuilt chunk " + Fixture.keyX(k) + "," + Fixture.keyZ(k)
+                               + " (lines before " + e.base.sigs.get(k).lines.size() + ", after " + e.edited.get(k).lines.size() + ", first diff " + e.base.sigs.get(k).diff(e.edited.get(k)) + ")");
             }
         });
 

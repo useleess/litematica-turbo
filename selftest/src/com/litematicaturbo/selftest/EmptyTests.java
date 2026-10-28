@@ -20,6 +20,15 @@ final class EmptyTests
     /** (0,0) has a block on the bottom layer of the world; (2,0) one on the very top layer. */
     private static final int[] S_EXTREME = {0, 6};
 
+    /** Versions whose render chunks are single 16-high sections have no empty section inside a build to skip. */
+    private static void noSectionsToSkip(Fixture f) throws Exception
+    {
+        if (f.sectionRenderers())
+        {
+            throw SelfTest.skip("this version builds 16-high sections one by one, so there is no empty section inside a build to skip");
+        }
+    }
+
     private static Long sChunk(Fixture f, int index)
     {
         return f.chunksOf("S").toArray(new Long[0])[index];
@@ -42,13 +51,15 @@ final class EmptyTests
         tests.add("empty/skips-empty-sections", () -> {
             Fixture f = WorldTests.fixture(ctx);
             Fixture.Capture on = WorldTests.turbo(f);
+            noSectionsToSkip(f);
             SelfTest.check(on.scannedSections > 0, "no section was looked at while building with skipping on");
-            SelfTest.check(on.skippedSections > 0, "no empty section was skipped (" + on.scannedSections + " looked at)");
+            SelfTest.check(on.skippedSections > 0, "no empty section was skipped (" + on.scannedSections + " looked at; world height " + f.height + " from y " + f.bottom + ")");
         });
 
         tests.add("empty/skipped-share-high", () -> {
             Fixture f = WorldTests.fixture(ctx);
             Fixture.Capture on = WorldTests.turbo(f);
+            noSectionsToSkip(f);
             SelfTest.check(on.scannedSections > 0, "no section was looked at");
             SelfTest.check(on.skippedSections * 2 >= on.scannedSections,
                            "only " + on.skippedSections + " of " + on.scannedSections + " sections were skipped, the test schematics are mostly empty");
@@ -72,25 +83,35 @@ final class EmptyTests
             Fixture f = WorldTests.fixture(ctx);
             Fixture.Capture on = WorldTests.turbo(f);
             Fixture.Capture stock = WorldTests.stock(f);
-            Fixture.Sig first = on.sigs.get(sChunk(f, S_EMPTY[0]));
-            Fixture.Sig second = on.sigs.get(sChunk(f, S_EMPTY[1]));
-            Fixture.Sig withBlock = on.sigs.get(sChunk(f, S_EXTREME[0]));
-            SelfTest.check(first.lines.equals(second.lines), "the two empty chunks differ: " + first.diff(second));
-            SelfTest.check(first.lines.equals(withBlock.lines) == false, "an empty chunk looks like a chunk with a block (the build result shows nothing)");
-            SelfTest.check(first.lines.equals(stock.sigs.get(sChunk(f, S_EMPTY[0])).lines), "empty chunk differs from plain Litematica's");
+
+            for (int index : S_EMPTY)
+            {
+                Fixture.Sig sig = on.sigs.get(sChunk(f, index));
+                SelfTest.equal(0, sig.count("data.empty=false"), "build results with something in them for the chunk without any block");
+                SelfTest.check(sig.lines.equals(stock.sigs.get(sChunk(f, index)).lines), "empty chunk differs from plain Litematica's: " + sig.diff(stock.sigs.get(sChunk(f, index))));
+            }
+
+            SelfTest.check(on.sigs.get(sChunk(f, S_EXTREME[0])).count("data.empty=false") > 0, "the chunk with a block has nothing built");
         });
 
         tests.add("empty/extreme-sections-kept", () -> {
             Fixture f = WorldTests.fixture(ctx);
             Fixture.Capture on = WorldTests.turbo(f);
             Fixture.Capture off = WorldTests.noSkip(f);
-            Fixture.Sig empty = on.sigs.get(sChunk(f, S_EMPTY[0]));
+            boolean sections = f.sectionRenderers();
 
             for (int index : S_EXTREME)
             {
                 Long k = sChunk(f, index);
-                SelfTest.check(on.sigs.get(k).lines.equals(empty.lines) == false, "the block at the bottom / top of the world is missing (chunk " + Fixture.keyX(k) + "," + Fixture.keyZ(k) + ")");
-                SelfTest.check(on.sigs.get(k).lines.equals(off.sigs.get(k).lines), "chunk " + Fixture.keyX(k) + "," + Fixture.keyZ(k) + " differs with skipping off: " + on.sigs.get(k).diff(off.sigs.get(k)));
+                String where = "chunk " + Fixture.keyX(k) + "," + Fixture.keyZ(k);
+
+                if (sections && index == S_EXTREME[1])
+                {
+                    continue; // this version builds only the 16-high sections the camera sees: the section at the very top is not among them
+                }
+
+                SelfTest.check(on.sigs.get(k).count("data.empty=false") > 0, "the block at the bottom / top of the world is missing (" + where + ")");
+                SelfTest.check(on.sigs.get(k).lines.equals(off.sigs.get(k).lines), where + " differs with skipping off: " + on.sigs.get(k).diff(off.sigs.get(k)));
             }
         });
 
