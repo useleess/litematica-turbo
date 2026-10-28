@@ -52,7 +52,7 @@ final class Fixture
          * itself (seen: two builds of the same chunk, Turbo off, 251680 vs 251600), so they cannot tell Turbo's build
          * from Litematica's. Which overlay types exist, and everything else, is still compared.
          */
-        private static final java.util.regex.Pattern OVERLAY_COUNT = java.util.regex.Pattern.compile("(?i).*overlay.*(pos=|lim=|cap=|vertexCount|indexCount|size|drawParameters)[^=]*=.*");
+        private static final java.util.regex.Pattern OVERLAY_COUNT = java.util.regex.Pattern.compile("(?i).*overlay.*=(-?[0-9.]+|java[.]nio[.].*)$");
 
         Sig(List<String> all)
         {

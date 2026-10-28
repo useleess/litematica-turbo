@@ -52,6 +52,17 @@ final class SafetyTests
             Object hud = Game.fieldOfType(ctx.client, "InGameHud", "Gui");
             Object chat = Game.fieldOfType(hud, "ChatHud", "ChatComponent");
 
+            // newer versions keep the chat one object deeper (Gui -> Hud -> chat)
+            for (Field hf : hud.getClass().getDeclaredFields())
+            {
+                if (chat == null && hf.getType().isPrimitive() == false && java.lang.reflect.Modifier.isStatic(hf.getModifiers()) == false)
+                {
+                    hf.setAccessible(true);
+                    Object inner = hf.get(hud);
+                    chat = inner == null ? null : Game.fieldOfType(inner, "ChatHud", "ChatComponent");
+                }
+            }
+
             if (chat == null)
             {
                 try
