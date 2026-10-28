@@ -234,7 +234,29 @@ final class MoveTests
         r.buildsInTotal = f.stats("totalBuilds") - builds0;
         r.finalView = new Fixture.Capture(turbo ? "turbo-moved" : "stock-moved");
         Set<Long> keys = f.renderedKeys();
-        r.finalView.sigs.putAll(f.describeAll(keys));
+        // uploads to the graphics card finish a little after the builds: describe until two looks in a row agree
+        java.util.Map<Long, Fixture.Sig> look = f.describeAll(keys);
+
+        for (int tries = 0; tries < 80; tries++)
+        {
+            Thread.sleep(150);
+            java.util.Map<Long, Fixture.Sig> next = f.describeAll(keys);
+            boolean same = next.keySet().equals(look.keySet());
+
+            for (Long k : next.keySet())
+            {
+                same &= same && next.get(k).lines.equals(look.get(k).lines);
+            }
+
+            look = next;
+
+            if (same)
+            {
+                break;
+            }
+        }
+
+        r.finalView.sigs.putAll(look);
         r.worldHash = r.removed ? 0 : hashRegion(ctx, r.finalOrigin);
         r.markerNew = stateAt(ctx, r.finalOrigin[0] + Fixture.MARKER[0], r.finalOrigin[1] + Fixture.MARKER[1], r.finalOrigin[2] + Fixture.MARKER[2]);
         r.markerOld = stateAt(ctx, start[0] + Fixture.MARKER[0], start[1] + Fixture.MARKER[1], start[2] + Fixture.MARKER[2]);

@@ -211,7 +211,7 @@ final class Fixture
         this.game.command("gamemode spectator");
         // ... in the middle of its chunk, so the three chunks right in front are all within 32 blocks
         int[] spawn = ctx.onMain(this.game::playerPos);
-        this.game.command("tp @s " + (Math.floorDiv(spawn[0], 16) * 16 + 8.5) + " " + (ctx.onMain(this.game::bottomY) + 6) + " " + (Math.floorDiv(spawn[2], 16) * 16 + 8.5));
+        this.game.command("tp @s " + (Math.floorDiv(spawn[0], 16) * 16 + 8.5) + " " + (ctx.onMain(this.game::bottomY) + 6) + " " + (Math.floorDiv(spawn[2], 16) * 16 + 8.5) + " 0 0"); // facing +Z, where the zones are
 
         // the player may still be falling onto the ground while the world loads: wait until the position holds still
         int[] p = ctx.onMain(this.game::playerPos);
