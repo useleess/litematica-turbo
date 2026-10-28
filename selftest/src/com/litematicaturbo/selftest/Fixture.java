@@ -52,7 +52,7 @@ final class Fixture
          * itself (seen: two builds of the same chunk, Turbo off, 251680 vs 251600), so they cannot tell Turbo's build
          * from Litematica's. Which overlay types exist, and everything else, is still compared.
          */
-        private static final java.util.regex.Pattern OVERLAY_COUNT = java.util.regex.Pattern.compile("(?i).*overlay.*=(-?[0-9.]+|java[.]nio[.].*)$");
+        private static final java.util.regex.Pattern OVERLAY_COUNT = java.util.regex.Pattern.compile("(?i).*overlay.*(=(-?[0-9.]+|java[.]nio[.].*)$|primitiveCenters)");
 
         Sig(List<String> all)
         {
@@ -739,6 +739,12 @@ final class Fixture
 
             return false;
         });
+    }
+
+    /** The first renderer of a chunk column now in view (diagnostics). */
+    Object rendererOf(long chunk) throws Exception
+    {
+        return this.renderersOnMain().get(chunk).get(0);
     }
 
     /** Waits until nothing is queued, nothing is being built and every chunk in view is built, for about a second. */

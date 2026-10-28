@@ -32,7 +32,7 @@ final class Digest
     private static final String[] NEVER = {
         "WorldRenderer", "Dispatcher", "Worker", "ChunkRendererSchematic", "ChunkCache", "World", "Level", "Minecraft", "Client", "Task",
         "Uploader"};
-    private static final Pattern SKIP_FIELD = Pattern.compile("(?i).*(time|lock|thread|handle|fence|label|pointer|address|closed|vertexarray).*|(?i)id|.*Id");
+    private static final Pattern SKIP_FIELD = Pattern.compile("(?i).*(time|thread|handle|fence|label|pointer|address|closed|vertexarray).*|.*Lock.*|lock.*|(?i)id|.*Id"); // (not "lock" inside "block...": those are the block layers)
     private static final Pattern HASH = Pattern.compile("@[0-9a-fA-F]+|\\$\\$Lambda[\\w$/.]*");
     private static final int MAX_LINES = 20000;
     private static final int MAX_DEPTH = 7;
