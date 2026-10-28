@@ -168,6 +168,10 @@ final class Game
             throw new SelfTest.Fail("the test world did not open in 5 minutes (screen: " + (screen == null ? "none" : screen.getClass().getName()) + ")");
         }
 
+        // floating at once: on some versions the test world has no ground at the spawn and a falling survival player
+        // dies of "fell out of the world" within seconds, which leaves the death screen over every later test
+        this.command("gamemode spectator");
+
         // wait for the player to land: the same position for 3 seconds
         int[] last = null;
         int still = 0;

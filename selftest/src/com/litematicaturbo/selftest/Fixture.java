@@ -974,6 +974,9 @@ final class Fixture
     }
 
     /** Why nothing is in view, for a failure message: the screen, Litematica's switches, where the player is. */
+    /** A layer view can leave a chunk with nothing to show, and some versions then keep no renderer for it. */
+    boolean renderersMayBeMissing;
+
     private String diagnosis()
     {
         StringBuilder out = new StringBuilder();
@@ -1166,7 +1169,7 @@ final class Fixture
                 {
                     List<Object> column = map.get(k);
 
-                    if (column == null && this.blockless.contains(k))
+                    if (column == null && (this.blockless.contains(k) || this.renderersMayBeMissing))
                     {
                         continue;
                     }
@@ -1256,9 +1259,9 @@ final class Fixture
 
                 if (column == null)
                 {
-                    if (this.blockless.contains(k))
+                    if (this.blockless.contains(k) || this.renderersMayBeMissing)
                     {
-                        out.put(k, new Sig(new ArrayList<>(java.util.Collections.singletonList("no renderer: the chunk has no block"))));
+                        out.put(k, new Sig(new ArrayList<>(java.util.Collections.singletonList("no renderer: the chunk has nothing to show"))));
                     }
 
                     continue;

@@ -315,6 +315,7 @@ final class MoveTests
         Set<Long> common = new LinkedHashSet<>(stock.finalView.sigs.keySet());
         common.retainAll(turbo.finalView.sigs.keySet());
         SelfTest.check(common.size() >= 4, "only " + common.size() + " chunks in view in both runs");
+        SelfTest.equal(stock.worldHash, turbo.worldHash, "the blocks of the placement in the schematic world after the move");
         WorldTests.same(withoutUploads(stock.finalView), withoutUploads(turbo.finalView), common, "after the move, plain Litematica vs Turbo");
         SelfTest.equal(stock.markerNew, turbo.markerNew, "the marker block at the new place");
         SelfTest.equal(stock.markerOld, turbo.markerOld, "the block left at the old place");

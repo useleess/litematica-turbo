@@ -205,6 +205,9 @@ final class PlaceTests
 
         if (second)
         {
+            // laid over the first once that is done: two placement jobs running at the same time decide the shared cells
+            // by whichever finishes last, on plain Litematica as well
+            f.awaitQuiet("the first placement is in the schematic world");
             placement2 = f.placeLone("P2");
         }
 

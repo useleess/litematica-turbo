@@ -137,6 +137,7 @@ final class CompatTests
 
             try
             {
+                f.renderersMayBeMissing = true;
                 setMode(ctx, mode);
                 setLayer(ctx, y);
                 Fixture.Capture stock = staged("plain Litematica", () -> f.captureNew("layer-" + name + "-stock", false, 0, true, true));
@@ -159,6 +160,7 @@ final class CompatTests
             }
             finally
             {
+                f.renderersMayBeMissing = false;
                 setMode(ctx, "ALL");
                 f.configure(true, 3, true, true);
                 ctx.ticks(40);
