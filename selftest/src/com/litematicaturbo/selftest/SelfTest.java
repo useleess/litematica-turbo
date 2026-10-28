@@ -90,6 +90,8 @@ public final class SelfTest
         BuildTests.register(ctx, tests);
         NearTests.register(ctx, tests);
         EmptyTests.register(ctx, tests);
+        MoveTests.register(ctx, tests);
+        SafetyTests.register(ctx, tests);
 
         List<String> prefixes = new ArrayList<>();
 

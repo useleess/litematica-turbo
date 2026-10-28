@@ -597,6 +597,147 @@ final class Fixture
         return schematic;
     }
 
+    // ---- a lone placement for the move tests ----
+
+    /** Block position (relative to the lone placement's origin) of the marker block that is always in it. */
+    static final int[] MARKER = {3, 2, 3};
+
+    /**
+     * Switches every placement of the standard test zones on or off. Turbo moves a placement the cheap way only
+     * while it is the only enabled one, so the move tests switch the zones off and use a lone placement.
+     */
+    void zonesEnabled(boolean enabled, String... only) throws Exception
+    {
+        List<String> names = new ArrayList<>();
+
+        for (String n : only)
+        {
+            names.add("turbo-" + n);
+        }
+
+        this.ctx.onMain(() -> {
+            Object manager = Ctx.call(this.ctx.cls("fi.dy.masa.litematica.data.DataManager"), "getSchematicPlacementManager");
+
+            for (Object placement : new ArrayList<Object>((java.util.Collection<?>) Ctx.call(manager, "getAllSchematicsPlacements")))
+            {
+                String name = String.valueOf(Ctx.call(placement, "getName"));
+
+                if (name.startsWith("turbo-") && name.startsWith("turbo-lone-") == false && (names.isEmpty() || names.contains(name)) && (Boolean) Ctx.call(placement, "isEnabled") != enabled)
+                {
+                    Ctx.call(placement, "toggleEnabled");
+                }
+            }
+
+            return null;
+        });
+        this.ctx.ticks(2);
+    }
+
+    /**
+     * A new lone test placement: 2 x 2 chunks, a sprinkle of mixed blocks overhead plus the marker block, whose
+     * origin is at the first chunk of zone N's near row. Returns the placement.
+     */
+    Object placeLone(String name) throws Exception
+    {
+        File dir = new File(System.getProperty("user.dir"), "schematics");
+        Class<?> schematicClass = this.ctx.cls("fi.dy.masa.litematica.schematic.LitematicaSchematic");
+        int dataVersion = (Integer) Ctx.getStatic(schematicClass, "MINECRAFT_DATA_VERSION");
+        int version = (Integer) Ctx.getStatic(schematicClass, "SCHEMATIC_VERSION");
+        List<Object> mixed = this.statesNamed("minecraft:stone", "minecraft:glass", "minecraft:oak_planks", "minecraft:oak_leaves", "minecraft:water",
+                                              "minecraft:white_stained_glass", "minecraft:torch", "minecraft:oak_stairs");
+        Object gold = this.stateNamed("minecraft:gold_block");
+        SelfTest.check(gold != null && mixed.size() >= 3, "the block registry has no gold block / stone / glass");
+        int sx = 32, sy = 6, sz = 32;
+        Map<String, Integer> index = new HashMap<>();
+        List<String[]> palette = new ArrayList<>();
+        palette.add(new String[] {"minecraft:air", ""});
+        index.put("air", 0);
+        int[] cells = new int[sx * sy * sz];
+        int[] rnd = this.lcg(name.hashCode());
+
+        for (int i = 0; i < cells.length; i++)
+        {
+            if (next(rnd, 100) < 7)
+            {
+                cells[i] = this.paletteIndex(index, palette, mixed.get(next(rnd, mixed.size())));
+            }
+        }
+
+        cells[(MARKER[1] * sz + MARKER[2]) * sx + MARKER[0]] = this.paletteIndex(index, palette, gold);
+        File file = new File(dir, "turbo-test-" + name + ".litematic");
+        WorldFiles.writeSchematic(file, dataVersion, version, "turbo " + name, sx, sy, sz, palette, cells);
+        Object holder = Ctx.call(this.ctx.cls("fi.dy.masa.litematica.data.SchematicHolder"), "getInstance");
+        Object schematic = this.load(holder, file);
+        Class<?> placementClass = this.ctx.cls("fi.dy.masa.litematica.schematic.placement.SchematicPlacement");
+        return this.ctx.onMain(() -> {
+            Object manager = Ctx.call(this.ctx.cls("fi.dy.masa.litematica.data.DataManager"), "getSchematicPlacementManager");
+            Object origin = this.game.blockPos((this.playerChunkX - 1) * 16, this.nearY, (this.playerChunkZ + 1) * 16);
+            Object placement = Ctx.call(placementClass, "createFor", schematic, origin, "turbo-lone-" + name, true, true);
+            Ctx.call(manager, "addSchematicPlacement", placement, false);
+            return placement;
+        });
+    }
+
+    /** The block chunks (keys) a lone placement touches when its origin is at the given block position. */
+    Set<Long> chunksAt(int originX, int originZ)
+    {
+        Set<Long> out = new LinkedHashSet<>();
+
+        for (int x = Math.floorDiv(originX, 16); x <= Math.floorDiv(originX + 31, 16); x++)
+        {
+            for (int z = Math.floorDiv(originZ, 16); z <= Math.floorDiv(originZ + 31, 16); z++)
+            {
+                out.add(key(x, z));
+            }
+        }
+
+        return out;
+    }
+
+    /** Chunk columns that currently have a renderer (in view). */
+    Set<Long> renderedKeys() throws Exception
+    {
+        return this.ctx.onMain(() -> new LinkedHashSet<>(this.renderersOnMain().keySet()));
+    }
+
+    /** True when every chunk renderer in view has a finished build (nothing waits to be built). */
+    boolean everythingBuilt() throws Exception
+    {
+        return this.ctx.onMain(() -> {
+            for (List<Object> column : this.renderersOnMain().values())
+            {
+                for (Object r : column)
+                {
+                    if (built(r) == false)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        });
+    }
+
+    /** The origins {x, y, z} of every chunk renderer now in view, as they are drawn. */
+    List<int[]> renderOrigins() throws Exception
+    {
+        return this.ctx.onMain(() -> {
+            List<int[]> out = new ArrayList<>();
+
+            for (List<Object> column : this.renderersOnMain().values())
+            {
+                for (Object r : column)
+                {
+                    Object o = Ctx.call(r, "getOrigin");
+                    out.add(new int[] {(Integer) Ctx.call(o, "getX"), (Integer) Ctx.call(o, "getY"), (Integer) Ctx.call(o, "getZ")});
+                }
+            }
+
+            return out;
+        });
+    }
+
     // ---- configurations, captures ----
 
     void configure(boolean enabled, int threads, boolean skipEmpty, boolean asyncNear) throws Exception
@@ -657,6 +798,12 @@ final class Fixture
     Capture captureNew(String label, boolean enabled, int threads, boolean skipEmpty, boolean asyncNear) throws Exception
     {
         this.configure(enabled, threads, skipEmpty, asyncNear);
+        return this.captureAsIs(label);
+    }
+
+    /** Like {@link #captureNew} with the configuration exactly as it is now. */
+    Capture captureAsIs(String label) throws Exception
+    {
         long builds = this.stat("totalBuilds");
         long main = this.stat("totalMainThreadNanos");
         long scanned = ((AtomicLong) Ctx.getStatic(this.statsClass, "sectionsScanned")).get();
