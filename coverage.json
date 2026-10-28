@@ -1,0 +1,16 @@
+{
+  "package": "com.litematicaturbo",
+  "sources": [
+    "core/src/main/java",
+    "versions/*/src/main/java"
+  ],
+  "not_mod_code": [
+    "/selftest/"
+  ],
+  "mixin_jars": [
+    "versions/*/build/devlibs/*-dev.jar"
+  ],
+  "built_jars": [
+    "versions/*/build/devlibs/*-dev.jar"
+  ]
+}
