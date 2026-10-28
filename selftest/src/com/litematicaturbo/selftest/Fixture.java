@@ -930,7 +930,31 @@ final class Fixture
         // up the new renderers. So the chunks are asked for again, by name, once the renderers stand: the same request on
         // every version.
         this.ctx.ticks(3);
-        this.rebuildAll();
+
+        boolean scheduled = this.ctx.onMain(() -> {
+            if ((Boolean) Ctx.call(this.worldRenderer, "turbo$isIdle") == false)
+            {
+                return true;
+            }
+
+            for (List<Object> column : this.renderersOnMain().values())
+            {
+                for (Object r : column)
+                {
+                    if ((Boolean) Ctx.call(r, "needsUpdate"))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        });
+
+        if (scheduled == false)
+        {
+            this.rebuildAll();
+        }
     }
 
     /** Marks every test chunk for a new build the way an edit in the schematic world does, keeping the renderers. */
