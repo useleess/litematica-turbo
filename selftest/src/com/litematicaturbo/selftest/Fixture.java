@@ -329,6 +329,39 @@ final class Fixture
         }
     }
 
+    /**
+     * Litematica 1.21.11 and 26.x: a build is on show from its first moment, so the render thread can walk the block entity
+     * list of a chunk while one of Turbo's build threads is still filling it (knownbug/render/): the game dies with a
+     * ConcurrentModificationException. The groups that do not look at block entities draw none (and Litematica then
+     * collects none); the ones that do build on the render thread only.
+     */
+    boolean blockEntityDrawRace()
+    {
+        return this.ctx.pkg.endsWith("mc12111") || this.ctx.pkg.endsWith("mc262") || this.ctx.pkg.endsWith("mc263");
+    }
+
+    /** Switches the drawing (and collecting) of the schematic's block entities, Litematica's "render tile entities" option. */
+    void drawBlockEntities(boolean on) throws Exception
+    {
+        this.ctx.onMain(() -> {
+            this.setBlockEntityDrawing(on);
+            return null;
+        });
+    }
+
+    /** On the render thread already. */
+    private void setBlockEntityDrawing(boolean on)
+    {
+        try
+        {
+            Ctx.call(Ctx.getStatic(this.ctx.cls("fi.dy.masa.litematica.config.Configs$Visuals"), "RENDER_SCHEMATIC_TILE_ENTITIES"), "setBooleanValue", on);
+        }
+        catch (ReflectiveOperationException e)
+        {
+            // not an option on this version
+        }
+    }
+
     private void enableRendering() throws Exception
     {
         this.ctx.onMain(() -> {
@@ -344,6 +377,14 @@ final class Fixture
                 {
                     // not an option on this version
                 }
+            }
+
+            // The tests read the build results, not the frames. Drawing the block entities of the schematic walks the lists
+            // of the finished builds on the render thread, and with Turbo's build threads that walk can meet a rebuild
+            // (ConcurrentModificationException = the game dies): see knownbug/render/. Everything else is drawn as usual.
+            if (this.blockEntityDrawRace())
+            {
+                this.setBlockEntityDrawing(false);
             }
 
             this.aim();
@@ -889,6 +930,34 @@ final class Fixture
         // up the new renderers. So the chunks are asked for again, by name, once the renderers stand: the same request on
         // every version.
         this.ctx.ticks(3);
+        this.rebuildAll();
+    }
+
+    /** Marks every test chunk for a new build the way an edit in the schematic world does, keeping the renderers. */
+    void touchAll() throws Exception
+    {
+        this.ctx.onMain(() -> {
+            Object refresher = Ctx.getStatic(this.ctx.cls("fi.dy.masa.litematica.util.SchematicWorldRefresher"), "INSTANCE");
+
+            for (Long k : this.expected)
+            {
+                try
+                {
+                    Ctx.call(refresher, "markSchematicChunksForRenderUpdate", keyX(k), keyZ(k));
+                }
+                catch (NoSuchMethodException e)
+                {
+                    Ctx.call(refresher, "markSchematicChunkForRenderUpdate", this.game.blockPos(keyX(k) * 16 + 8, this.nearY, keyZ(k) * 16 + 8));
+                }
+            }
+
+            return null;
+        });
+    }
+
+    /** Asks the renderer to build every test chunk again (the request an edit in the schematic world makes). */
+    void rebuildAll() throws Exception
+    {
         this.ctx.onMain(() -> {
             for (Long k : this.expected)
             {

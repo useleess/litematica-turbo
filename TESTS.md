@@ -159,7 +159,7 @@ How a run goes (`Fixture`, built once on first use, the same for every version):
   `async-off-builds-on-render-thread` (off: it did).
 - `place/` - a lone test placement (32 x 6 x 32, random blocks, one gold marker block) is added; the blocks in the schematic
   world (read back around the placement's origin) are exactly plain Litematica's, unrotated, rotated 90 / 180 / 270,
-  mirrored, rotated + mirrored, and with a second placement laid over the first (`same-as-stock-*`); the gold marker
+  mirrored, rotated + mirrored, and with a second placement laid over the first (`same-as-stock-*`, and `two-placements-overlapping-plain` / `-turbo`: every cell of two overlapping placements holds the block of one of them); the gold marker
   is where the schematic has it (`marker-block-arrives`) and moves when the placement is rotated / mirrored
   (`rotation-turns-the-build`, `mirror-flips-the-build`).
   `move/rotated-while-moving-same-as-stock` and `move/mirrored-while-moving-same-as-stock`: rotating / mirroring a
@@ -228,9 +228,38 @@ A test that shows a reported, not yet fixed mod bug gets an id starting with `kn
 (`SelfTest.KNOWN_BUG`): the normal run leaves it out, `FILTER=knownbug/` runs it. When the bug is fixed, move the
 test to its normal id.
 
-None so far. Seen once, not reproduced: `compat/layer-all-below-same-as-stock` failed in a full 1.21.4 run with the game's own
-`IllegalStateException: Missing elements in vertex` and passed in two reruns (watch it on the all-versions run).
+- `knownbug/render/draw-block-entities-while-rebuilt` - **the game ends** on Litematica 1.21.11 / 26.x (1.21.11, 26.2, 26.3 and
+  the NeoForge builds): the schematic's block entities are drawn while Turbo's build threads rebuild the chunks that hold
+  them, and the render thread meets a list the build thread is still filling (`ConcurrentModificationException` in
+  `WorldRendererSchematic.prepareBlockEntities`, found by the first full runs as `NO RESULT` on those versions). Passes on
+  1.21.10 and older. Because of it the in-world tests of those versions draw no block entities (`Fixture.blockEntityDrawRace`)
+  and `build/block-entities-same` compares plain Litematica with Turbo's single-thread mode there. Running the test ends the
+  run without a result on an affected version; that is the bug.
+- `knownbug/move/fixed-budget-final-view` - with a fixed catch-up budget the finished view after a move is not exactly plain
+  Litematica's (older helper's finding).
+- `knownbug/move/near-chunks-keep-block-buffers` - after a move across a chunk border the chunks in front of the player hold no
+  uploaded block buffers on 1.19.4 / 1.20.1 while the build result is the same (older helper's finding).
 
-Test-box note (found 2026-10-28): a game window on the box can have its camera turned by the cursor moving while other
-windows are tiled, which emptied the view and made every later capture wait its 100 s (a 1.21.4 run ended `NO RESULT`
-after 2702 s). `Fixture.aim()` now points the player along +Z on every poll of `awaitIdle`.
+Seen once, not reproduced: `compat/layer-all-below-same-as-stock` failed in a full 1.21.4 run with plain Litematica's own
+`IllegalStateException: Missing elements in vertex` (it happens while plain Litematica rebuilds a layer view; Turbo is off at
+that moment). The test now tries the plain capture once more; a second failure is reported.
+
+## Notes on how the tests deal with the platforms
+
+- Test-box note (found 2026-10-28): a game window on the box can have its camera turned by the cursor moving while other
+  windows are tiled, which emptied the view and made every later capture wait its 100 s (a 1.21.4 run ended `NO RESULT`
+  after 2702 s). `Fixture.aim()` now points the player along +Z on every poll of `awaitIdle`.
+- Litematica 0.24 (Minecraft 1.21.9 / 1.21.10): plain Litematica has its build worker threads commented out, so with Turbo off
+  it never builds the queued chunks while a test waits (the 2702 s `NO RESULT` of 1.21.10, and every capture came back empty).
+  There "plain Litematica" is Turbo with ONE build thread and everything else off (`Fixture.plainHasNoWorkers`), the same
+  build code. Also on those versions `SchematicWorldRefresher.updateAll()` schedules nothing after a renderer reload, so the
+  harness asks for the test chunks by name once the renderers stand (`Fixture.reload`).
+- Forge 1.17.1 dies on a floating comparator that is removed again in the schematic world (Forge's own
+  `ModelDataManager`): the all-states zone leaves comparators out there.
+- The player is put into spectator mode the moment the world opens (some versions have no ground at the spawn and a falling
+  survival player died of "fell out of the world", leaving the death screen over every later test).
+- Two placements over the same cells: which one ends up in a cell is not fixed (plain Litematica included), so
+  `place/two-placements-overlapping-*` checks that every cell holds the block of one of the two placements.
+- A moved + rotated / mirrored placement: plain Litematica's own moved view can keep a border face that its next full rebuild
+  drops, so `move/rotated-` / `mirrored-while-moving-same-as-stock` compare Turbo's moved view with plain Litematica's fully
+  rebuilt one (and check the placed blocks themselves first).
