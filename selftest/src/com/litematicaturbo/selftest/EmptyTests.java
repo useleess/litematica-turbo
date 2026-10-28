@@ -140,11 +140,11 @@ final class EmptyTests
             for (int index : S_EMPTY)
             {
                 Fixture.Sig sig = on.sigs.get(sChunk(f, index));
-                SelfTest.equal(0, sig.count("data.empty=false"), "build results with something in them for the chunk without any block");
+                SelfTest.equal(0, sig.built(), "build results with something in them for the chunk without any block");
                 SelfTest.check(sig.lines.equals(stock.sigs.get(sChunk(f, index)).lines), "empty chunk differs from plain Litematica's: " + sig.diff(stock.sigs.get(sChunk(f, index))));
             }
 
-            SelfTest.check(on.sigs.get(sChunk(f, S_EXTREME[0])).count("data.empty=false") > 0, "the chunk with a block has nothing built");
+            SelfTest.check(on.sigs.get(sChunk(f, S_EXTREME[0])).built() > 0, "the chunk with a block has nothing built");
         });
 
         tests.add("empty/extreme-sections-kept", () -> {
@@ -163,7 +163,7 @@ final class EmptyTests
                     continue; // this version builds only the 16-high sections the camera sees: the section at the very top is not among them
                 }
 
-                SelfTest.check(on.sigs.get(k).count("data.empty=false") > 0, "the block at the bottom / top of the world is missing (" + where + ")");
+                SelfTest.check(on.sigs.get(k).built() > 0, "the block at the bottom / top of the world is missing (" + where + ")");
                 SelfTest.check(on.sigs.get(k).lines.equals(off.sigs.get(k).lines), where + " differs with skipping off: " + on.sigs.get(k).diff(off.sigs.get(k)));
             }
         });

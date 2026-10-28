@@ -52,7 +52,7 @@ final class Fixture
          * itself (seen: two builds of the same chunk, Turbo off, 251680 vs 251600), so they cannot tell Turbo's build
          * from Litematica's. Which overlay types exist, and everything else, is still compared.
          */
-        private static final java.util.regex.Pattern OVERLAY_COUNT = java.util.regex.Pattern.compile("(?i).*overlay.*(=(-?[0-9.]+|java[.]nio[.].*)$|primitiveCenters)");
+        private static final java.util.regex.Pattern OVERLAY_COUNT = java.util.regex.Pattern.compile("(?i).*overlay.*(=(-?[0-9.]+|java[.]nio[.].*)$|primitiveCenters)|.*[.](generation|capacity)=-?[0-9]+$|.*this[$]0[.].*");
 
         Sig(List<String> all)
         {
@@ -96,6 +96,22 @@ final class Fixture
             }
 
             return this.lines.size() + " lines vs " + other.lines.size() + " lines";
+        }
+
+        /** How many 16-high parts of the chunk have blocks built (the build result says "not empty"). */
+        int built()
+        {
+            int n = 0;
+
+            for (String l : this.lines)
+            {
+                if (l.matches(".*data[.](empty|blocksEmpty)=false"))
+                {
+                    ++n;
+                }
+            }
+
+            return n;
         }
 
         int count(String prefixOrPart)
