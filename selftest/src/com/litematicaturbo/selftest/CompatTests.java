@@ -93,7 +93,38 @@ final class CompatTests
         }
         catch (Exception e)
         {
-            throw new SelfTest.Fail("while " + who + " built: " + e);
+            if (who.startsWith("plain") && String.valueOf(e).contains("Missing elements in vertex"))
+            {
+                // Plain Litematica (Turbo off) sometimes throws this on 1.21.4 while a layer view is rebuilt: its own race,
+                // not Turbo's. One more try; a second failure is reported.
+                try
+                {
+                    return stage.run();
+                }
+                catch (SelfTest.Fail | SelfTest.Skip e2)
+                {
+                    throw e2;
+                }
+                catch (Exception e2)
+                {
+                    e = e2;
+                }
+            }
+
+            StringBuilder at = new StringBuilder();
+            Throwable root = e;
+
+            while (root.getCause() != null)
+            {
+                root = root.getCause();
+            }
+
+            for (int i = 0; i < Math.min(6, root.getStackTrace().length); i++)
+            {
+                at.append(" < ").append(root.getStackTrace()[i]);
+            }
+
+            throw new SelfTest.Fail("while " + who + " built: " + e + at);
         }
     }
 
