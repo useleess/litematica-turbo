@@ -107,7 +107,8 @@ final class BuildTests
             for (int n : new int[] {2, 4, 8})
             {
                 Fixture.Capture c = WorldTests.threads(f, n);
-                SelfTest.check(c.builds >= chunks, n + " threads: " + c.builds + " builds for " + chunks + " chunks (a chunk was not built)");
+                // plain Litematica builds no chunk that has no block in it at all: Turbo must build exactly those, no fewer
+                SelfTest.check(c.builds >= stock.builds, n + " threads: " + c.builds + " builds, plain Litematica made " + stock.builds + " for " + chunks + " chunks (a chunk was not built)");
                 SelfTest.check(c.builds <= Math.max(stock.builds, chunks) + 2,
                                n + " threads: " + c.builds + " builds for " + chunks + " chunks, plain Litematica needed " + stock.builds + " (chunks built twice)");
             }
@@ -135,9 +136,11 @@ final class BuildTests
                 SelfTest.equal(n, WorldTests.threads(f, n).threads, "build threads started for the setting " + n);
             }
 
+            int automatic = WorldTests.automatic(f).threads;
+            f.configure(true, 0, true, true); // captures are kept, so the config may hold another setting by now
             Object config = Ctx.call(f.configClass, "get");
             Object cpu = Ctx.getStatic(f.configClass, "CPU_COUNT");
-            SelfTest.equal(Ctx.call(config, "resolveBuildThreads", cpu), WorldTests.automatic(f).threads, "build threads for the automatic setting");
+            SelfTest.equal(Ctx.call(config, "resolveBuildThreads", cpu), automatic, "build threads for the automatic setting");
         });
 
         tests.add("build/overlay-same", () -> {

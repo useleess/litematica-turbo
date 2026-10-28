@@ -42,10 +42,12 @@ final class NearTests
     private static Set<Long> nearChunks(Fixture f) throws Exception
     {
         Set<Long> near = new LinkedHashSet<>();
+        StringBuilder seen = new StringBuilder();
 
         for (Long k : f.chunksOf("N"))
         {
             double d = f.nearDistanceSq(k);
+            seen.append(' ').append(Fixture.keyX(k)).append(',').append(Fixture.keyZ(k)).append('=').append(Math.round(Math.sqrt(d)));
 
             if (d == d && d < 900)
             {
@@ -55,7 +57,7 @@ final class NearTests
 
         if (near.isEmpty())
         {
-            throw SelfTest.skip("no chunk of the test zone is within 32 blocks of the player (the player stands high above the world floor)");
+            throw SelfTest.skip("no chunk of the test zone is within 32 blocks of the player (player at " + f.playerX + "," + f.playerY + "," + f.playerZ + ", zone N from y " + f.nearY + ", renderer y " + f.lastOriginY + ", distances" + seen + ")");
         }
 
         return near;
@@ -71,10 +73,10 @@ final class NearTests
         return String.valueOf(ctx.onMain(() -> Ctx.call(f.schematicWorld(), "getBlockState", pos)));
     }
 
-    /** An edit position: block (x, y, z) of the schematic world. */
+    /** An edit position: block (x, y, z) of the schematic world; chunkDz 0 = the first row of zone N, the one right in front of the player. */
     private static int[] at(Fixture f, int chunkDx, int chunkDz, int inChunkX, int inChunkZ, int dy)
     {
-        return new int[] {(f.playerChunkX + chunkDx) * 16 + inChunkX, f.bottom + 12 + dy, (f.playerChunkZ + chunkDz) * 16 + inChunkZ};
+        return new int[] {(f.playerChunkX + chunkDx) * 16 + inChunkX, f.nearY + 2 + dy, (f.playerChunkZ + 1 + chunkDz) * 16 + inChunkZ};
     }
 
     /**
@@ -268,7 +270,7 @@ final class NearTests
 
         tests.add("near/many-edits-same-as-stock", () -> {
             Fixture f = WorldTests.fixture(ctx);
-            Edit e = edit(ctx, "many", true, at(f, 0, 0, 3, 3, 0), at(f, 1, 0, 5, 9, 1), at(f, -1, 0, 12, 4, 2), at(f, 0, 1, 8, 8, 0), at(f, 1, 1, 2, 13, 1));
+            Edit e = edit(ctx, "many", true, at(f, 0, 0, 3, 3, 0), at(f, 1, 0, 5, 9, 1), at(f, -1, 0, 12, 4, 2), at(f, -1, 0, 6, 6, 0), at(f, 1, 0, 2, 13, 1));
             Fixture.Capture background = new Fixture.Capture("turbo-after-edits");
             background.sigs.putAll(e.edited);
             WorldTests.same(e.stockAfter, background, f.allChunks(), "five edits rebuilt in the background vs plain Litematica");

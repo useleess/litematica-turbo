@@ -125,7 +125,7 @@ How a run goes (`Fixture`, built once on first use, the same for every version):
    (`startIntegratedServer` before 1.19, `IntegratedServerLoader.start` / `WorldOpenFlows.openWorld` after, found by
    return type). The script also sets render distance 12 and silences (Neo)Forge's mod-warning screen.
 2. Test schematics, written as `.litematic` files from the running game's block registry and placed with Litematica's
-   own placement manager, in chunk zones in front of the player (who looks along +Z): `N` near (3 x 3 chunks starting at the player's own chunk and going forward, since Litematica builds only chunks in the view), `A` every block state without a block entity, `B` every state with one,
+   own placement manager, in chunk zones in front of the player (who looks along +Z): `N` near (3 x 3 chunks starting one chunk in front of the player, since Litematica builds only chunks in the view), `A` every block state without a block entity, `B` every state with one,
    `S` sparse (full world height, a handful of blocks at the very bottom / top / on section borders, most chunks and
    sections empty), `T` translucent and transparent blocks, `F` fluids (every level, waterlogged), `E` blocks along
    the chunk borders.

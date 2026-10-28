@@ -2,6 +2,7 @@ package com.litematicaturbo.selftest;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -46,8 +47,25 @@ final class Fixture
         final List<String> lines;
         final String hash;
 
-        Sig(List<String> lines)
+        /**
+         * The index counts of the overlay (outline / quad) buffers differ from build to build in plain Litematica
+         * itself (seen: two builds of the same chunk, Turbo off, 251680 vs 251600), so they cannot tell Turbo's build
+         * from Litematica's. Which overlay types exist, and everything else, is still compared.
+         */
+        private static final java.util.regex.Pattern OVERLAY_COUNT = java.util.regex.Pattern.compile(".*[oO]verlay.*\\[(OUTLINE|QUAD)\\].*(drawParameters|indexCount|vertexCount|size)[^=]*=[0-9]+$");
+
+        Sig(List<String> all)
         {
+            List<String> lines = new java.util.ArrayList<>();
+
+            for (String l : all)
+            {
+                if (OVERLAY_COUNT.matcher(l).matches() == false)
+                {
+                    lines.add(l);
+                }
+            }
+
             this.lines = lines;
             this.hash = Integer.toHexString(lines.hashCode());
         }
@@ -61,7 +79,19 @@ final class Fixture
             {
                 if (this.lines.get(i).equals(other.lines.get(i)) == false)
                 {
-                    return "'" + this.lines.get(i) + "' vs '" + other.lines.get(i) + "'";
+                    StringBuilder all = new StringBuilder("'" + this.lines.get(i) + "' vs '" + other.lines.get(i) + "'");
+                    int shown = 1;
+
+                    for (int j = i + 1; j < n && shown < 5; j++)
+                    {
+                        if (this.lines.get(j).equals(other.lines.get(j)) == false)
+                        {
+                            all.append(" | '").append(this.lines.get(j)).append("' vs '").append(other.lines.get(j)).append("'");
+                            ++shown;
+                        }
+                    }
+
+                    return all.toString();
                 }
             }
 
@@ -109,7 +139,12 @@ final class Fixture
     final Game game;
     final Map<String, Zone> zones = new LinkedHashMap<>();
     final Map<String, Capture> captures = new HashMap<>();
+    /** A capture that failed once is not retried by every test that needs it (each retry would cost its full wait). */
+    final Map<String, String> captureFailures = new HashMap<>();
     int playerX, playerY, playerZ, playerChunkX, playerChunkZ, bottom, height;
+    /** Lowest layer of the near zone N: a little above the player's feet, inside the 32-block near rule. */
+    int nearY;
+    int lastOriginY;
     final List<Object> states = new ArrayList<>();
     final Class<?> configClass;
     final Class<?> statsClass;
@@ -171,18 +206,38 @@ final class Fixture
         this.config = Ctx.call(this.configClass, "get");
 
         this.game.join("turbo-test");
+        // Litematica's "near" rule measures to a renderer that stands on the bottom of the world (one per chunk column),
+        // so the player goes down there and floats (spectator mode, no gravity): only then is anything "near"
+        this.game.command("gamemode spectator");
+        // ... in the middle of its chunk, so the three chunks right in front are all within 32 blocks
+        int[] spawn = ctx.onMain(this.game::playerPos);
+        this.game.command("tp @s " + (Math.floorDiv(spawn[0], 16) * 16 + 8.5) + " " + (ctx.onMain(this.game::bottomY) + 6) + " " + (Math.floorDiv(spawn[2], 16) * 16 + 8.5));
+
+        // the player may still be falling onto the ground while the world loads: wait until the position holds still
         int[] p = ctx.onMain(this.game::playerPos);
+        long settleEnd = System.currentTimeMillis() + 60_000L;
+        int stillFor = 0;
+
+        while ((stillFor < 20 || p[1] > ctx.onMain(this.game::bottomY) + 30) && System.currentTimeMillis() < settleEnd)
+        {
+            ctx.ticks(1);
+            int[] q = ctx.onMain(this.game::playerPos);
+            stillFor = Arrays.equals(p, q) ? stillFor + 1 : 0;
+            p = q;
+        }
+
         this.playerX = p[0];
         this.playerY = p[1];
         this.playerZ = p[2];
         this.playerChunkX = Math.floorDiv(p[0], 16);
         this.playerChunkZ = Math.floorDiv(p[2], 16);
         this.bottom = ctx.onMain(this.game::bottomY);
+        this.nearY = this.playerY + 2;
         this.height = ctx.onMain(this.game::worldHeight);
         this.states.addAll(ctx.onMain(this.game::allBlockStates));
 
         this.enableRendering();
-        this.zone("N", -1, 0, 3); // in front of the player: Litematica builds only chunks in the view
+        this.zone("N", -1, 1, 3); // in front of the player: Litematica builds only chunks in the view
         this.zone("A", -4, 5, 3);
         this.zone("S", -1, 5, 3);
         this.zone("T", 2, 5, 3);
@@ -493,7 +548,7 @@ final class Fixture
                 default: // N: a few blocks overhead, 10 up from the world floor, within 8 blocks of every chunk border too
                 {
                     sy = 6;
-                    originY = this.bottom + 10;
+                    originY = this.nearY;
                     cells = new int[sx * sy * sz];
 
                     for (int i = 0; i < cells.length; i++)
@@ -578,9 +633,24 @@ final class Fixture
             return existing;
         }
 
-        Capture c = this.captureNew(label, enabled, threads, skipEmpty, asyncNear);
-        this.captures.put(label, c);
-        return c;
+        String earlier = this.captureFailures.get(label);
+
+        if (earlier != null)
+        {
+            throw new SelfTest.Fail(earlier);
+        }
+
+        try
+        {
+            Capture c = this.captureNew(label, enabled, threads, skipEmpty, asyncNear);
+            this.captures.put(label, c);
+            return c;
+        }
+        catch (SelfTest.Fail e)
+        {
+            this.captureFailures.put(label, e.getMessage());
+            throw e;
+        }
     }
 
     /** Like {@link #capture} but always reloads (the live renderers then show this configuration's result). */
@@ -615,19 +685,48 @@ final class Fixture
     }
 
     /** Current chunk renderers by chunk key (only those in view and in render distance). */
-    private Map<Long, Object> renderersOnMain() throws Exception
+    private Map<Long, List<Object>> renderersOnMain() throws Exception
     {
-        Map<Long, Object> map = new HashMap<>();
+        Map<Long, List<Object>> map = new HashMap<>();
+        Map<Object, Integer> heights = new java.util.IdentityHashMap<>();
 
         for (Object r : new ArrayList<Object>((List<?>) Ctx.getField(this.worldRenderer, "renderInfos")))
         {
             Object origin = Ctx.call(r, "getOrigin");
             int x = (Integer) Ctx.call(origin, "getX");
             int z = (Integer) Ctx.call(origin, "getZ");
-            map.put(key(Math.floorDiv(x, 16), Math.floorDiv(z, 16)), r);
+            heights.put(r, (Integer) Ctx.call(origin, "getY"));
+            map.computeIfAbsent(key(Math.floorDiv(x, 16), Math.floorDiv(z, 16)), q -> new ArrayList<>()).add(r);
+        }
+
+        // a chunk column has one renderer per 16-high section that Litematica builds: keep them in height order
+        for (List<Object> column : map.values())
+        {
+            column.sort((a, b) -> Integer.compare(heights.get(a), heights.get(b)));
         }
 
         return map;
+    }
+
+    /** True when none of the column's sections has a newer build result than the earlier list of results. */
+    private static boolean sameData(List<Object> column, Object earlier) throws ReflectiveOperationException
+    {
+        List<?> old = (List<?>) earlier;
+
+        if (old.size() != column.size())
+        {
+            return false;
+        }
+
+        for (int i = 0; i < old.size(); i++)
+        {
+            if (dataOf(column.get(i)) != old.get(i))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static Object dataOf(Object renderer) throws ReflectiveOperationException
@@ -646,7 +745,8 @@ final class Fixture
     {
         Object data = dataOf(renderer);
 
-        if (data == null || data == Ctx.getStatic(data.getClass(), "EMPTY"))
+        // a chunk with nothing in it legitimately ends with the shared EMPTY data: finished = no update pending
+        if (data == null)
         {
             return false;
         }
@@ -692,7 +792,7 @@ final class Fixture
      */
     void awaitIdle(String what, Set<Long> chunks, Map<Long, Object> oldData) throws Exception
     {
-        long deadline = System.currentTimeMillis() + 4 * 60_000L;
+        long deadline = System.currentTimeMillis() + 100_000L;
         int stable = 0;
         String missing = "";
 
@@ -713,25 +813,32 @@ final class Fixture
                     return false;
                 }
 
-                Map<Long, Object> map = this.renderersOnMain();
+                Map<Long, List<Object>> map = this.renderersOnMain();
 
                 for (Long k : chunks)
                 {
-                    Object r = map.get(k);
+                    List<Object> column = map.get(k);
 
-                    if (r == null)
+                    if (column == null)
                     {
                         why[0] = "chunk " + keyX(k) + "," + keyZ(k) + " has no renderer (not in view?; " + map.size() + " renderers in view, e.g. " + map.keySet().stream().limit(4).map(q -> keyX(q) + "," + keyZ(q)).collect(java.util.stream.Collectors.joining(" ")) + "; player chunk " + this.playerChunkX + "," + this.playerChunkZ + ")";
                         return false;
                     }
 
-                    if (built(r) == false)
+                    boolean allBuilt = true;
+
+                    for (Object r : column)
                     {
-                        why[0] = "chunk " + keyX(k) + "," + keyZ(k) + " not built";
+                        allBuilt &= built(r);
+                    }
+
+                    if (allBuilt == false)
+                    {
+                        why[0] = "chunk " + keyX(k) + "," + keyZ(k) + " not built (" + column.size() + " sections)";
                         return false;
                     }
 
-                    if (oldData != null && oldData.containsKey(k) && dataOf(r) == oldData.get(k))
+                    if (oldData != null && oldData.containsKey(k) && sameData(column, oldData.get(k)))
                     {
                         why[0] = "chunk " + keyX(k) + "," + keyZ(k) + " not rebuilt yet";
                         return false;
@@ -749,7 +856,7 @@ final class Fixture
             }
         }
 
-        throw new SelfTest.Fail(what + ": not finished in 4 minutes (" + missing + ")");
+        throw new SelfTest.Fail(what + ": not finished in 100 seconds (" + missing + ")");
     }
 
     /** The build data object of each chunk now (identity, to see later whether it was rebuilt). */
@@ -757,13 +864,20 @@ final class Fixture
     {
         return this.ctx.onMain(() -> {
             Map<Long, Object> out = new HashMap<>();
-            Map<Long, Object> map = this.renderersOnMain();
+            Map<Long, List<Object>> map = this.renderersOnMain();
 
             for (Long k : chunks)
             {
                 if (map.get(k) != null)
                 {
-                    out.put(k, dataOf(map.get(k)));
+                    List<Object> datas = new ArrayList<>();
+
+                    for (Object r : map.get(k))
+                    {
+                        datas.add(dataOf(r));
+                    }
+
+                    out.put(k, datas);
                 }
             }
 
@@ -775,29 +889,35 @@ final class Fixture
     {
         return this.ctx.onMain(() -> {
             Map<Long, Sig> out = new LinkedHashMap<>();
-            Map<Long, Object> map = this.renderersOnMain();
+            Map<Long, List<Object>> map = this.renderersOnMain();
 
             for (Long k : chunks)
             {
-                Object r = map.get(k);
+                List<Object> column = map.get(k);
 
-                if (r == null)
+                if (column == null)
                 {
                     continue;
                 }
 
                 List<String> lines = new ArrayList<>();
-                Digest.lines("data", dataOf(r), lines);
+                int section = 0;
 
-                for (String field : new String[] {"vertexBufferBlocks", "vertexBufferOverlay"})
+                for (Object r : column)
                 {
-                    try
+                    String at = "section" + section++;
+                    Digest.lines(at + ".data", dataOf(r), lines);
+
+                    for (String field : new String[] {"vertexBufferBlocks", "vertexBufferOverlay"})
                     {
-                        Digest.lines(field, Ctx.getField(r, field), lines);
-                    }
-                    catch (ReflectiveOperationException e)
-                    {
-                        // this version keeps its buffers elsewhere
+                        try
+                        {
+                            Digest.lines(at + "." + field, Ctx.getField(r, field), lines);
+                        }
+                        catch (ReflectiveOperationException e)
+                        {
+                            // this version keeps its buffers elsewhere
+                        }
                     }
                 }
 
@@ -869,18 +989,28 @@ final class Fixture
     double nearDistanceSq(long chunk) throws Exception
     {
         return this.ctx.onMain(() -> {
-            Object r = this.renderersOnMain().get(chunk);
+            List<Object> column = this.renderersOnMain().get(chunk);
 
-            if (r == null)
+            if (column == null)
             {
                 return Double.NaN;
             }
 
-            Object origin = Ctx.call(r, "getOrigin");
-            double dx = (Integer) Ctx.call(origin, "getX") + 8 - this.playerX;
-            double dy = (Integer) Ctx.call(origin, "getY") + 8 - (this.playerY + 1);
-            double dz = (Integer) Ctx.call(origin, "getZ") + 8 - this.playerZ;
-            return dx * dx + dy * dy + dz * dz;
+            double nearest = Double.MAX_VALUE;
+
+            for (Object r : column)
+            {
+                Object origin = Ctx.call(r, "getOrigin");
+                double dx = (Integer) Ctx.call(origin, "getX") + 8 - this.playerX;
+                double dy = (Integer) Ctx.call(origin, "getY") + 8 - (this.playerY + 1);
+                double dz = (Integer) Ctx.call(origin, "getZ") + 8 - this.playerZ;
+                nearest = Math.min(nearest, dx * dx + dy * dy + dz * dz);
+            }
+
+            Object any = column.get(0);
+            Object o = Ctx.call(any, "getOrigin");
+            this.lastOriginY = (Integer) Ctx.call(o, "getY");
+            return nearest;
         });
     }
 }

@@ -105,6 +105,34 @@ final class Game
         return fieldOfType(this.ctx.client, "ClientPlayerEntity", "LocalPlayer");
     }
 
+    /** Runs a chat command (without the slash) as the player; the test world allows commands. */
+    void command(String text) throws Exception
+    {
+        this.ctx.onMain(() -> {
+            Object player = this.player();
+            Object handler = fieldOfType(player, "ClientPlayNetworkHandler", "ClientPacketListener");
+
+            if (handler != null)
+            {
+                for (String name : new String[] {"sendChatCommand", "sendCommand", "sendUnsignedCommand"})
+                {
+                    try
+                    {
+                        Ctx.call(handler, name, text);
+                        return null;
+                    }
+                    catch (NoSuchMethodException e)
+                    {
+                        // an older / newer version names it differently
+                    }
+                }
+            }
+
+            callAny(player, new String[] {"sendChatMessage", "chat"}, "/" + text); // before 1.19.1
+            return null;
+        });
+    }
+
     /**
      * Writes the flat test world into saves/ of the game folder and opens it from the title screen. Returns when the
      * player is in the world and has stopped falling.
