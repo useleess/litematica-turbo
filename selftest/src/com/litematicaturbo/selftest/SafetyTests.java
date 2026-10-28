@@ -54,7 +54,21 @@ final class SafetyTests
 
             if (chat == null)
             {
-                chat = Game.callAny(hud, new String[] {"getChatHud", "getChat"});
+                try
+                {
+                    chat = Game.callAny(hud, new String[] {"getChatHud", "getChat"});
+                }
+                catch (NoSuchMethodException e)
+                {
+                    StringBuilder fields = new StringBuilder();
+
+                    for (Field hf : hud.getClass().getDeclaredFields())
+                    {
+                        fields.append(' ').append(hf.getType().getSimpleName());
+                    }
+
+                    throw new NoSuchMethodException("no chat in " + hud.getClass().getName() + ", its fields:" + fields);
+                }
             }
 
             StringBuilder all = new StringBuilder();

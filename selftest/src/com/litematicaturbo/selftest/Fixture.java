@@ -152,6 +152,7 @@ final class Fixture
     private final Object schematicWorld;
     private final Object worldRenderer;
     private final Set<Long> expected = new LinkedHashSet<>();
+    private final Set<Long> blockless = new LinkedHashSet<>();
 
     static synchronized Fixture get(Ctx ctx) throws Exception
     {
@@ -249,6 +250,11 @@ final class Fixture
         {
             this.expected.addAll(z.chunks);
         }
+
+        // the two chunks of the sparse zone that have no block at all: some versions give them no renderer
+        Long[] sparse = this.zones.get("S").chunks.toArray(new Long[0]);
+        this.blockless.add(sparse[1]);
+        this.blockless.add(sparse[3]);
 
         this.placeSchematics();
         this.schematicWorld = Ctx.call(ctx.cls("fi.dy.masa.litematica.world.SchematicWorldHandler"), "getSchematicWorld");
@@ -1003,6 +1009,11 @@ final class Fixture
                 {
                     List<Object> column = map.get(k);
 
+                    if (column == null && this.blockless.contains(k))
+                    {
+                        continue;
+                    }
+
                     if (column == null)
                     {
                         StringBuilder none = new StringBuilder();
@@ -1088,6 +1099,11 @@ final class Fixture
 
                 if (column == null)
                 {
+                    if (this.blockless.contains(k))
+                    {
+                        out.put(k, new Sig(new ArrayList<>(java.util.Collections.singletonList("no renderer: the chunk has no block"))));
+                    }
+
                     continue;
                 }
 

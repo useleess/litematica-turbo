@@ -5,7 +5,8 @@
     "versions/*/src/main/java"
   ],
   "not_mod_code": [
-    "/selftest/"
+    "/selftest/",
+    "/bench/"
   ],
   "mixin_jars": [
     "versions/*/build/devlibs/*-dev.jar"
