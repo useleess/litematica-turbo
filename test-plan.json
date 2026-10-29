@@ -50,6 +50,11 @@
    "prefix": "compat/",
    "min": 3,
    "what": "Litematica's own display options (layer view, translucent, fluids) give the same picture with Turbo; Turbo never changes Litematica's options"
+  },
+  {
+   "prefix": "render/",
+   "min": 1,
+   "what": "block entities drawn while Turbo rebuilds their chunks never crash the game"
   }
  ]
 }

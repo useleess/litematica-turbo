@@ -329,17 +329,6 @@ final class Fixture
         }
     }
 
-    /**
-     * Litematica 1.21.11 and 26.x: a build is on show from its first moment, so the render thread can walk the block entity
-     * list of a chunk while one of Turbo's build threads is still filling it (knownbug/render/): the game dies with a
-     * ConcurrentModificationException. The groups that do not look at block entities draw none (and Litematica then
-     * collects none); the ones that do build on the render thread only.
-     */
-    boolean blockEntityDrawRace()
-    {
-        return this.ctx.pkg.endsWith("mc12111") || this.ctx.pkg.endsWith("mc262") || this.ctx.pkg.endsWith("mc263");
-    }
-
     /** Switches the drawing (and collecting) of the schematic's block entities, Litematica's "render tile entities" option. */
     void drawBlockEntities(boolean on) throws Exception
     {
@@ -377,14 +366,6 @@ final class Fixture
                 {
                     // not an option on this version
                 }
-            }
-
-            // The tests read the build results, not the frames. Drawing the block entities of the schematic walks the lists
-            // of the finished builds on the render thread, and with Turbo's build threads that walk can meet a rebuild
-            // (ConcurrentModificationException = the game dies): see knownbug/render/. Everything else is drawn as usual.
-            if (this.blockEntityDrawRace())
-            {
-                this.setBlockEntityDrawing(false);
             }
 
             this.aim();

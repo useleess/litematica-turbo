@@ -52,54 +52,25 @@ final class BuildTests
             }
         });
 
-        tests.add("knownbug/render/draw-block-entities-while-rebuilt", () -> {
-            // The schematic's block entities are drawn while Turbo's threads rebuild the chunks that hold them. On Litematica
-            // 1.21.11 / 26.x the render thread then meets a list that a build thread is filling (ConcurrentModificationException
-            // in WorldRendererSchematic.prepareBlockEntities) and the GAME ENDS: this test is expected to end the run of such a
-            // version without a result (NO RESULT, the exception is in the game log) until Turbo is fixed.
+        tests.add("render/draw-block-entities-while-rebuilt", () -> {
+            // The schematic's block entities are drawn while Turbo's threads rebuild the chunks that hold them: the render
+            // thread must never meet a block entity list that a build thread is still filling (on Litematica 1.21.11 / 26.x
+            // that was a ConcurrentModificationException in WorldRendererSchematic.prepareBlockEntities and the game ended).
             Fixture f = WorldTests.fixture(ctx);
             f.configure(true, 3, true, true);
             f.drawBlockEntities(true);
 
-            try
+            for (int round = 0; round < 12; round++)
             {
-                for (int round = 0; round < 12; round++)
-                {
-                    java.util.Map<Long, Object> before = f.dataNow(f.allChunks());
-                    f.touchAll();
-                    f.awaitIdle("rebuilt with the block entities drawn", f.allChunks(), before);
-                }
-            }
-            finally
-            {
-                f.drawBlockEntities(f.blockEntityDrawRace() == false);
+                java.util.Map<Long, Object> before = f.dataNow(f.allChunks());
+                f.touchAll();
+                f.awaitIdle("rebuilt with the block entities drawn", f.allChunks(), before);
             }
         });
 
         zone(ctx, tests, "all-states-same", "A");
         tests.add("build/block-entities-same", () -> {
             Fixture f = WorldTests.fixture(ctx);
-
-            if (f.blockEntityDrawRace())
-            {
-                // see Fixture.blockEntityDrawRace: Turbo's own build threads are left out here until knownbug/render/ is fixed
-                f.drawBlockEntities(true);
-
-                try
-                {
-                    Fixture.Capture plain = f.captureNew("be-stock", false, 0, true, true);
-                    Fixture.Capture single = f.captureNew("be-single", true, -1, true, true);
-                    blockEntitiesSame(f, plain, single);
-                }
-                finally
-                {
-                    f.drawBlockEntities(false);
-                    f.configure(true, 3, true, true);
-                }
-
-                return;
-            }
-
             blockEntitiesSame(f, WorldTests.stock(f), WorldTests.turbo(f));
         });
         zone(ctx, tests, "translucent-same", "T");

@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import fi.dy.masa.litematica.render.schematic.ChunkRenderDataSchematic;
 import fi.dy.masa.litematica.render.schematic.ChunkRenderDispatcherBuffers;
 import fi.dy.masa.litematica.render.schematic.ChunkRenderGpuUploader;
 import fi.dy.masa.litematica.render.schematic.ChunkRenderTaskSchematic;
@@ -13,6 +14,7 @@ import fi.dy.masa.litematica.render.schematic.ChunkRenderWorkerLitematica;
 import fi.dy.masa.litematica.render.schematic.ChunkRendererSchematicVbo;
 
 import com.litematicaturbo.core.BuildStats;
+import com.litematicaturbo.mc263.TurboBuilt;
 import com.litematicaturbo.mc263.TurboRenderer;
 
 /**
@@ -31,6 +33,7 @@ public abstract class ChunkRenderWorkerLitematicaMixin
         ReentrantLock lock = ((TurboRenderer) renderer).turbo$buildLock();
         lock.lock();
         long start = System.nanoTime();
+        TurboBuilt.take();
 
         try
         {
@@ -67,6 +70,18 @@ public abstract class ChunkRenderWorkerLitematicaMixin
         {
             lock.unlock();
         }
+    }
+
+    /**
+     * The upload takes the data the build just finished (stock reads it back from the chunk, where
+     * the build thread had published it). onSuccess then publishes it on the render thread.
+     */
+    @Redirect(method = "processTask",
+              at = @At(value = "INVOKE", target = "Lfi/dy/masa/litematica/render/schematic/ChunkRenderTaskSchematic;getChunkRenderData()Lfi/dy/masa/litematica/render/schematic/ChunkRenderDataSchematic;"))
+    private ChunkRenderDataSchematic turbo$uploadBuiltData(ChunkRenderTaskSchematic task)
+    {
+        ChunkRenderDataSchematic built = TurboBuilt.take();
+        return built != null ? built : ((ChunkRenderTaskSchematicInvoker) task).turbo$getChunkRenderData();
     }
 
     /**

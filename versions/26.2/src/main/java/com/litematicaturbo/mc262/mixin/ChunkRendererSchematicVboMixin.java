@@ -18,11 +18,13 @@ import net.minecraft.world.phys.AABB;
 import fi.dy.masa.litematica.config.Configs;
 import fi.dy.masa.litematica.render.schematic.ChunkCacheSchematic;
 import fi.dy.masa.litematica.render.schematic.ChunkRenderDataSchematic;
+import fi.dy.masa.litematica.render.schematic.ChunkRenderTaskSchematic;
 import fi.dy.masa.litematica.render.schematic.ChunkRendererSchematicVbo;
 
 import com.litematicaturbo.core.SectionSlices;
 import com.litematicaturbo.core.TurboConfig;
 import com.litematicaturbo.mc262.CellIterable;
+import com.litematicaturbo.mc262.TurboBuilt;
 import com.litematicaturbo.mc262.TurboRenderer;
 
 @Mixin(value = ChunkRendererSchematicVbo.class, remap = false)
@@ -148,6 +150,32 @@ public abstract class ChunkRendererSchematicVboMixin implements TurboRenderer
         int index = chunk.getSectionIndexFromSectionY(sectionY);
 
         return index >= 0 && index < sections.length && sections[index] != null && sections[index].hasOnlyAir() == false;
+    }
+
+    /**
+     * A rebuild starts by clearing "the task's data", which stock hands out as the chunk's published
+     * data while the task has none of its own: a build thread would empty the block entity list that
+     * the render thread is drawing from. The build works on its own fresh data instead.
+     */
+    @Redirect(method = "rebuildChunk",
+              at = @At(value = "INVOKE",
+                       target = "Lfi/dy/masa/litematica/render/schematic/ChunkRenderTaskSchematic;getChunkRenderData()Lfi/dy/masa/litematica/render/schematic/ChunkRenderDataSchematic;"))
+    private ChunkRenderDataSchematic turbo$buildOnFreshData(ChunkRenderTaskSchematic task)
+    {
+        return new ChunkRenderDataSchematic();
+    }
+
+    /**
+     * Stock publishes the finished data here, on the build thread, and clears the old published
+     * data. Hold it back: processTask uploads it and publishes it on the render thread, where
+     * nothing else walks the old lists at the same time.
+     */
+    @Redirect(method = "rebuildChunk",
+              at = @At(value = "INVOKE",
+                       target = "Lfi/dy/masa/litematica/render/schematic/ChunkRendererSchematicVbo;updateChunkRenderData(Lfi/dy/masa/litematica/render/schematic/ChunkRenderDataSchematic;)V"))
+    private void turbo$holdBuiltData(ChunkRendererSchematicVbo self, ChunkRenderDataSchematic data)
+    {
+        TurboBuilt.set(data);
     }
 
     /**

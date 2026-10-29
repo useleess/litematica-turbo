@@ -4,6 +4,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import net.minecraft.world.level.ChunkPos;
 
+import fi.dy.masa.litematica.render.schematic.ChunkRenderDataSchematic;
 import fi.dy.masa.litematica.render.schematic.ChunkRenderTaskSchematic;
 import fi.dy.masa.litematica.render.schematic.ChunkRendererSchematicVbo;
 
@@ -18,4 +19,7 @@ public interface ChunkRenderTaskSchematicInvoker
 
     @Invoker("getChunkPos")
     ChunkPos turbo$getChunkPos();
+
+    @Invoker("getChunkRenderData")
+    ChunkRenderDataSchematic turbo$getChunkRenderData();
 }

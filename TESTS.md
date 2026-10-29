@@ -187,6 +187,7 @@ test id prefixes that show it works. All of them run on every version in `versio
 |---|---|
 | Big schematics build on several background threads, picture identical to plain Litematica | `build/` (`threads-<n>-same`, `threads-auto-same`, `threads-agree`, `repeat-parallel-stable`, `no-chunk-missed`, `built-once`, `thread-count-applied`, `render-thread-time-drops`) |
 | All block kinds look the same (every state, block entities, translucent, fluids, chunk borders, overlay) | `build/all-states-same`, `block-entities-same`, `translucent-same`, `fluids-same`, `sparse-same`, `region-edges-same`, `overlay-same` |
+| Chests, signs and other block entities drawn while Turbo rebuilds their chunks never crash the game | `render/` (`draw-block-entities-while-rebuilt`) |
 | No stutter standing in the schematic: nearby chunks rebuilt in the background, edits show up | `near/` |
 | Empty space skipped when building, nothing visible lost | `empty/` |
 | Adding / rotating / mirroring / overlapping placements puts the same blocks into the world, faster | `place/` |
@@ -228,13 +229,6 @@ A test that shows a reported, not yet fixed mod bug gets an id starting with `kn
 (`SelfTest.KNOWN_BUG`): the normal run leaves it out, `FILTER=knownbug/` runs it. When the bug is fixed, move the
 test to its normal id.
 
-- `knownbug/render/draw-block-entities-while-rebuilt` - **the game ends** on Litematica 1.21.11 / 26.x (1.21.11, 26.2, 26.3 and
-  the NeoForge builds): the schematic's block entities are drawn while Turbo's build threads rebuild the chunks that hold
-  them, and the render thread meets a list the build thread is still filling (`ConcurrentModificationException` in
-  `WorldRendererSchematic.prepareBlockEntities`, found by the first full runs as `NO RESULT` on those versions). Passes on
-  1.21.10 and older. Because of it the in-world tests of those versions draw no block entities (`Fixture.blockEntityDrawRace`)
-  and `build/block-entities-same` compares plain Litematica with Turbo's single-thread mode there. Running the test ends the
-  run without a result on an affected version; that is the bug.
 - `knownbug/move/fixed-budget-final-view` - with a fixed catch-up budget the finished view after a move is not exactly plain
   Litematica's (older helper's finding).
 - `knownbug/move/near-chunks-keep-block-buffers` - after a move across a chunk border the chunks in front of the player hold no
