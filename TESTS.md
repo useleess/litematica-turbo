@@ -260,6 +260,8 @@ that moment). The test now tries the plain capture once more; a second failure i
   survival player died of "fell out of the world", leaving the death screen over every later test).
 - Two placements over the same cells: which one ends up in a cell is not fixed (plain Litematica included), so
   `place/two-placements-overlapping-*` checks that every cell holds the block of one of the two placements.
-- A moved + rotated / mirrored placement: plain Litematica's own moved view can keep a border face that its next full rebuild
-  drops, so `move/rotated-` / `mirrored-while-moving-same-as-stock` compare Turbo's moved view with plain Litematica's fully
-  rebuilt one (and check the placed blocks themselves first).
+- A moved + rotated / mirrored placement: the views built while the placement and its neighbour chunks were still being
+  worked on can keep or drop one face at a chunk border (plain Litematica as well, differently from run to run), so
+  `move/rotated-` / `mirrored-while-moving-same-as-stock` check the placed blocks, then compare plain Litematica's and
+  Turbo's views after a full rebuild of the final world. The other `move/same-as-stock-*` scenarios compare the moved
+  views directly and build once more before a difference counts.
