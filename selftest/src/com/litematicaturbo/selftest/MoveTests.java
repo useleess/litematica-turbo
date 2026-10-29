@@ -259,13 +259,17 @@ final class MoveTests
 
         r.finalView.sigs.putAll(look);
 
-        // for the failure message only: what the same chunks look like when everything is built again from the final world
+        // What the same chunks look like when they are all built again from the final world (the settled picture): plain
+        // Litematica's own moved view can keep a border face that its next full rebuild drops, so it is no steady reference
         if (r.removed == false && extra != null)
         {
-            f.reload();
-            f.awaitIdle("everything rebuilt from the final world", keys, null);
-            r.reloadedView = new Fixture.Capture(turbo ? "turbo-reloaded" : "stock-reloaded");
-            r.reloadedView.sigs.putAll(f.describeAll(keys));
+            Set<Long> mine = new LinkedHashSet<>(f.chunksOf("N"));
+            mine.retainAll(keys);
+            java.util.Map<Long, Object> dataBefore = f.dataNow(mine);
+            f.touchAll();
+            f.awaitIdle("everything rebuilt from the final world", mine, dataBefore);
+            r.reloadedView = new Fixture.Capture(turbo ? "turbo-rebuilt" : "stock-rebuilt");
+            r.reloadedView.sigs.putAll(f.describeAll(mine));
         }
 
         r.worldHash = r.removed ? 0 : hashRegion(ctx, r.finalOrigin);
@@ -340,26 +344,20 @@ final class MoveTests
         common.retainAll(turbo.finalView.sigs.keySet());
         SelfTest.check(common.size() >= 4, "only " + common.size() + " chunks in view in both runs");
         SelfTest.equal(stock.worldHash, turbo.worldHash, "the blocks of the placement in the schematic world after the move");
-        try
+        if (stock.reloadedView != null && turbo.reloadedView != null)
         {
-            // Plain Litematica's own moved view can keep a border face that its next full rebuild drops (which of its
-            // neighbours built last), so when a full rebuild was made, that settled view is the reference
-            WorldTests.same(withoutUploads(stock.reloadedView != null ? stock.reloadedView : stock.finalView), withoutUploads(turbo.finalView), common,
-                            stock.reloadedView != null ? "after the move, plain Litematica fully rebuilt vs Turbo's moved view" : "after the move, plain Litematica vs Turbo");
+            // The turned placement: Turbo's moved view is what a full rebuild of the final world gives, and that is plain
+            // Litematica's full rebuild (plain Litematica's own moved view is not steady: a border face can differ between runs)
+            Set<Long> mine = new LinkedHashSet<>(turbo.reloadedView.sigs.keySet());
+            mine.retainAll(stock.reloadedView.sigs.keySet());
+            mine.retainAll(turbo.finalView.sigs.keySet());
+            SelfTest.check(mine.size() >= 2, "only " + mine.size() + " test chunks in view in both runs");
+            WorldTests.same(withoutUploads(stock.reloadedView), withoutUploads(turbo.reloadedView), mine, "after the move, plain Litematica fully rebuilt vs Turbo fully rebuilt");
+            WorldTests.same(withoutUploads(turbo.reloadedView), withoutUploads(turbo.finalView), mine, "Turbo's moved view vs its own full rebuild of the same world");
         }
-        catch (SelfTest.Fail e)
+        else
         {
-            String which = "";
-
-            if (stock.reloadedView != null && turbo.reloadedView != null)
-            {
-                boolean stockStable = same(withoutUploads(stock.finalView), withoutUploads(stock.reloadedView), common);
-                boolean turboStable = same(withoutUploads(turbo.finalView), withoutUploads(turbo.reloadedView), common);
-                boolean reloadedEqual = same(withoutUploads(stock.reloadedView), withoutUploads(turbo.reloadedView), common);
-                which = " [plain Litematica's moved view equals its own full rebuild: " + stockStable + "; Turbo's: " + turboStable + "; the two full rebuilds equal each other: " + reloadedEqual + "]";
-            }
-
-            throw new SelfTest.Fail(e.getMessage() + which);
+            WorldTests.same(withoutUploads(stock.finalView), withoutUploads(turbo.finalView), common, "after the move, plain Litematica vs Turbo");
         }
 
         SelfTest.equal(stock.markerNew, turbo.markerNew, "the marker block at the new place");

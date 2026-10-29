@@ -878,6 +878,9 @@ final class Fixture
      * there is Turbo with a single build thread and every other Turbo feature off: the same build code, the same
      * result, only the scheduling differs.
      */
+    private boolean stoodInForGhost;
+    private boolean ghostBefore = true;
+
     boolean plainHasNoWorkers()
     {
         return this.ctx.pkg.endsWith("mc12110");
@@ -887,15 +890,25 @@ final class Fixture
     {
         if (this.plainHasNoWorkers())
         {
-            boolean plain = enabled == false;
-            Ctx.setField(this.config, "ghostMove", plain == false); // plain Litematica shows no shifted view
-
-            if (plain)
+            if (enabled == false)
             {
                 enabled = true;
                 threads = 1;
                 skipEmpty = false;
                 asyncNear = false;
+
+                if (this.stoodInForGhost == false)
+                {
+                    this.stoodInForGhost = true;
+                    this.ghostBefore = (Boolean) Ctx.getField(this.config, "ghostMove");
+                }
+
+                Ctx.setField(this.config, "ghostMove", false); // plain Litematica shows no shifted view
+            }
+            else if (this.stoodInForGhost)
+            {
+                this.stoodInForGhost = false;
+                Ctx.setField(this.config, "ghostMove", this.ghostBefore);
             }
         }
 
