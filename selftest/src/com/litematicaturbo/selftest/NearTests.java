@@ -210,6 +210,15 @@ final class NearTests
         return at(f, 0, 0, 8, 8, 0);
     }
 
+    /** Plain Litematica's own rebuild must show the edit in the build description, or the description cannot see edits here. */
+    private static void plainSeesEdit(Edit e, Long k)
+    {
+        if (e.stockAfter.sigs.get(k).lines.equals(e.base.sigs.get(k).lines))
+        {
+            throw SelfTest.skip("on this version the build description does not change for the edit even with plain Litematica, so it cannot show the edit");
+        }
+    }
+
     static void register(Ctx ctx, SelfTest.Tests tests)
     {
         tests.add("near/zones-are-near-and-far", () -> {
@@ -254,6 +263,7 @@ final class NearTests
 
             for (Long k : e.own)
             {
+                plainSeesEdit(e, k);
                 SelfTest.check(e.changed.contains(k), "the edit next to the player did not change the rebuilt chunk " + Fixture.keyX(k) + "," + Fixture.keyZ(k)
                                + " (lines before " + e.base.sigs.get(k).lines.size() + ", after " + e.edited.get(k).lines.size() + ", first diff " + e.base.sigs.get(k).diff(e.edited.get(k)) + ")");
             }
@@ -290,6 +300,7 @@ final class NearTests
 
             for (Long k : e.own)
             {
+                plainSeesEdit(e, k);
                 SelfTest.check(e.changed.contains(k), "the border edit did not change its own chunk");
             }
         });
@@ -300,6 +311,11 @@ final class NearTests
             Fixture.Capture background = new Fixture.Capture("turbo-after-edits");
             background.sigs.putAll(e.edited);
             WorldTests.same(e.stockAfter, background, f.allChunks(), "five edits rebuilt in the background vs plain Litematica");
+            for (Long k : e.own)
+            {
+                plainSeesEdit(e, k);
+            }
+
             SelfTest.check(e.changed.containsAll(e.own), "an edited chunk was not changed by its edit");
         });
 
