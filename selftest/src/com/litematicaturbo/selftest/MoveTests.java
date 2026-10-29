@@ -159,6 +159,33 @@ final class MoveTests
      * One scenario: a fresh placement, the given steps ({dx, dy, dz} from the starting origin, one every stepMs),
      * then wait for everything to settle. extra runs right after the last step (on the test thread).
      */
+    /** The description of the chunks once two looks in a row agree (uploads to the graphics card finish a little after the builds). */
+    private static java.util.Map<Long, Fixture.Sig> stableDescription(Set<Long> keys) throws Exception
+    {
+        java.util.Map<Long, Fixture.Sig> look = f.describeAll(keys);
+
+        for (int tries = 0; tries < 80; tries++)
+        {
+            Thread.sleep(150);
+            java.util.Map<Long, Fixture.Sig> next = f.describeAll(keys);
+            boolean same = next.keySet().equals(look.keySet());
+
+            for (Long k : next.keySet())
+            {
+                same &= same && next.get(k).lines.equals(look.get(k).lines);
+            }
+
+            look = next;
+
+            if (same)
+            {
+                break;
+            }
+        }
+
+        return look;
+    }
+
     private static Run run(Ctx ctx, boolean turbo, int stepMs, int[][] steps, Extra extra) throws Exception
     {
         Run r = new Run();
@@ -236,26 +263,7 @@ final class MoveTests
         r.finalView = new Fixture.Capture(turbo ? "turbo-moved" : "stock-moved");
         Set<Long> keys = f.renderedKeys();
         // uploads to the graphics card finish a little after the builds: describe until two looks in a row agree
-        java.util.Map<Long, Fixture.Sig> look = f.describeAll(keys);
-
-        for (int tries = 0; tries < 80; tries++)
-        {
-            Thread.sleep(150);
-            java.util.Map<Long, Fixture.Sig> next = f.describeAll(keys);
-            boolean same = next.keySet().equals(look.keySet());
-
-            for (Long k : next.keySet())
-            {
-                same &= same && next.get(k).lines.equals(look.get(k).lines);
-            }
-
-            look = next;
-
-            if (same)
-            {
-                break;
-            }
-        }
+        java.util.Map<Long, Fixture.Sig> look = stableDescription(keys);
 
         r.finalView.sigs.putAll(look);
 
@@ -269,7 +277,7 @@ final class MoveTests
             f.touchAll();
             f.awaitIdle("everything rebuilt from the final world", mine, dataBefore);
             r.reloadedView = new Fixture.Capture(turbo ? "turbo-rebuilt" : "stock-rebuilt");
-            r.reloadedView.sigs.putAll(f.describeAll(mine));
+            r.reloadedView.sigs.putAll(stableDescription(mine));
         }
 
         r.worldHash = r.removed ? 0 : hashRegion(ctx, r.finalOrigin);
