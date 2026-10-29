@@ -146,6 +146,25 @@ final class NearTests
             e.mainThreadNanos = f.stats("totalMainThreadNanos") - main;
             e.edited = f.describeAll(f.allChunks());
 
+            // the rebuilt build can be handed over a moment after the idle look: wait (up to 4 s) until each edited chunk shows its edit
+            for (int tries = 0; tries < 40; tries++)
+            {
+                boolean allChanged = true;
+
+                for (Long own : e.own)
+                {
+                    allChanged &= e.edited.get(own).lines.equals(e.base.sigs.get(own).lines) == false;
+                }
+
+                if (allChanged)
+                {
+                    break;
+                }
+
+                Thread.sleep(100);
+                e.edited = f.describeAll(f.allChunks());
+            }
+
             for (Long k : f.allChunks())
             {
                 if (e.edited.get(k).lines.equals(e.base.sigs.get(k).lines) == false)
