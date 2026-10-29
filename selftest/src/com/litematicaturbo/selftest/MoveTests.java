@@ -307,7 +307,7 @@ final class MoveTests
     }
 
     /** The lines about what was uploaded to the graphics card (older versions keep it next to the build result). */
-    private static final java.util.regex.Pattern UPLOAD_STATE = java.util.regex.Pattern.compile(".*vertexBuffer(Blocks|Overlay).*");
+    private static final java.util.regex.Pattern UPLOAD_STATE = java.util.regex.Pattern.compile("(?s).*vertexBuffer(Blocks|Overlay).*");
 
     /** The view with the upload-state lines taken out: the upload is compared by its own (known bug) test. */
     private static Fixture.Capture withoutUploads(Fixture.Capture c)
