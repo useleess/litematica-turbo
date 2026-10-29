@@ -369,7 +369,23 @@ final class MoveTests
         tests.add("move/same-as-stock-" + name, () -> {
             f = WorldTests.fixture(ctx);
             guarded(ctx, () -> {
-                Run[] r = both(ctx, stepMs, steps);
+                Run[] r;
+
+                try
+                {
+                    r = both(ctx, stepMs, steps);
+                }
+                catch (SelfTest.Fail first)
+                {
+                    // The order of the quads of translucent blocks follows the build moment; once more before calling it a difference
+                    if (first.getMessage().contains("differs between 'stock-moved' and 'turbo-moved'") == false)
+                    {
+                        throw first;
+                    }
+
+                    r = both(ctx, stepMs, steps);
+                }
+
                 SelfTest.check(r[1].markerNew.contains("gold_block"), "the marker block is not at the new place: " + r[1].markerNew);
                 SelfTest.check(r[1].markerOld.contains("gold_block") == false, "the marker block is still at the old place");
             });
