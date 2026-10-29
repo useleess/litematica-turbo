@@ -240,6 +240,11 @@ test to its normal id.
 - `knownbug/move/near-chunks-keep-block-buffers` - after a move across a chunk border the chunks in front of the player hold no
   uploaded block buffers on 1.19.4 / 1.20.1 while the build result is the same (older helper's finding).
 
+- `knownbug/flaky/safety/litematica-builds-as-stock` (flaky test, parked): a plain-Litematica-against-plain-Litematica build
+  of one chunk (-3,8) differed by a face at a border in the full all-version runs, twice in a row, but never in the
+  filtered runs; run `FILTER=knownbug/` to see it.
+- `1.17.1-forge` full run: the game ended without a result once in three full runs (box load; passed alone, 148 tests).
+
 Seen once, not reproduced: `compat/layer-all-below-same-as-stock` failed in a full 1.21.4 run with plain Litematica's own
 `IllegalStateException: Missing elements in vertex` (it happens while plain Litematica rebuilds a layer view; Turbo is off at
 that moment). The test now tries the plain capture once more; a second failure is reported.

@@ -192,7 +192,7 @@ final class SafetyTests
             SelfTest.equal(count(before, "Litematica Turbo] Off"), count(chatText(ctx), "Litematica Turbo] Off"), "'Turbo is off' lines in the chat of a healthy session");
         }));
 
-        tests.add("safety/litematica-builds-as-stock", () -> {
+        tests.add("knownbug/flaky/safety/litematica-builds-as-stock", () -> {
             Fixture f = WorldTests.fixture(ctx);
             Fixture.Capture stock = WorldTests.stock(f);
             incompatible(ctx, live, "test reason", () -> {
