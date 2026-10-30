@@ -132,9 +132,6 @@ loom {
             if (project.hasProperty('stock')) {
                 vmArg '-Dlitematicaturbo.stock=true'
             }
-            if (project.hasProperty('jfr')) {
-                vmArg "-XX:StartFlightRecording=filename=${project.jfr},settings=profile"
-            }
         }
     }
 }

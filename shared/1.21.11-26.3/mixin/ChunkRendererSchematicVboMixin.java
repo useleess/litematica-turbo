@@ -29,7 +29,6 @@ public abstract class ChunkRendererSchematicVboMixin implements TurboRenderer
     @Shadow protected ChunkCacheSchematic schematicWorldView;
     @Shadow protected ChunkCacheSchematic clientWorldView;
     @Shadow @Final protected BlockPos.MutableBlockPos position;
-    @Shadow protected ChunkPos chunkPosition;
     @Shadow private AABB boundingBox;
 
     @Shadow protected abstract ChunkRenderDataSchematic getChunkRenderData();
