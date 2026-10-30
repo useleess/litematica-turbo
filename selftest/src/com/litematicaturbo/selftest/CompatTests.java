@@ -23,7 +23,7 @@ final class CompatTests
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static void setMode(Ctx ctx, String mode) throws Exception
+    static void setMode(Ctx ctx, String mode) throws Exception
     {
         ctx.onMain(() -> {
             Object range = layerRange(ctx);
@@ -49,7 +49,7 @@ final class CompatTests
         });
     }
 
-    private static void setLayer(Ctx ctx, int y) throws Exception
+    static void setLayer(Ctx ctx, int y) throws Exception
     {
         ctx.onMain(() -> {
             Object range = layerRange(ctx);

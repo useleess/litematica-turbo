@@ -8,6 +8,9 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import com.google.common.util.concurrent.FutureCallback;
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.level.ChunkPos;
 
 import fi.dy.masa.litematica.render.LitematicaRenderer;
@@ -22,13 +25,31 @@ import com.litematicaturbo.shared.ChunkKeys;
 import com.litematicaturbo.core.TurboConfig;
 
 /**
- * The upload of a build finished (render thread) and its data is in place: close the GPU buffers
- * of layers it no longer has (a build thread does not clear them when the build starts).
+ * The upload of a build finished: always on the render thread, then its data is in place: close the
+ * GPU buffers of layers it no longer has (a build thread does not clear them when the build starts).
  */
 @Mixin(targets = "fi.dy.masa.litematica.render.schematic.ChunkRenderWorkerLitematica$2", remap = false)
 public abstract class ChunkRenderUploadCallbackMixin
 {
     @Shadow @Final ChunkRenderTaskSchematic val$task;
+
+    /**
+     * A build with nothing to upload (only chests, signs and the like; more of them with a layer view or with
+     * translucent / fluids switched) completes at once, so stock runs this on the build thread: it publishes the
+     * new data there and clears the old data's block entity list while the render thread draws from it. The whole
+     * callback runs on the render thread instead, with the next frame's tasks.
+     */
+    @Inject(method = "onSuccess(Ljava/util/List;)V", at = @At("HEAD"), cancellable = true)
+    @SuppressWarnings("unchecked")
+    private void turbo$publishOnRenderThread(List<Object> results, CallbackInfo ci)
+    {
+        if (RenderSystem.isOnRenderThread() == false)
+        {
+            FutureCallback<List<Object>> self = (FutureCallback<List<Object>>) (Object) this;
+            Minecraft.getInstance().execute(() -> self.onSuccess(results));
+            ci.cancel();
+        }
+    }
 
     @Inject(method = "onSuccess(Ljava/util/List;)V", at = @At("RETURN"))
     private void turbo$dropOldLayers(List<Object> results, CallbackInfo ci)

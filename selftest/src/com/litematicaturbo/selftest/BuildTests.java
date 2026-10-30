@@ -56,15 +56,67 @@ final class BuildTests
             // The schematic's block entities are drawn while Turbo's threads rebuild the chunks that hold them: the render
             // thread must never meet a block entity list that a build thread is still filling (on Litematica 1.21.11 / 26.x
             // that was a ConcurrentModificationException in WorldRendererSchematic.prepareBlockEntities and the game ended).
+            // Between rounds Litematica's display options change the way the compat/ tests change them (layer views,
+            // translucent, fluids, a renderer reload): those make other builds (e.g. chunks left with only block entities).
             Fixture f = WorldTests.fixture(ctx);
             f.configure(true, 3, true, true);
             f.drawBlockEntities(true);
+            String[] steps = {"", "SINGLE_LAYER", "ALL_ABOVE", "ALL_BELOW", "ALL", "RENDER_BLOCKS_AS_TRANSLUCENT", "RENDER_BLOCKS_AS_TRANSLUCENT",
+                              "ENABLE_SCHEMATIC_FLUIDS", "ENABLE_SCHEMATIC_FLUIDS", "reload", "", ""};
 
-            for (int round = 0; round < 12; round++)
+            java.util.Map<Object, Boolean> options = new java.util.LinkedHashMap<>();
+
+            try
             {
-                java.util.Map<Long, Object> before = f.dataNow(f.allChunks());
-                f.touchAll();
-                f.awaitIdle("rebuilt with the block entities drawn", f.allChunks(), before);
+                f.renderersMayBeMissing = true;
+
+                for (String step : steps)
+                {
+                    java.util.Map<Long, Object> before = step.isEmpty() ? f.dataNow(f.allChunks()) : null;
+
+                    if (step.equals("reload"))
+                    {
+                        f.reloadLikeTheTab();
+                    }
+                    else if (step.startsWith("ALL") || step.equals("SINGLE_LAYER"))
+                    {
+                        CompatTests.setMode(ctx, step);
+                        CompatTests.setLayer(ctx, f.nearY + 2);
+                    }
+                    else if (step.isEmpty() == false)
+                    {
+                        Object opt;
+
+                        try
+                        {
+                            opt = Ctx.getStatic(ctx.cls("fi.dy.masa.litematica.config.Configs$Visuals"), step);
+                        }
+                        catch (ReflectiveOperationException e)
+                        {
+                            continue; // not an option of this Litematica
+                        }
+
+                        boolean value = (Boolean) Ctx.call(opt, "getBooleanValue");
+                        options.putIfAbsent(opt, value);
+                        Ctx.call(opt, "setBooleanValue", value == false);
+                    }
+
+                    f.touchAll();
+                    f.awaitIdle("rebuilt with the block entities drawn" + (step.isEmpty() ? "" : " after " + step), f.allChunks(), before);
+                }
+            }
+            finally
+            {
+                f.renderersMayBeMissing = false;
+                CompatTests.setMode(ctx, "ALL");
+
+                for (java.util.Map.Entry<Object, Boolean> e : options.entrySet())
+                {
+                    Ctx.call(e.getKey(), "setBooleanValue", e.getValue());
+                }
+
+                f.configure(true, 3, true, true);
+                ctx.ticks(40);
             }
         });
 

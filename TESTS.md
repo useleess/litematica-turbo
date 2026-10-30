@@ -187,7 +187,7 @@ test id prefixes that show it works. All of them run on every version in `versio
 |---|---|
 | Big schematics build on several background threads, picture identical to plain Litematica | `build/` (`threads-<n>-same`, `threads-auto-same`, `threads-agree`, `repeat-parallel-stable`, `no-chunk-missed`, `built-once`, `thread-count-applied`, `render-thread-time-drops`) |
 | All block kinds look the same (every state, block entities, translucent, fluids, chunk borders, overlay) | `build/all-states-same`, `block-entities-same`, `translucent-same`, `fluids-same`, `sparse-same`, `region-edges-same`, `overlay-same` |
-| Chests, signs and other block entities drawn while Turbo rebuilds their chunks never crash the game | `render/` (`draw-block-entities-while-rebuilt`) |
+| Chests, signs and other block entities drawn while Turbo rebuilds their chunks never crash the game, also while layer views, translucent, fluids or a renderer reload change | `render/` (`draw-block-entities-while-rebuilt`) |
 | No stutter standing in the schematic: nearby chunks rebuilt in the background, edits show up | `near/` |
 | Empty space skipped when building, nothing visible lost | `empty/` |
 | Adding / rotating / mirroring / overlapping placements puts the same blocks into the world, faster | `place/` |
