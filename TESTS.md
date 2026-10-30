@@ -10,7 +10,7 @@ both run the client tests.
 
 ## Running
 
-Game clients never start on the user's PC (they take the mouse). Run on the test box:
+Run on the test box (where tests run and all test rules: the workspace `CLAUDE.md`):
 
 ```sh
 "../../discord-bot/.venv/Scripts/python.exe" ../../discord-bot/testbox.py run . ingame-test.sh client
