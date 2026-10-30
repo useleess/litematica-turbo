@@ -1,0 +1,45 @@
+// Game-side code that several Minecraft versions share is written once, in shared/<first>-<last>/ (both versions
+// included) or shared/all/, in package com.litematicaturbo.shared. Each version's build copies the folders whose
+// range holds its version into build/generated/turbo-shared, renamed to that version's own package
+// (com.litematicaturbo.mc<digits of the version>), and compiles them with its own folder. A class may exist in only
+// one of the folders a version uses (the copy fails otherwise). See CODE_MAP.md.
+// Set ext.turboFabricVersion (the Fabric version folder name, e.g. 1.21.11) before applying this.
+
+def turboVersionKey = { String v -> v.tokenize('.').collect { it as int } }
+def turboCompare = { List a, List b ->
+    for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
+        if (a[i] != b[i]) {
+            return a[i] <=> b[i]
+        }
+    }
+    return a.size() <=> b.size()
+}
+
+def mcFolder = project.ext.turboFabricVersion
+def mcKey = turboVersionKey(mcFolder)
+def packageDir = 'mc' + mcFolder.replace('.', '')
+def sharedRoot = new File(buildscript.sourceFile.parentFile, '../shared').canonicalFile
+def sharedDirs = (sharedRoot.listFiles() ?: []).findAll { File dir ->
+    if (!dir.isDirectory()) {
+        return false
+    }
+    if (dir.name == 'all') {
+        return true
+    }
+    def range = dir.name.split('-')
+    return turboCompare(turboVersionKey(range[0]), mcKey) <= 0 && turboCompare(mcKey, turboVersionKey(range[1])) <= 0
+}.sort { it.name }
+
+def turboSharedSources = tasks.register('turboSharedSources', Sync) {
+    inputs.property 'package', packageDir
+    duplicatesStrategy = DuplicatesStrategy.FAIL
+    includeEmptyDirs = false
+    into layout.buildDirectory.dir('generated/turbo-shared')
+    sharedDirs.each { File dir ->
+        from(dir) {
+            into "com/litematicaturbo/$packageDir"
+        }
+    }
+    filter { String line -> line.replace('com.litematicaturbo.shared', "com.litematicaturbo.$packageDir") }
+}
+sourceSets.main.java.srcDir(turboSharedSources)

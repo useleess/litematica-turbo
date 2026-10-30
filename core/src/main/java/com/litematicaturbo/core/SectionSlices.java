@@ -1,6 +1,7 @@
 package com.litematicaturbo.core;
 
 import java.util.function.IntPredicate;
+import java.util.function.Predicate;
 
 /**
  * Splits a vertical block range into the parts that lie in 16-high chunk sections worth visiting.
@@ -11,6 +12,29 @@ public final class SectionSlices
 {
     private SectionSlices()
     {
+    }
+
+    /** Empty sections are skipped when the setting is on and the box lies in one chunk column (one render chunk). */
+    public static boolean skipApplies(int fromX, int fromZ, int toX, int toZ)
+    {
+        return TurboConfig.get().skipEmptySectionsEnabled() && (fromX >> 4) == (toX >> 4) && (fromZ >> 4) == (toZ >> 4);
+    }
+
+    /** grid[x][z], or null when the grid is missing or x / z is outside it. */
+    public static <T> T cell(T[][] grid, int x, int z)
+    {
+        if (grid == null || x < 0 || x >= grid.length || z < 0 || z >= grid[x].length)
+        {
+            return null;
+        }
+
+        return grid[x][z];
+    }
+
+    /** True when sections[index] exists and is not empty. */
+    public static <S> boolean hasBlocks(S[] sections, int index, Predicate<S> isEmpty)
+    {
+        return index >= 0 && index < sections.length && sections[index] != null && isEmpty.test(sections[index]) == false;
     }
 
     /**

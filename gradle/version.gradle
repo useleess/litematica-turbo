@@ -30,6 +30,9 @@ repositories {
 
 // The version-independent core is compiled straight into every version jar.
 sourceSets.main.java.srcDir rootProject.file('core/src/main/java')
+// Code shared with other versions (shared/<range>/, see shared-sources.gradle)
+ext.turboFabricVersion = project.projectDir.name
+apply from: rootProject.file('gradle/shared-sources.gradle')
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"

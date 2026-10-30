@@ -25,7 +25,8 @@
     "GuiConfigsTabListenerMixin",
     "SchematicPlacementManagerMixin",
     "SchematicPlacementMixin",
-    "WorldRendererSchematicMixin"
+    "WorldRendererSchematicMixin",
+    "WorldRendererSchematicStatsMixin"
   ],
   "injectors": {
     "defaultRequire": 0

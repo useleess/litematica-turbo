@@ -50,6 +50,9 @@ repositories {
 sourceSets.main.java.srcDirs += [file('../../core/src/main/java'), new File(fabricSource, 'src/main/java')]
 sourceSets.main.java.exclude '**/LitematicaTurbo.java'
 sourceSets.main.resources.srcDirs += [new File(fabricSource, 'src/main/resources')]
+// ... and the code that Fabric version shares with others (shared/<range>/, see gradle/shared-sources.gradle)
+ext.turboFabricVersion = project.fabric_source
+apply from: new File(fabricSource, '../../gradle/shared-sources.gradle')
 sourceSets.main.resources.exclude 'fabric.mod.json'
 
 dependencies {

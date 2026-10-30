@@ -9,14 +9,21 @@
     "ChunkCacheSchematicAccessor",
     "ChunkRenderDispatcherLitematicaMixin",
     "ChunkRendererSchematicVboMixin",
+    "ChunkRendererSchematicVboRenderThreadMixin",
     "ChunkRenderWorkerLitematicaMixin",
     "RenderUtilsMixin",
     "GuiConfigsMixin",
     "GuiConfigsTabListenerMixin",
     "SchematicPlacementManagerMixin",
+    "SchematicPlacementManagerQueueMixin",
     "SchematicPlacementMixin",
+    "SchematicPlacingUtilsCopyMixin",
     "SchematicPlacingUtilsMixin",
-    "WorldRendererSchematicMixin"
+    "WorldRendererSchematicMixin",
+    "WorldRendererSchematicResortMixin",
+    "WorldRendererSchematicDetachMixin",
+    "WorldRendererSchematicGhostMixin",
+    "WorldRendererSchematicStatsMixin"
   ],
   "injectors": {
     "defaultRequire": 0

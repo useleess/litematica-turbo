@@ -7,15 +7,17 @@ public final class TurboLog
 {
     private static volatile Consumer<String> info = msg -> System.out.println("[Litematica Turbo] " + msg);
     private static volatile Consumer<String> warn = msg -> System.err.println("[Litematica Turbo] " + msg);
+    private static volatile Consumer<String> error = msg -> System.err.println("[Litematica Turbo] " + msg);
 
     private TurboLog()
     {
     }
 
-    public static void bind(Consumer<String> infoSink, Consumer<String> warnSink)
+    public static void bind(Consumer<String> infoSink, Consumer<String> warnSink, Consumer<String> errorSink)
     {
         info = infoSink;
         warn = warnSink;
+        error = errorSink;
     }
 
     public static void info(String msg)
@@ -26,5 +28,10 @@ public final class TurboLog
     public static void warn(String msg)
     {
         warn.accept(msg);
+    }
+
+    public static void error(String msg)
+    {
+        error.accept(msg);
     }
 }

@@ -9,6 +9,7 @@
     "ChunkCacheSchematicAccessor",
     "ChunkRenderDispatcherLitematicaMixin",
     "ChunkRendererSchematicVboMixin",
+    "ChunkRendererSchematicVboRenderThreadMixin",
     "ChunkRenderWorkerLitematicaMixin",
     "ChunkRenderDispatcherSchematicAccessor",
     "ChunkRenderTaskSchematicInvoker",
@@ -16,9 +17,14 @@
     "GuiConfigsMixin",
     "GuiConfigsTabListenerMixin",
     "SchematicPlacementManagerMixin",
+    "SchematicPlacementManagerQueueMixin",
     "SchematicPlacementMixin",
+    "SchematicPlacingUtilsCopyMixin",
     "SchematicPlacingUtilsMixin",
-    "WorldRendererSchematicMixin"
+    "WorldRendererSchematicMixin",
+    "WorldRendererSchematicDetachMixin",
+    "WorldRendererSchematicGhostMixin",
+    "WorldRendererSchematicStatsMixin"
   ],
   "injectors": {
     "defaultRequire": 0

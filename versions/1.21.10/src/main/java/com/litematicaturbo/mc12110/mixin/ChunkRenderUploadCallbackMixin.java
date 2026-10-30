@@ -12,7 +12,7 @@ import fi.dy.masa.litematica.render.schematic.ChunkRenderTaskSchematic;
 import fi.dy.masa.litematica.render.schematic.ChunkRenderWorkerLitematica;
 
 import com.litematicaturbo.core.TurboConfig;
-import com.litematicaturbo.mc12110.TurboRenderer;
+import com.litematicaturbo.mc12110.TurboGpuBuffers;
 
 /**
  * Litematica 0.24 no longer hands a build's buffer cache back to the pool once its upload has
@@ -40,7 +40,7 @@ public abstract class ChunkRenderUploadCallbackMixin
     {
         if (TurboConfig.get().threadingEnabled())
         {
-            ((TurboRenderer) ((ChunkRenderTaskSchematicInvoker) this.val$task).turbo$getRenderChunk()).turbo$dropUnusedGpuBuffers();
+            ((TurboGpuBuffers) ((ChunkRenderTaskSchematicInvoker) this.val$task).turbo$getRenderChunk()).turbo$dropUnusedGpuBuffers();
         }
     }
 }
