@@ -218,7 +218,8 @@ final class Ctx
 
         try
         {
-            return future.get(30, TimeUnit.SECONDS);
+            // room for a busy test box: 12 games at once stalled 1.17.1-forge's client thread past 30 s (2026-10-30)
+            return future.get(120, TimeUnit.SECONDS);
         }
         catch (java.util.concurrent.ExecutionException e)
         {
