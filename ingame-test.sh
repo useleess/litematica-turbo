@@ -97,7 +97,11 @@ run_version()
     if [ -z "$summary" ]; then
         echo "$v: NO RESULT after ${secs} s (build or game failed: see $dir/selftest.log)" > "$WORK/results/$v"
         # what the game was doing when it ended (the log goes with the throwaway copy on the test box)
-        grep -v "SCOPE-TEST pass" "$log" | tail -n 30 | cut -c 1-240 | sed 's/^/    | /'
+        # the game's own last lines (not Gradle's failure text) and every error / crash line
+        sed '/^FAILURE: Build failed/,$d' "$log" | grep -v "SCOPE-TEST pass" | tail -n 30 | cut -c 1-240 | sed 's/^/    | /'
+        echo "    errors:"
+        grep -E "Exception|Error|Crash|crash|hs_err|insufficient memory|Killed|exit code|halt" "$log" | grep -v "SCOPE-TEST" \
+            | tail -n 20 | cut -c 1-240 | sed 's/^/    ! /'
     else
         set -- $summary
         echo "$v: $1 passed, $2 failed, $3 skipped (${secs} s)" > "$WORK/results/$v"
