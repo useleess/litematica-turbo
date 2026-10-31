@@ -372,6 +372,27 @@ final class MoveTests
         SelfTest.equal(stock.markerOld, turbo.markerOld, "the block left at the old place");
     }
 
+    /**
+     * Before a turned-while-moving comparison: the lone placement put straight where and how the runs end (plain Litematica,
+     * no move). The comparison needs 4 of its chunks in the camera's view; fewer is the test window's shape / field of view,
+     * told here instead of as a later "only N chunks in view".
+     */
+    private static void inView(Ctx ctx, String setter, String constant, int[] step, int[] marker) throws Exception
+    {
+        int[] start = prepare(ctx, false);
+        int[] o = {start[0] + step[0], start[1] + step[1], start[2] + step[2]};
+        setOrigin(ctx, o[0], o[1], o[2]);
+        PlaceTests.turn(ctx, placement, setter, constant);
+        Set<Long> area = f.chunksAt(start[0] + 8, start[2]);
+        settle(ctx, area);
+        String m = stateAt(ctx, o[0] + marker[0], o[1] + marker[1], o[2] + marker[2]);
+        SelfTest.check(m.contains("gold_block"), "the turned placement is not where the test expects it (no marker block at its place: " + m + ")");
+        Set<Long> seen = new LinkedHashSet<>(area);
+        seen.retainAll(f.renderedKeys());
+        SelfTest.check(seen.size() >= 4, "TEST ENVIRONMENT: only " + seen.size() + " of the " + area.size()
+                                         + " chunks the turned placement ends on are in the camera's view (game window shape / field of view), not a mod problem");
+    }
+
     private static void scenario(Ctx ctx, SelfTest.Tests tests, String name, int stepMs, int[]... steps)
     {
         tests.add("move/same-as-stock-" + name, () -> {
@@ -697,17 +718,27 @@ final class MoveTests
             });
         });
 
-        for (String[] turn : new String[][] {{"rotated", "setRotation", "CLOCKWISE_90"}, {"mirrored", "setMirror", "LEFT_RIGHT"}})
+        // {name, setter, constant}, the step before the turn, where the marker block ends up from the turned origin. A placement
+        // turns around its origin: each step makes the turned placement end on the blocks of the plain move by 8, in front
+        // of the player whatever the window's shape (turned after a move by 8 it reached two chunks to the side or behind)
+        Object[][] turns = {{new String[] {"rotated", "setRotation", "CLOCKWISE_90"}, new int[] {39, 0, 0}, new int[] {-3, 2, 3}},
+                            {new String[] {"mirrored", "setMirror", "LEFT_RIGHT"}, new int[] {8, 0, 31}, new int[] {3, 2, -3}}};
+
+        for (Object[] t : turns)
         {
+            String[] turn = (String[]) t[0];
+            int[] step = (int[]) t[1];
+            int[] marker = (int[]) t[2];
             tests.add("move/" + turn[0] + "-while-moving-same-as-stock", () -> {
                 f = WorldTests.fixture(ctx);
                 guarded(ctx, () -> {
+                    inView(ctx, turn[1], turn[2], step, marker);
                     Extra turnIt = run -> {
                         PlaceTests.turn(ctx, placement, turn[1], turn[2]);
                         ctx.ticks(2);
                     };
-                    Run turbo = run(ctx, true, 0, new int[][] {{8, 0, 0}}, turnIt);
-                    Run stock = run(ctx, false, 0, new int[][] {{8, 0, 0}}, turnIt);
+                    Run turbo = run(ctx, true, 0, new int[][] {step}, turnIt);
+                    Run stock = run(ctx, false, 0, new int[][] {step}, turnIt);
                     SelfTest.check(turbo.activeAfterSettle == false, "the shifted view stays after the placement was " + turn[0]);
                     sameFinal(stock, turbo);
                 });

@@ -163,7 +163,9 @@ How a run goes (`Fixture`, built once on first use, the same for every version):
   is where the schematic has it (`marker-block-arrives`) and moves when the placement is rotated / mirrored
   (`rotation-turns-the-build`, `mirror-flips-the-build`).
   `move/rotated-while-moving-same-as-stock` and `move/mirrored-while-moving-same-as-stock`: rotating / mirroring a
-  placement that is being moved ends the shifted view and gives plain Litematica's result.
+  placement that is being moved ends the shifted view and gives plain Litematica's result. The step before the turn is
+  chosen so the turned placement ends in front of the player (in view for any window shape); a check before the runs
+  fails with `TEST ENVIRONMENT` when too few of its chunks are in the camera's view.
 - `compat/` - with a Litematica display option changed (translucent blocks, fluids, layer view single / above / below)
   every chunk Turbo builds equals plain Litematica's, and the option really changes what is built; Turbo's work never
   changes any of Litematica's own options (`litematica-options-untouched`).
