@@ -91,6 +91,12 @@ run_version()
         echo "== $v: attempt $attempt ended before the tests started:"
         grep -E -A3 "What went wrong|Exception|Error:|error:" "$log" | head -n 12 | sed 's/^/    | /'
     done
+    # a crashed game: its crash report (the throwaway copy and the report go away with it)
+    for c in "$run"/crash-reports/*.txt; do
+        [ -f "$c" ] || continue
+        echo "    crash report $(basename "$c"):"
+        grep -v -E "^\s*$" "$c" | head -n 70 | cut -c 1-240 | sed 's/^/    # /'
+    done
     rm -rf "$run"
     secs=$(( $(date +%s) - start ))
     summary=$(sed -n 's/.*SCOPE TESTS: \([0-9]*\) passed, \([0-9]*\) failed, \([0-9]*\) skipped.*/\1 \2 \3/p' "$log" | tail -n 1)
