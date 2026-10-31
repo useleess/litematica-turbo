@@ -46,7 +46,7 @@ final class SafetyTests
     }
 
     /** The text of every chat line the player has now. */
-    private static String chatText(Ctx ctx) throws Exception
+    static String chatText(Ctx ctx) throws Exception
     {
         return ctx.onMain(() -> {
             Object hud = Game.fieldOfType(ctx.client, "InGameHud", "Gui");

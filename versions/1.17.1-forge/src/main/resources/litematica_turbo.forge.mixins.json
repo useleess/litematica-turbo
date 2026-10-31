@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "com.litematicaturbo.mc1171.mixin",
+  "compatibilityLevel": "JAVA_16",
+  "client": [
+    "ModelDataManagerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

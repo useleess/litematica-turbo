@@ -1,5 +1,7 @@
 package com.litematicaturbo.shared;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.Set;
 import com.google.common.collect.ArrayListMultimap;
@@ -16,6 +18,7 @@ import fi.dy.masa.litematica.world.WorldSchematic;
 
 import com.litematicaturbo.core.BuildStats;
 import com.litematicaturbo.core.TurboConfig;
+import com.litematicaturbo.core.TurboLog;
 
 /**
  * Copying a placement into Litematica's schematic world visits every cell of the region boxes in a
@@ -26,6 +29,10 @@ import com.litematicaturbo.core.TurboConfig;
  * air cell can never change anything: every cell maps to its own world position, so there is no
  * block or block entity there to replace. Those cells are handed to the loop as structure void,
  * which it already skips.
+ *
+ * Safety: if one of these calls into the game throws, the copy path switches itself off for the session (the
+ * player is told once in the chat, the log gets the details) and that call and all later ones go the plain
+ * Litematica way, so the placement still ends up exactly as without Turbo.
  */
 public final class SchematicCopy
 {
@@ -33,6 +40,10 @@ public final class SchematicCopy
 
     /** The schematic chunk being filled; every position the loop touches lies inside it. */
     private static final ThreadLocal<ChunkSchematic> CHUNK = new ThreadLocal<>();
+
+    /** Why the copy path switched itself off this session; null while it works. */
+    private static volatile String failure;
+    private static volatile boolean warned;
 
     private SchematicCopy()
     {
@@ -43,9 +54,16 @@ public final class SchematicCopy
     {
         ChunkSchematic chunk = null;
 
-        if (TurboConfig.get().enabled && world instanceof WorldSchematic)
+        if (active() && world instanceof WorldSchematic)
         {
-            chunk = CopyCalls.loadedChunk((WorldSchematic) world, chunkPos);
+            try
+            {
+                chunk = CopyCalls.loadedChunk((WorldSchematic) world, chunkPos);
+            }
+            catch (RuntimeException | LinkageError e)
+            {
+                switchOff("begin", e);
+            }
         }
 
         boolean skip = chunk != null && chunk.isEmpty();
@@ -64,6 +82,33 @@ public final class SchematicCopy
     {
         SKIP_AIR.set(Boolean.FALSE);
         CHUNK.remove();
+    }
+
+    private static boolean active()
+    {
+        return TurboConfig.get().enabled && failure == null;
+    }
+
+    private static void switchOff(String call, Throwable t)
+    {
+        StringWriter trace = new StringWriter();
+        t.printStackTrace(new PrintWriter(trace));
+        TurboLog.error("The fast placement copy failed in " + call + " and is off for this session; placements are copied the plain Litematica way:\n" + trace);
+        failure = t.toString();
+        CHUNK.remove();
+        SKIP_AIR.set(Boolean.FALSE);
+    }
+
+    /** The reason for the one chat message after the copy path switched itself off; null when none is due. */
+    static String takeFailureWarning(boolean playerPresent)
+    {
+        if (warned == false && failure != null && playerPresent)
+        {
+            warned = true;
+            return failure;
+        }
+
+        return null;
     }
 
     private static ChunkSchematic chunkFor(BlockPos pos)
@@ -85,7 +130,20 @@ public final class SchematicCopy
     public static BlockState getBlockState(World world, BlockPos pos)
     {
         ChunkSchematic chunk = chunkFor(pos);
-        return chunk != null ? chunk.getBlockState(pos) : world.getBlockState(pos);
+
+        if (chunk != null)
+        {
+            try
+            {
+                return chunk.getBlockState(pos);
+            }
+            catch (RuntimeException | LinkageError e)
+            {
+                switchOff("getBlockState", e);
+            }
+        }
+
+        return world.getBlockState(pos);
     }
 
     public static BlockEntity getBlockEntity(World world, BlockPos pos)
@@ -94,9 +152,19 @@ public final class SchematicCopy
 
         // The schematic chunk creates a block entity whenever it places a block that has one,
         // so with none in the map there is none to find or to create here either.
-        if (chunk != null && chunk.getBlockEntities().isEmpty())
+        if (chunk != null)
         {
-            return null;
+            try
+            {
+                if (chunk.getBlockEntities().isEmpty())
+                {
+                    return null;
+                }
+            }
+            catch (RuntimeException | LinkageError e)
+            {
+                switchOff("getBlockEntity", e);
+            }
         }
 
         return world.getBlockEntity(pos);
@@ -111,12 +179,20 @@ public final class SchematicCopy
             return world.setBlockState(pos, state, flags);
         }
 
-        if (CopyCalls.outsideHeight(world, pos))
+        try
         {
-            return false;
-        }
+            if (CopyCalls.outsideHeight(world, pos))
+            {
+                return false;
+            }
 
-        return CopyCalls.place(chunk, pos, state);
+            return CopyCalls.place(chunk, pos, state);
+        }
+        catch (RuntimeException | LinkageError e)
+        {
+            switchOff("setBlockState", e);
+            return world.setBlockState(pos, state, flags);
+        }
     }
 
 /**
@@ -129,7 +205,7 @@ public final class SchematicCopy
     public static void refreshInsteadOfReplacing(Set<ChunkPos> rebuildQueue, Set<ChunkPos> toRebuild,
                                                  ArrayListMultimap<ChunkPos, SchematicPlacement> touching, WorldSchematic world)
     {
-        if (TurboConfig.get().enabled == false || rebuildQueue.isEmpty())
+        if (active() == false || rebuildQueue.isEmpty())
         {
             return;
         }

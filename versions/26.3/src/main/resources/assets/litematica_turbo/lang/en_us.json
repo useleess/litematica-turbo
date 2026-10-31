@@ -8,5 +8,6 @@
   "config.name.turbocatchupauto": "Automatic catch-up",
   "config.name.turbocatchupbudgetms": "Catch-up budget (ms per tick)",
   "config.name.turboshowstats": "Show F3 stats",
-  "litematica_turbo.gui.button.config_gui.turbo": "Turbo"
+  "litematica_turbo.gui.button.config_gui.turbo": "Turbo",
+  "litematica_turbo.message.copy_off": "[Litematica Turbo] Fast placement copying hit an error (%s) and is off for this session. Placements are copied the normal Litematica way."
 }

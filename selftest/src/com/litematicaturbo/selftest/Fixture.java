@@ -427,29 +427,6 @@ final class Fixture
         return limit > 0 && out.size() > limit ? new ArrayList<>(out.subList(0, limit)) : out;
     }
 
-    /**
-     * Forge 1.17.1 throws "Cannot use model data for a world other than the current client world" (and the client
-     * dies) when a comparator without support is removed again in the schematic world: Forge's own bug, hit by any
-     * schematic with a floating comparator, with or without Turbo. The all-states zone leaves comparators out there.
-     */
-    private boolean crashesForgeModelData(Object s)
-    {
-        if (this.ctx.pkg.contains("mc117") == false || Game.describe(s)[0].equals("minecraft:comparator") == false)
-        {
-            return false;
-        }
-
-        try
-        {
-            this.ctx.cls("net.minecraftforge.client.model.ModelDataManager");
-            return true;
-        }
-        catch (ClassNotFoundException e)
-        {
-            return false;
-        }
-    }
-
     private boolean isAir(Object s)
     {
         String n = Game.describe(s)[0];
@@ -496,7 +473,7 @@ final class Fixture
         {
             Object s = this.states.get(i);
 
-            if (this.isAir(s) == false && this.crashesForgeModelData(s) == false)
+            if (this.isAir(s) == false)
             {
                 (entity[i] ? withEntity : plain).add(s);
             }

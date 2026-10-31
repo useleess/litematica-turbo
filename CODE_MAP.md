@@ -11,7 +11,7 @@ in the same change when files move or are added.
 | `shared/<first>-<last>/` | Game-side code several Fabric versions share, written once in package `com.litematicaturbo.shared`. A version uses every folder whose range holds it (both ends included). |
 | `shared/all/` | Game-side code every version uses (entry point, start-up, settings tab, ghost moving, mixin guard, the mixins that never changed). |
 | `versions/<mc>/` | The thin per-version layer of a Fabric version: only what differs there, plus `fabric.mod.json`, `litematica_turbo.mixins.json`, `lang/en_us.json`, `gradle.properties` (Minecraft / Litematica / MaLiLib versions). |
-| `versions/<mc>-forge`, `-neoforge` | Forge / NeoForge builds (for Forgematica): only the loader entry point and `mods.toml`; all other code comes from the Fabric folder named by `fabric_source` in their `gradle.properties`. |
+| `versions/<mc>-forge`, `-neoforge` | Forge / NeoForge builds (for Forgematica): only the loader entry point, `mods.toml` and (where Forge's own classes need a patch) `litematica_turbo.forge.mixins.json`; all other code comes from the Fabric folder named by `fabric_source` in their `gradle.properties`. |
 | `forge/` | The separate Gradle build for those (Architectury Loom can't share a build with Fabric Loom). `forge/version.gradle` = their shared setup. |
 | `gradle/` | `version.gradle` (setup of every Fabric version: dependencies, dev-client switches), `shared-sources.gradle` (copies `shared/` into a version). |
 | `selftest/` | The in-game test agent (a `-javaagent` jar, never in a release jar). Test groups `*Tests.java`, runner `SelfTest`. |
@@ -31,8 +31,11 @@ builds get the same code through their `fabric_source` folder.
 - **Faster builds:** schematic chunk builds go to Turbo's build threads (`BuildThreads`, `BuildWorkers` /
   `TurboBuildThread`, the `ChunkRenderDispatcher*` / `ChunkRenderWorker*` mixins); `EmptySections` + `SectionSlices` +
   `BoxCellIterator` skip empty 16-high sections; `RebuildQueue` moves near rebuilds off the render thread.
-- **Placing:** `SchematicCopy` + `SchematicPlacingUtils*Mixin` (faster copy into the schematic world),
-  `PlacementQueue` / `SchematicPlacementManagerQueueMixin` (catch-up budget per tick).
+- **Placing:** `SchematicCopy` + `SchematicPlacingUtils*Mixin` (faster copy into the schematic world; a call that
+  throws switches the copy off for the session, `SettingsTicker` tells the player), `PlacementQueue` /
+  `SchematicPlacementManagerQueueMixin` (catch-up budget per tick). Forge 1.16.5 - 1.18.2 only: `ModelDataManagerMixin`
+  (listed in `versions/<mc>-forge/.../litematica_turbo.forge.mixins.json`) stops Forge throwing when a block entity of
+  the schematic world is removed.
 - **Moving a placement:** `GhostMove` + `GhostRenderers` keep showing the old chunks shifted until the new ones are built.
 - **Settings:** `TurboConfig` (core) holds the options; `TurboSettingsTab` + `TurboOptions` + `GuiConfigsMixin` add
   the Turbo tab to Litematica's config screen; `SettingsTicker` applies changes each tick. Option names are

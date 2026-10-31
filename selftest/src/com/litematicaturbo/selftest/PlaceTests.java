@@ -343,5 +343,108 @@ final class PlaceTests
             List<String> mirrored = placed(ctx, "same-as-stock-mirrored", true, null, "LEFT_RIGHT", false);
             SelfTest.check(markerIndex(mirrored) >= 0 && markerIndex(mirrored) != markerIndex(plain), "the marker block did not move when the placement was mirrored");
         }));
+
+        copyFailure(ctx, tests);
+        forgeModelData(ctx, tests);
+    }
+
+    /**
+     * A call of the fast copy that throws (here: bad data, a null block state) switches the copy path off for the session
+     * instead of taking the game down: the player gets one chat line, and placements are then copied the plain Litematica way,
+     * with exactly plain Litematica's result. Only where the fast copy exists (up to 1.21.10).
+     */
+    private static void copyFailure(Ctx ctx, SelfTest.Tests tests)
+    {
+        Class<?> copy;
+
+        try
+        {
+            copy = ctx.turbo("SchematicCopy");
+        }
+        catch (ClassNotFoundException e)
+        {
+            return;
+        }
+
+        tests.add("place/copy-failure-switches-off", () -> guarded(ctx, () -> {
+            // a label of its own: a cached dump would leave no placement to work on
+            List<String> stock = placed(ctx, "copy-failure-stock", false, null, null, false);
+            f.configure(true, 3, true, true);
+            Object originPos = ctx.onMain(() -> Ctx.call(placement, "getOrigin"));
+            Object chunkPos = ctx.cls("net.minecraft.util.math.ChunkPos").getConstructor(originPos.getClass()).newInstance(originPos);
+
+            try
+            {
+                ctx.onMain(() -> {
+                    Object world = f.schematicWorld();
+                    Ctx.call(copy, "begin", world, chunkPos);
+
+                    try
+                    {
+                        Ctx.call(copy, "setBlockState", world, originPos, null, 3);
+                    }
+                    catch (RuntimeException e)
+                    {
+                        // plain Litematica's own answer to a null block state, after Turbo handed the call over
+                    }
+                    finally
+                    {
+                        Ctx.call(copy, "end");
+                    }
+
+                    return null;
+                });
+                SelfTest.check(Ctx.getStatic(copy, "failure") != null, "the failing copy call did not switch the copy path off");
+                ctx.ticks(4);
+                String chat = SafetyTests.chatText(ctx);
+                SelfTest.check(chat.contains("litematica_turbo.message.copy_off") || chat.contains("Fast placement copying"),
+                               "no chat line says the fast copy is off:\n" + chat);
+                SelfTest.check(ctx.onMain(() -> ctx.client != null), "the client is gone");
+                List<String> off = placed(ctx, "copy-switched-off", true, null, null, false);
+                SelfTest.check(stock.equals(off), "the placed blocks with the copy path switched off differ from plain Litematica: " + firstDifference(stock, off));
+            }
+            finally
+            {
+                Ctx.setStatic(copy, "failure", null);
+                Ctx.setStatic(copy, "warned", false);
+            }
+        }));
+    }
+
+    /**
+     * Forge 1.16.5 - 1.18.2 throw on the render thread when a block entity of a world other than the client's own one is
+     * removed (Forge's model data), and Litematica replaces block entities in its schematic world: a chest there replaced by
+     * air must not throw. Only where that Forge model data exists.
+     */
+    private static void forgeModelData(Ctx ctx, SelfTest.Tests tests)
+    {
+        try
+        {
+            ctx.cls("net.minecraftforge.client.model.ModelDataManager");
+        }
+        catch (ClassNotFoundException e)
+        {
+            return;
+        }
+
+        tests.add("place/chest-replaced-in-schematic-world", () -> guarded(ctx, () -> {
+            placed(ctx, "chest-replaced", true, null, null, false);
+            int[] o = origin(ctx, placement);
+            Object chest = f.stateNamed("minecraft:chest");
+            Object air = f.stateNamed("minecraft:air");
+            SelfTest.check(chest != null && air != null, "the block registry has no chest / air");
+            String result = ctx.onMain(() -> {
+                Object world = f.schematicWorld();
+                Object pos = f.game.blockPos(o[0], o[1] + 5, o[2]);
+                Object client = Ctx.call(ctx.cls("net.minecraft.client.MinecraftClient"), "getInstance");
+                SelfTest.check(Ctx.getField(client, "world") != world, "the schematic world is the client world, the test proves nothing");
+                Ctx.call(world, "setBlockState", pos, chest, 3);
+                Object entity = Ctx.call(world, "getBlockEntity", pos);
+                SelfTest.check(entity != null && Ctx.call(entity, "getWorld") == world, "the chest in the schematic world has no block entity of that world");
+                Ctx.call(world, "setBlockState", pos, air, 3);
+                return String.valueOf(Ctx.call(world, "getBlockState", pos));
+            });
+            SelfTest.check(result.contains("air"), "the chest was not replaced by air: " + result);
+        }));
     }
 }

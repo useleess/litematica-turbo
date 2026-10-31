@@ -2,11 +2,12 @@ package com.litematicaturbo.shared;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 
 import fi.dy.masa.malilib.interfaces.IClientTickHandler;
 
-/** The settings tab's work on each client tick (see TurboSettingsTab), and its chat warning. */
+/** The settings tab's work on each client tick (see TurboSettingsTab), and the chat warnings of a switched-off Turbo. */
 final class SettingsTicker implements IClientTickHandler
 {
     static final SettingsTicker INSTANCE = new SettingsTicker();
@@ -23,6 +24,13 @@ final class SettingsTicker implements IClientTickHandler
         if (warning != null)
         {
             mc.inGameHud.getChatHud().addMessage(new LiteralText(warning).formatted(Formatting.GOLD));
+        }
+
+        String copyFailure = SchematicCopy.takeFailureWarning(mc.player != null);
+
+        if (copyFailure != null)
+        {
+            mc.inGameHud.getChatHud().addMessage(new TranslatableText("litematica_turbo.message.copy_off", copyFailure).formatted(Formatting.GOLD));
         }
 
         TurboSettingsTab.applyPendingChanges();
