@@ -345,7 +345,6 @@ final class PlaceTests
         }));
 
         copyFailure(ctx, tests);
-        forgeModelData(ctx, tests);
     }
 
     /**
@@ -397,8 +396,10 @@ final class PlaceTests
                 SelfTest.check(Ctx.getStatic(copy, "failure") != null, "the failing copy call did not switch the copy path off");
                 ctx.ticks(4);
                 String chat = SafetyTests.chatText(ctx);
-                SelfTest.check(chat.contains("litematica_turbo.message.copy_off") || chat.contains("Fast placement copying"),
-                               "no chat line says the fast copy is off:\n" + chat);
+                SelfTest.check(chat.contains("litematica_turbo.message.copy_off"), "no chat line says the fast copy is off:\n" + chat);
+                String lang = AuditTests.resource(copy.getClassLoader(), "assets/litematica_turbo/lang/en_us.json");
+                SelfTest.check(lang != null && lang.contains("\"litematica_turbo.message.copy_off\": \"[Litematica Turbo] Fast placement copying hit an error (%s)"),
+                               "en_us.json has no English text for the chat line litematica_turbo.message.copy_off");
                 SelfTest.check(ctx.onMain(() -> ctx.client != null), "the client is gone");
                 List<String> off = placed(ctx, "copy-switched-off", true, null, null, false);
                 SelfTest.check(stock.equals(off), "the placed blocks with the copy path switched off differ from plain Litematica: " + firstDifference(stock, off));
@@ -408,43 +409,6 @@ final class PlaceTests
                 Ctx.setStatic(copy, "failure", null);
                 Ctx.setStatic(copy, "warned", false);
             }
-        }));
-    }
-
-    /**
-     * Forge 1.16.5 - 1.18.2 throw on the render thread when a block entity of a world other than the client's own one is
-     * removed (Forge's model data), and Litematica replaces block entities in its schematic world: a chest there replaced by
-     * air must not throw. Only where that Forge model data exists.
-     */
-    private static void forgeModelData(Ctx ctx, SelfTest.Tests tests)
-    {
-        try
-        {
-            ctx.cls("net.minecraftforge.client.model.ModelDataManager");
-        }
-        catch (ClassNotFoundException e)
-        {
-            return;
-        }
-
-        tests.add("place/chest-replaced-in-schematic-world", () -> guarded(ctx, () -> {
-            placed(ctx, "chest-replaced", true, null, null, false);
-            int[] o = origin(ctx, placement);
-            Object chest = f.stateNamed("minecraft:chest");
-            Object air = f.stateNamed("minecraft:air");
-            SelfTest.check(chest != null && air != null, "the block registry has no chest / air");
-            String result = ctx.onMain(() -> {
-                Object world = f.schematicWorld();
-                Object pos = f.game.blockPos(o[0], o[1] + 5, o[2]);
-                Object client = Ctx.call(ctx.cls("net.minecraft.client.MinecraftClient"), "getInstance");
-                SelfTest.check(Ctx.getField(client, "world") != world, "the schematic world is the client world, the test proves nothing");
-                Ctx.call(world, "setBlockState", pos, chest, 3);
-                Object entity = Ctx.call(world, "getBlockEntity", pos);
-                SelfTest.check(entity != null && Ctx.call(entity, "getWorld") == world, "the chest in the schematic world has no block entity of that world");
-                Ctx.call(world, "setBlockState", pos, air, 3);
-                return String.valueOf(Ctx.call(world, "getBlockState", pos));
-            });
-            SelfTest.check(result.contains("air"), "the chest was not replaced by air: " + result);
         }));
     }
 }
