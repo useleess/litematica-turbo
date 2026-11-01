@@ -9,7 +9,8 @@ in the same change when files move or are added.
 |---|---|
 | `core/` | Version-free Java (no Minecraft, no Litematica): config, build threads, section slices, sparse block storage and memory budget, stats, the benchmark's script. Compiled into every version jar; unit tests in `core/src/test` (incl. `HygieneTest`). |
 | `shared/<first>-<last>/` | Game-side code several Fabric versions share, written once in package `com.litematicaturbo.shared`. A version uses every folder whose range holds it (both ends included). |
-| `shared/1.16.5-1.16.5/` | Batch drawing for Minecraft 1.16.5 only (`BatchDraw`, its mixins): the first render era (fixed-function GL). |
+| `shared/1.16.5-1.21.4/` | Among others `BatchRegions`: the batch drawing every render era shares (which layers, when it runs, grouping by region, making a region); an era passes in only how its pieces' data is read back (`BatchRegions.Gpu`). |
+| `shared/1.16.5-1.16.5/` | Batch drawing for Minecraft 1.16.5 only (`BatchDraw`: its `Gpu` and drawing, its mixins): the first render era (fixed-function GL). |
 | `shared/1.17.1-1.21.4/` | Batch drawing for the direct-GL render era (`BatchDraw`, `BatchPiece`, `BatchPlacement`, two mixins); the smaller ranges inside it hold only what the game changed: `BatchCalls` (Mojang call names and the vertex buffer's GL name, 1.17.1-1.18.2 / 1.19.4-1.21.4), `ChunkOffsetPlacement` (1.17.1-1.21), `ModelViewPlacement` (1.21.4) and `WorldRendererSchematicBatchLayerMixin` (its method signature differs in 1.17.1-1.18.2, 1.19.4-1.20.4, 1.21, 1.21.4). |
 | `shared/all/` | Game-side code every version uses (entry point, start-up, settings tab, ghost moving, mixin guard, the mixins that never changed). |
 | `versions/<mc>/` | The thin per-version layer of a Fabric version: only what differs there, plus `fabric.mod.json`, `litematica_turbo.mixins.json`, `lang/en_us.json`, `gradle.properties` (Minecraft / Litematica / MaLiLib versions). |
@@ -47,8 +48,11 @@ builds get the same code through their `fabric_source` folder.
 - **Batch drawing (1.16.5 - 1.21.4):** `BatchBook` (core, no game code) holds the rules: 4 x 4 x 4 piece regions, a region is
   made only after its pieces stayed unchanged 20 frames, one region and 4 MB read-back per frame, unused regions given back;
   `BatchDrawing` (core) the setting check, the switch-off after an error (chat line via `SettingsTicker`) and the draw-call
-  counters the tests read. 1.16.5 (`shared/1.16.5-1.16.5`): `WorldRendererSchematicBatchMixin` takes over `renderBlockLayer`
-  for the opaque layers and `BatchDraw` copies the pieces' vertex buffers into a region buffer and draws a region with one
+  counters the tests read. `BatchRegions` (`shared/1.16.5-1.21.4`) is the game-side part written once: layer index, the
+  on / off gate (paused for a test, a placement being moved, regions freed once off), the listed pieces grouped by region,
+  picking / making a region (read back through the era's `BatchRegions.Gpu`, positions moved to the region's corner,
+  one upload). Each era's `BatchDraw` keeps only its `Gpu`, its draw calls and its try / catch. 1.16.5 (`shared/1.16.5-1.16.5`): `WorldRendererSchematicBatchMixin` takes over `renderBlockLayer`
+  for the opaque layers and `BatchDraw` reads the pieces back through the array buffer and draws a region with one
   `glMultiDrawArrays`. 1.17.1-1.21.4 (`shared/1.17.1-1.21.4`): `WorldRendererSchematicBatchLayerMixin` calls
   `BatchDraw.begin` at the start of `renderBlockLayer` (regions due are made - each piece's vertex buffer is read back and
   moved to the region's corner - and the pieces a ready region holds leave Litematica's list), `drawRegions` just before
@@ -58,7 +62,8 @@ builds get the same code through their `fabric_source` folder.
   new built data; a piece's GL buffer name is read from the GL state (`BatchCalls`; the audit allows mixins on Litematica
   classes only). See-through layers, a placement being
   moved and any error keep the stock drawing (an error inside `drawRegions` costs that layer's region pieces for one frame).
-  1.21.5+ (render passes) will reuse `BatchBook`.
+  A new render era (1.21.10+) adds only its own `BatchDraw` (a `Gpu` + its drawing) and reuses `BatchRegions` (widen its
+  folder range) and `BatchBook`.
 - **Moving a placement:** `GhostMove` + `GhostRenderers` keep showing the old chunks shifted until the new ones are built.
 - **Settings:** `TurboConfig` (core) holds the options; `TurboSettingsTab` + `TurboOptions` + `GuiConfigsMixin` add
   the Turbo tab to Litematica's config screen; `SettingsTicker` applies changes each tick. Option names are

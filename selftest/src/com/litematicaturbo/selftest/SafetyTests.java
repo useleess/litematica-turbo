@@ -45,6 +45,13 @@ final class SafetyTests
         });
     }
 
+    /** incompatible(), in the test world: the warning goes to a player's chat, so a filtered run must not stay on the title screen. */
+    private static void inWorld(Ctx ctx, SettingsTests.Live live, String reason, SelfTest.Body body) throws Exception
+    {
+        WorldTests.fixture(ctx);
+        incompatible(ctx, live, reason, body);
+    }
+
     /** The text of every chat line the player has now. */
     static String chatText(Ctx ctx) throws Exception
     {
@@ -155,7 +162,7 @@ final class SafetyTests
             SelfTest.check(live.fileText().contains("enabled=false"), "the file did not take the player's 'enabled=false':\n" + live.fileText());
         }));
 
-        tests.add("safety/chat-message", () -> incompatible(ctx, live, "7 of 9 patches do not fit this Litematica version", () -> {
+        tests.add("safety/chat-message", () -> inWorld(ctx, live, "7 of 9 patches do not fit this Litematica version", () -> {
             ctx.onMain(() -> {
                 Ctx.setStatic(tab, "warnedIncompatible", false);
                 return null;
@@ -167,7 +174,7 @@ final class SafetyTests
             SelfTest.check(chat.contains("Litematica works as normal"), "the chat line does not say that Litematica works as normal:\n" + chat);
         }));
 
-        tests.add("safety/message-only-once", () -> incompatible(ctx, live, "once-only reason xyz", () -> {
+        tests.add("safety/message-only-once", () -> inWorld(ctx, live, "once-only reason xyz", () -> {
             ctx.onMain(() -> {
                 Ctx.setStatic(tab, "warnedIncompatible", false);
                 return null;

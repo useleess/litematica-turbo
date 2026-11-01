@@ -1,12 +1,10 @@
 package com.litematicaturbo.shared;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,7 +12,6 @@ import java.util.Set;
 import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexFormat;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
@@ -30,13 +27,12 @@ import com.litematicaturbo.core.BatchBook;
 import com.litematicaturbo.core.BatchDrawing;
 
 /**
- * Batch drawing for Minecraft 1.17.1 - 1.21.4 (the direct OpenGL render era): the built pieces of a 4 x 4 x 4 piece region
- * of an opaque block layer are copied (read back from the graphics card once) into one region buffer, with their vertex
- * positions moved to the region's corner. Before Litematica draws a layer, the pieces a ready region holds are taken out of
- * its list; while the layer's shader is still set up, one glMultiDrawElementsBaseVertex call draws exactly those pieces'
- * vertices from the region buffer, so the picture is the same as drawing them one by one. Pieces a region does not hold
- * (yet) are drawn by Litematica as before. Any error switches batch drawing off for the session (BatchDrawing) and
- * Litematica's own drawing takes over. Render thread only.
+ * Batch drawing for Minecraft 1.17.1 - 1.21.4 (the direct OpenGL render era): the regions (BatchRegions) are read back
+ * through the copy buffers. Before Litematica draws a layer, the pieces a ready region holds are taken out of its list;
+ * while the layer's shader is still set up, one glMultiDrawElementsBaseVertex call draws exactly those pieces' vertices
+ * from the region buffer, so the picture is the same as drawing them one by one. Pieces a region does not hold (yet) are
+ * drawn by Litematica as before. Any error switches batch drawing off for the session (BatchDrawing) and Litematica's own
+ * drawing takes over. Render thread only.
  */
 public final class BatchDraw
 {
@@ -44,12 +40,59 @@ public final class BatchDraw
     private static final int MAX_PIECES = 64;
     private static final int FIRST_INDEX_QUADS = 4096;
 
-    private static final BatchBook<ChunkRendererSchematicVbo> BOOK = new BatchBook<>(3);
+    private static final BatchRegions.Gpu GPU = new BatchRegions.Gpu()
+    {
+        @Override
+        public boolean has(ChunkRendererSchematicVbo piece, RenderLayer layer)
+        {
+            return vertexBuffer(piece, layer) != null;
+        }
+
+        @Override
+        public int stride(RenderLayer layer)
+        {
+            return BatchCalls.stride(layer.getVertexFormat());
+        }
+
+        @Override
+        public int[] sizes(List<ChunkRendererSchematicVbo> pieces, RenderLayer layer, int stride)
+        {
+            int[] sizes = new int[pieces.size()];
+            GL30.glBindVertexArray(vertexArray());
+
+            for (int i = 0; i < sizes.length; i++)
+            {
+                GL15.glBindBuffer(GL31.GL_COPY_READ_BUFFER, BatchCalls.id(vertexBuffer(pieces.get(i), layer)));
+                sizes[i] = GL15.glGetBufferParameteri(GL31.GL_COPY_READ_BUFFER, GL15.GL_BUFFER_SIZE) / stride;
+            }
+
+            GL30.glBindVertexArray(0);
+            VertexBuffer.unbind();
+            GL15.glBindBuffer(GL31.GL_COPY_READ_BUFFER, 0);
+            return sizes;
+        }
+
+        @Override
+        public void read(ChunkRendererSchematicVbo piece, RenderLayer layer, ByteBuffer data)
+        {
+            GL15.glBindBuffer(GL31.GL_COPY_READ_BUFFER, BatchCalls.id(vertexBuffer(piece, layer)));
+            GL15.glGetBufferSubData(GL31.GL_COPY_READ_BUFFER, 0, data);
+            GL15.glBindBuffer(GL31.GL_COPY_READ_BUFFER, 0);
+        }
+
+        @Override
+        public void upload(int buffer, ByteBuffer data)
+        {
+            GL15.glBindBuffer(GL31.GL_COPY_WRITE_BUFFER, buffer);
+            GL15.glBufferData(GL31.GL_COPY_WRITE_BUFFER, data, GL15.GL_STATIC_DRAW);
+            GL15.glBindBuffer(GL31.GL_COPY_WRITE_BUFFER, 0);
+        }
+    };
+
     private static final IntBuffer COUNTS = BufferUtils.createIntBuffer(MAX_PIECES);
     private static final IntBuffer BASES = BufferUtils.createIntBuffer(MAX_PIECES);
     /** Every piece's indices start at the beginning of the index buffer: all pointers stay zero. */
     private static final PointerBuffer STARTS = BufferUtils.createPointerBuffer(MAX_PIECES);
-    private static ByteBuffer scratch;
     private static int vertexArray;
     private static int indexBuffer;
     private static int indexQuads;
@@ -60,7 +103,7 @@ public final class BatchDraw
     {
         final RenderLayer layer;
         final Vec3d camera;
-        final List<Draw> draws = new ArrayList<>();
+        final List<BatchRegions.Pick> draws = new ArrayList<>();
         List<ChunkRendererSchematicVbo> saved;
         int pieces;
         int quads;
@@ -72,36 +115,8 @@ public final class BatchDraw
         }
     }
 
-    private static final class Draw
-    {
-        final BatchBook.Region<ChunkRendererSchematicVbo> region;
-        final List<ChunkRendererSchematicVbo> pieces;
-
-        Draw(BatchBook.Region<ChunkRendererSchematicVbo> region, List<ChunkRendererSchematicVbo> pieces)
-        {
-            this.region = region;
-            this.pieces = pieces;
-        }
-    }
-
     private BatchDraw()
     {
-    }
-
-    /** The index of an opaque block layer; -1 for any layer that is drawn the stock way (see-through ones). */
-    private static int layerIndex(RenderLayer layer)
-    {
-        if (layer == RenderLayer.getSolid())
-        {
-            return 0;
-        }
-
-        if (layer == RenderLayer.getCutoutMipped())
-        {
-            return 1;
-        }
-
-        return layer == RenderLayer.getCutout() ? 2 : -1;
     }
 
     /**
@@ -111,44 +126,23 @@ public final class BatchDraw
     public static void begin(RenderLayer layer, Vec3d camera, List<ChunkRendererSchematicVbo> infos)
     {
         plan = null;
-        int index = layerIndex(layer);
+        int index = BatchRegions.start(layer, BatchDraw::clear);
 
-        if (index == 0)
+        if (index < 0)
         {
-            BatchDrawing.countFrame();
-        }
-
-        if (BatchDrawing.pausedForTest())
-        {
-            return;
-        }
-
-        if (BatchDrawing.active() == false || index < 0 || GhostMove.isActive())
-        {
-            if (BOOK.regionCount() > 0 && BatchDrawing.active() == false)
-            {
-                clear();
-            }
-
             return;
         }
 
         try
         {
             BatchDrawing.checkFaultForTest();
-
-            if (index == 0)
-            {
-                free(BOOK.nextFrame());
-            }
-
             Plan next = plan(index, layer, camera, infos);
 
             if (next.draws.isEmpty() == false)
             {
                 Set<ChunkRendererSchematicVbo> covered = Collections.newSetFromMap(new IdentityHashMap<>());
 
-                for (Draw draw : next.draws)
+                for (BatchRegions.Pick draw : next.draws)
                 {
                     covered.addAll(draw.pieces);
                 }
@@ -166,46 +160,20 @@ public final class BatchDraw
 
     private static Plan plan(int index, RenderLayer layer, Vec3d camera, List<ChunkRendererSchematicVbo> infos)
     {
-        Map<Long, List<ChunkRendererSchematicVbo>> groups = new LinkedHashMap<>();
-
-        for (ChunkRendererSchematicVbo piece : infos)
-        {
-            if (vertexBuffer(piece, layer) != null)
-            {
-                BlockPos origin = piece.getOrigin();
-                groups.computeIfAbsent(BatchBook.regionKey(origin.getX() >> 4, origin.getY() >> 4, origin.getZ() >> 4), k -> new ArrayList<>(8)).add(piece);
-            }
-        }
-
         Plan next = new Plan(layer, camera);
 
-        for (Map.Entry<Long, List<ChunkRendererSchematicVbo>> entry : groups.entrySet())
+        for (Map.Entry<Long, List<ChunkRendererSchematicVbo>> entry : BatchRegions.groups(index, layer, infos, GPU).entrySet())
         {
-            List<ChunkRendererSchematicVbo> group = entry.getValue();
-            boolean quiet = true;
+            BatchRegions.Pick pick = BatchRegions.pick(index, layer, entry.getKey(), entry.getValue(), GPU);
 
-            for (ChunkRendererSchematicVbo piece : group)
+            if (pick.pieces.isEmpty() == false)
             {
-                quiet &= BOOK.see(index, piece, piece.getOrigin().asLong(), version(piece));
-            }
+                next.draws.add(pick);
+                next.pieces += pick.pieces.size();
 
-            BatchBook.Region<ChunkRendererSchematicVbo> region = BOOK.region(index, entry.getKey());
-            List<ChunkRendererSchematicVbo> inRegion = held(region, group);
-
-            if (group.size() > 1 && inRegion.size() < group.size() && quiet && BOOK.mayMake())
-            {
-                region = make(index, layer, entry.getKey(), group, region);
-                inRegion = region != null ? group : new ArrayList<>();
-            }
-
-            if (inRegion.isEmpty() == false)
-            {
-                next.draws.add(new Draw(region, inRegion));
-                next.pieces += inRegion.size();
-
-                for (ChunkRendererSchematicVbo piece : inRegion)
+                for (ChunkRendererSchematicVbo piece : pick.pieces)
                 {
-                    next.quads = Math.max(next.quads, region.member(piece).count / 4);
+                    next.quads = Math.max(next.quads, pick.region.member(piece).count / 4);
                 }
             }
         }
@@ -213,131 +181,11 @@ public final class BatchDraw
         return next;
     }
 
-    /** The pieces of the group that the region holds exactly as they are now. */
-    private static List<ChunkRendererSchematicVbo> held(BatchBook.Region<ChunkRendererSchematicVbo> region, List<ChunkRendererSchematicVbo> group)
-    {
-        List<ChunkRendererSchematicVbo> held = new ArrayList<>(group.size());
-
-        for (ChunkRendererSchematicVbo piece : group)
-        {
-            if (BOOK.holds(region, piece, piece.getOrigin().asLong(), version(piece)))
-            {
-                held.add(piece);
-            }
-        }
-
-        return held;
-    }
-
-    /** The piece's state: it changes whenever the piece got new built data. */
-    private static int version(ChunkRendererSchematicVbo piece)
-    {
-        return ((BatchPiece) piece).turbo$batchVersion();
-    }
-
     /** The vertex buffer Litematica would draw for the piece in the layer; null when it would draw nothing or the buffer is closed. */
     private static VertexBuffer vertexBuffer(ChunkRendererSchematicVbo piece, RenderLayer layer)
     {
         VertexBuffer buffer = ((BatchPiece) piece).turbo$buffer(layer);
         return buffer != null && BatchCalls.open(buffer) ? buffer : null;
-    }
-
-    /** Copies the pieces into one region buffer; null when there is nothing to draw. */
-    private static BatchBook.Region<ChunkRendererSchematicVbo> make(int index, RenderLayer layer, long key, List<ChunkRendererSchematicVbo> listed,
-                                                                    BatchBook.Region<ChunkRendererSchematicVbo> old)
-    {
-        // a region keeps the pieces it already holds, so turning the camera (which lists other pieces of the
-        // same region) does not make it again
-        List<ChunkRendererSchematicVbo> all = new ArrayList<>(listed);
-
-        if (old != null)
-        {
-            for (Map.Entry<ChunkRendererSchematicVbo, BatchBook.Member> e : old.members())
-            {
-                ChunkRendererSchematicVbo piece = e.getKey();
-                BlockPos at = piece.getOrigin();
-
-                if (all.contains(piece) == false && BOOK.holds(old, piece, at.asLong(), version(piece)) && vertexBuffer(piece, layer) != null
-                        && BatchBook.regionKey(at.getX() >> 4, at.getY() >> 4, at.getZ() >> 4) == key)
-                {
-                    all.add(piece);
-                }
-            }
-        }
-
-        int stride = BatchCalls.stride(layer.getVertexFormat());
-        int[] ids = new int[all.size()];
-        int[] sizes = new int[ids.length];
-        int total = 0;
-        GL30.glBindVertexArray(vertexArray());
-
-        for (int i = 0; i < sizes.length; i++)
-        {
-            ids[i] = BatchCalls.id(vertexBuffer(all.get(i), layer));
-            GL15.glBindBuffer(GL31.GL_COPY_READ_BUFFER, ids[i]);
-            sizes[i] = GL15.glGetBufferParameteri(GL31.GL_COPY_READ_BUFFER, GL15.GL_BUFFER_SIZE) / stride;
-            total += sizes[i];
-        }
-
-        GL30.glBindVertexArray(0);
-        VertexBuffer.unbind();
-
-        if (total == 0)
-        {
-            GL15.glBindBuffer(GL31.GL_COPY_READ_BUFFER, 0);
-            return null;
-        }
-
-        int bytes = total * stride;
-
-        if (scratch == null || scratch.capacity() < bytes)
-        {
-            scratch = BufferUtils.createByteBuffer(Math.max(bytes, 1 << 20)).order(ByteOrder.nativeOrder());
-        }
-
-        BatchBook.Region<ChunkRendererSchematicVbo> region = old != null ? old : new BatchBook.Region<>();
-        BlockPos first = all.get(0).getOrigin();
-        region.clearMembers();
-        region.originX = BatchBook.regionOrigin(first.getX() >> 4);
-        region.originY = BatchBook.regionOrigin(first.getY() >> 4);
-        region.originZ = BatchBook.regionOrigin(first.getZ() >> 4);
-        int vertexAt = 0;
-
-        for (int i = 0; i < sizes.length; i++)
-        {
-            ChunkRendererSchematicVbo piece = all.get(i);
-            int count = sizes[i];
-            BlockPos at = piece.getOrigin();
-            region.add(piece, at.asLong(), version(piece), vertexAt, count);
-
-            if (count > 0)
-            {
-                int start = vertexAt * stride;
-                GL15.glBindBuffer(GL31.GL_COPY_READ_BUFFER, ids[i]);
-                scratch.clear();
-                scratch.position(start).limit(start + count * stride);
-                GL15.glGetBufferSubData(GL31.GL_COPY_READ_BUFFER, 0, scratch);
-                scratch.clear();
-                BatchBook.shiftPositions(scratch, start, count, stride, at.getX() - region.originX, at.getY() - region.originY, at.getZ() - region.originZ);
-                vertexAt += count;
-            }
-        }
-
-        GL15.glBindBuffer(GL31.GL_COPY_READ_BUFFER, 0);
-
-        if (region.buffer == 0)
-        {
-            region.buffer = GL15.glGenBuffers();
-        }
-
-        scratch.position(0).limit(bytes);
-        GL15.glBindBuffer(GL31.GL_COPY_WRITE_BUFFER, region.buffer);
-        GL15.glBufferData(GL31.GL_COPY_WRITE_BUFFER, scratch, GL15.GL_STATIC_DRAW);
-        GL15.glBindBuffer(GL31.GL_COPY_WRITE_BUFFER, 0);
-        scratch.clear();
-        BOOK.made(index, key, region, bytes);
-        BatchDrawing.countRegion();
-        return region;
     }
 
     /**
@@ -358,7 +206,7 @@ public final class BatchDraw
             VertexFormat format = current.layer.getVertexFormat();
             prepareArrays(current.quads);
 
-            for (Draw draw : current.draws)
+            for (BatchRegions.Pick draw : current.draws)
             {
                 drawRegion(format, placement, current.camera, draw);
             }
@@ -409,7 +257,7 @@ public final class BatchDraw
     }
 
     /** The listed pieces of a region with one call. */
-    private static void drawRegion(VertexFormat format, BatchPlacement placement, Vec3d camera, Draw draw)
+    private static void drawRegion(VertexFormat format, BatchPlacement placement, Vec3d camera, BatchRegions.Pick draw)
     {
         BatchBook.Region<ChunkRendererSchematicVbo> region = draw.region;
         COUNTS.clear();
@@ -429,7 +277,7 @@ public final class BatchDraw
         COUNTS.flip();
         BASES.flip();
         STARTS.clear().limit(COUNTS.limit());
-        BOOK.used(region);
+        BatchRegions.used(region);
 
         if (COUNTS.limit() == 0)
         {
@@ -471,7 +319,7 @@ public final class BatchDraw
     /** Renderers reloaded or batch drawing off: every region buffer goes. */
     public static void clear()
     {
-        free(BOOK.clear());
+        BatchRegions.clear();
 
         if (vertexArray != 0)
         {
@@ -486,18 +334,6 @@ public final class BatchDraw
     /** How many region buffers exist (tests). */
     public static int regionCount()
     {
-        return BOOK.regionCount();
-    }
-
-    private static void free(List<BatchBook.Region<ChunkRendererSchematicVbo>> regions)
-    {
-        for (BatchBook.Region<ChunkRendererSchematicVbo> region : regions)
-        {
-            if (region.buffer != 0)
-            {
-                GL15.glDeleteBuffers(region.buffer);
-                region.buffer = 0;
-            }
-        }
+        return BatchRegions.regionCount();
     }
 }
