@@ -41,7 +41,7 @@ public final class TurboSettingsTab
     public static final ConfigBoolean COMPACT_STORAGE = TurboOptions.bool("turboCompactStorage", true,
             "Keep huge, mostly empty schematics in little memory (only the parts that hold blocks use memory),\nand show a message instead of running out of memory when a file is too big.\nApplies to schematics loaded from now on.", "Compact storage for huge schematics");
     public static final ConfigBoolean BATCH_DRAW = TurboOptions.bool("turboBatchDraw", true,
-            "Draw the built pieces of the schematic in groups (4 x 4 x 4 pieces), one call per group instead of one per piece.\nThe picture stays the same, the game has less to do. Works on Minecraft 1.16.5 for now.", "Batch drawing");
+            "Draw the built pieces of the schematic in groups (4 x 4 x 4 pieces), one call per group instead of one per piece.\nThe picture stays the same, the game has less to do. Works on Minecraft 1.16.5 - 1.21.4.", "Batch drawing");
 
     public static final List<IConfigBase> OPTIONS = ImmutableList.of(
             ENABLED, BUILD_THREADS, SKIP_EMPTY_SECTIONS, ASYNC_NEAR_REBUILDS,

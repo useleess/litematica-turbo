@@ -6,6 +6,7 @@ import net.minecraft.util.Formatting;
 
 import fi.dy.masa.malilib.interfaces.IClientTickHandler;
 
+import com.litematicaturbo.core.BatchDrawing;
 import com.litematicaturbo.core.CompactStorage;
 
 /** The settings tab's work on each client tick (see TurboSettingsTab), and the chat warnings of a switched-off Turbo. */
@@ -39,6 +40,13 @@ final class SettingsTicker implements IClientTickHandler
         if (storageFailure != null)
         {
             mc.inGameHud.getChatHud().addMessage(Text.translatable("litematica_turbo.message.storage_off", storageFailure).formatted(Formatting.GOLD));
+        }
+
+        String batchFailure = BatchDrawing.takeFailureWarning(mc.player != null);
+
+        if (batchFailure != null)
+        {
+            mc.inGameHud.getChatHud().addMessage(Text.translatable("litematica_turbo.message.batch_off", batchFailure).formatted(Formatting.GOLD));
         }
 
         TurboSettingsTab.applyPendingChanges();

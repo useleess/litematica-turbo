@@ -165,7 +165,7 @@ How a run goes (`Fixture`, built once on first use, the same for every version):
   blocks in the schematic world), `budget/too-big-file-gets-a-translated-message` (pretended low memory: nothing loaded,
   refusal counted, no crash; the setting off loads it), `safety/error-switches-off-and-loads-dense` (a fault in the sparse
   code: dense and unchanged, chat line, stays off), `messages/translated`.
-- `draw/` - batch drawing, Minecraft 1.16.5 (Fabric + Forge) only so far; every other version skips each test with "batch
+- `draw/` - batch drawing, Minecraft 1.16.5 - 1.21.4 (Fabric, Forge, NeoForge); 1.21.10 and up skip each test with "batch
   drawing for this render era comes in a later job". Counted, never timed: `fewer-calls-per-frame` (draw calls per frame of
   the schematic with the setting on are at most half of those with it off, same game, same camera; read from
   `BatchDrawing`'s counters), `same-picture` (the frame read back from the game's main frame buffer with regions ready equals the
@@ -210,7 +210,7 @@ test id prefixes that show it works. All of them run on every version in `versio
 | Empty space skipped when building, nothing visible lost | `empty/` |
 | Adding / rotating / mirroring / overlapping placements puts the same blocks into the world, faster | `place/` |
 | Huge, mostly empty schematics in little memory, a message for a file that cannot fit | `memory/` |
-| Batch drawing: far fewer draw calls, the same picture, a failing batch switches itself off (1.16.5; other versions skip) | `draw/` |
+| Batch drawing: far fewer draw calls, the same picture, a failing batch switches itself off (1.16.5 - 1.21.4; newer versions skip) | `draw/` |
 | Smooth placement moving: ghost shifted, rebuilt once stopped, swapped in one frame, same end result | `move/` |
 | F3 `[Litematica]` line with Turbo numbers, can be switched off | `stats/` |
 | Fail-safe: a patch that does not fit switches Turbo off with a chat message, no crash | `safety/` |
