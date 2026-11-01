@@ -22,6 +22,7 @@ import fi.dy.masa.litematica.render.schematic.ChunkRenderTaskSchematic;
 import fi.dy.masa.litematica.render.schematic.ChunkRendererSchematicVbo;
 
 import com.litematicaturbo.shared.ChunkKeys;
+import com.litematicaturbo.shared.CompleteUploads;
 import com.litematicaturbo.core.TurboConfig;
 
 /**
@@ -68,7 +69,8 @@ public abstract class ChunkRenderUploadCallbackMixin
         }
 
         ChunkPos pos = ((ChunkRenderTaskSchematicInvoker) this.val$task).turbo$getChunkPos();
-        ChunkRenderGpuUploader uploader = ((ChunkRenderGpuDispatcherAccessor) gpu).turbo$uploaders().get(ChunkKeys.of(pos));
+        ChunkRenderGpuUploader own = ((CompleteUploads) renderer).turbo$completeUploader();
+        ChunkRenderGpuUploader uploader = own != null ? own : ((ChunkRenderGpuDispatcherAccessor) gpu).turbo$uploaders().get(ChunkKeys.of(pos));
 
         if (uploader == null)
         {

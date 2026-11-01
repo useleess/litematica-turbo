@@ -36,6 +36,7 @@ public abstract class ChunkRendererSchematicVboMixin implements TurboRenderer
     @Shadow protected abstract void finishCompileTask();
     @Shadow protected abstract boolean needsUpdate();
     @Shadow protected abstract void setNeedsUpdate(boolean immediate);
+    @Shadow protected abstract void clearNeedsUpdate();
     @Shadow protected abstract void deleteGlResources();
 
     @Unique
@@ -73,6 +74,12 @@ public abstract class ChunkRendererSchematicVboMixin implements TurboRenderer
     public void turbo$setNeedsUpdate(boolean immediate)
     {
         this.setNeedsUpdate(immediate);
+    }
+
+    @Override
+    public void turbo$clearNeedsUpdate()
+    {
+        this.clearNeedsUpdate();
     }
 
     @Override

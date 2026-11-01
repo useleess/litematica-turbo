@@ -75,11 +75,11 @@ builds get the same code through their `fabric_source` folder.
   class from 1.21 (`shared/1.21-26.3`). Camera and render distance come from Litematica's own fields (`lastCameraX/Z`,
   `renderDistanceChunks`). Setting: "Less detail far away" (`TurboConfig.farDetail`).
 - **Moving a placement:** `GhostMove` + `GhostRenderers` keep showing the old chunks shifted until the new ones are built.
-- **Complete copy while moving (1.16.5 - 1.21.10):** Litematica's pieces leave out blocks that already match the world, so
+- **Complete copy while moving (every version):** Litematica's pieces leave out blocks that already match the world, so
   the shifted old pieces have holes. `CompleteCopy` (core) holds the rules: the byte limit (the smaller of an eighth of Java's
   memory and a quarter of the graphics memory the card reports), when the copy is skipped or dropped (Java memory low, or less
   than 256 MB graphics memory free), the switch-off after an error (chat line via each `SettingsTicker`) and the counters the
-  tests read. `CompletePieces` (`shared/1.16.5-1.21.10`) is the game side: when `GhostMove` starts a move it plans one complete
+  tests read. `CompletePieces` (`shared/1.16.5-26.3`, with `CompletePiece` and `CompleteWorldRenderer`) is the game side: when `GhostMove` starts a move it plans one complete
   piece per ghost holding part of the placement (the ghost's boxes, nearest first), builds them a few at a time on the build
   threads and keeps them while they fit the limit; `GhostMove.blockRenderers()` gives the block layers the finished pieces
   (moved to where the placement is) plus the ghosts they do not cover yet (the overlay still comes from the ghosts). A kept copy
@@ -87,10 +87,15 @@ builds get the same code through their `fabric_source` folder.
   `GhostMove.isHoldingWork` waits up to 3 s for its last builds before the real copy changes the schematic world. A complete
   piece is a normal Litematica chunk renderer made by `WorldRendererSchematicCompleteMixin` and marked by
   `ChunkRendererSchematicVboCompleteMixin`: it compares with an all-air world (`EmptyChunkView`), draws no overlay and keeps out
-  of the world renderer's block entities. `GpuMemory` is the read-only card query (LWJGL 3; `shared/1.16.5-1.21.4`; 1.21.10's
-  graphics API reports no memory, so `shared/1.21.10-1.21.10` answers -1 and only the Java limit counts). The version-specific bits are
-  `TurboRenderer.turbo$clearNeedsUpdate` and `TurboDispatcher.turbo$queueLater` (1.21 passes a profiler). 1.21.11 and newer have a
-  no-op `CompletePieces` (`shared/1.21.11-26.3`) until their step comes. Setting: "Complete copy while moving" (`TurboConfig.completeCopy`).
+  of the world renderer's block entities. Those two and the camera position (`GhostRenderers.cameraPos`) exist once per naming:
+  Yarn `shared/1.16.5-1.21.10`, Mojang `shared/1.21.11-26.3`. On the Mojang-named versions a piece also keeps its graphics
+  buffers in a GPU uploader of its own (`CompleteUploads`; the worker, the upload callback and the block layers use it), malilib's box
+  class is read through `CompleteBoxes` (`versions/1.21.11` / `shared/26.2-26.3`: it moved package), and because Litematica 0.26
+  changes the schematic world during the move itself, `GhostRenderers.holdForCopy` / `isCopyHeld` keep its background threads
+  (`PlacementManagerDaemonExecutorMixin`) and the unloading of the chunks the placement left (`SchematicPlacementManagerHoldMixin`)
+  waiting while the copy is built. `GpuMemory` is the read-only card query (LWJGL 3; `shared/1.16.5-1.21.4`; from 1.21.10 the
+  graphics API reports no memory, so `shared/1.21.10-26.3` answers -1 and only the Java limit counts). The other version-specific
+  bits are `TurboRenderer.turbo$clearNeedsUpdate` and `TurboDispatcher.turbo$queueLater` (1.21 - 1.21.10 pass a profiler). Setting: "Complete copy while moving" (`TurboConfig.completeCopy`).
 - **Settings:** `TurboConfig` (core) holds the options; `TurboSettingsTab` + `TurboOptions` + `GuiConfigsMixin` add
   the Turbo tab to Litematica's config screen; `SettingsTicker` applies changes each tick. Option names are
   translation keys `config.name.<option>` in `lang/en_us.json`.

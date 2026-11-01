@@ -4,23 +4,27 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import fi.dy.masa.litematica.render.schematic.ChunkRenderDataSchematic;
 import fi.dy.masa.litematica.render.schematic.ChunkRenderDispatcherBuffers;
+import fi.dy.masa.litematica.render.schematic.ChunkRenderGpuDispatcher;
 import fi.dy.masa.litematica.render.schematic.ChunkRenderGpuUploader;
 import fi.dy.masa.litematica.render.schematic.ChunkRenderTaskSchematic;
 import fi.dy.masa.litematica.render.schematic.ChunkRenderWorkerLitematica;
 import fi.dy.masa.litematica.render.schematic.ChunkRendererSchematicVbo;
 
 import com.litematicaturbo.core.BuildStats;
+import com.litematicaturbo.shared.CompletePiece;
+import com.litematicaturbo.shared.CompleteUploads;
 import com.litematicaturbo.shared.TurboBuilt;
 import com.litematicaturbo.shared.TurboRenderer;
 
 /**
  * Runs each build/resort under the chunk's own lock, so a cancelled build still finishing on one
  * thread never overlaps a new build of the same chunk on another (they share scratch fields).
- * Also times builds for the F3 statistics.
+ * Also times builds of the view for the F3 statistics.
  */
 @Mixin(value = ChunkRenderWorkerLitematica.class, remap = false)
 public abstract class ChunkRenderWorkerLitematicaMixin
@@ -51,7 +55,11 @@ public abstract class ChunkRenderWorkerLitematicaMixin
         finally
         {
             lock.unlock();
-            BuildStats.recordBuild(System.nanoTime() - start, onRenderThread);
+
+            if (((CompletePiece) renderer).turbo$isComplete() == false)
+            {
+                BuildStats.recordBuild(System.nanoTime() - start, onRenderThread);
+            }
         }
     }
 
@@ -82,6 +90,16 @@ public abstract class ChunkRenderWorkerLitematicaMixin
     {
         ChunkRenderDataSchematic built = TurboBuilt.take();
         return built != null ? built : ((ChunkRenderTaskSchematicInvoker) task).turbo$getChunkRenderData();
+    }
+
+    /** A complete-copy piece uploads into its own uploader, not the one of the view's chunk there. */
+    @Redirect(method = "processTask",
+              at = @At(value = "INVOKE", target = "Lfi/dy/masa/litematica/render/schematic/ChunkRenderGpuDispatcher;addOrGetUploader(II)Lfi/dy/masa/litematica/render/schematic/ChunkRenderGpuUploader;"))
+    private ChunkRenderGpuUploader turbo$pieceUploader(ChunkRenderGpuDispatcher dispatcher, int chunkX, int chunkZ, @Local(argsOnly = true) ChunkRenderTaskSchematic task)
+    {
+        ChunkRendererSchematicVbo renderer = ((ChunkRenderTaskSchematicInvoker) task).turbo$getRenderChunk();
+        ChunkRenderGpuUploader own = ((CompleteUploads) renderer).turbo$completeUploader();
+        return own != null ? own : ((ChunkRenderGpuDispatcherInvoker) dispatcher).turbo$addOrGetUploader(chunkX, chunkZ);
     }
 
     /**

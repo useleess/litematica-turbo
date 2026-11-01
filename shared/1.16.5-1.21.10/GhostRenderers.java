@@ -1,6 +1,8 @@
 package com.litematicaturbo.shared;
 
 import java.util.List;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 
 import fi.dy.masa.litematica.data.DataManager;
@@ -36,6 +38,13 @@ public final class GhostRenderers
     {
         BlockPos origin = renderer.getOrigin();
         return new int[] {origin.getX(), origin.getY(), origin.getZ()};
+    }
+
+    /** The camera's position {x, y, z}; null without a camera. */
+    static double[] cameraPos()
+    {
+        Entity camera = MinecraftClient.getInstance().getCameraEntity();
+        return camera == null ? null : new double[] {camera.getX(), camera.getY(), camera.getZ()};
     }
 
     /** Takes all chunk renderers out of the world renderer; null when there are none. */

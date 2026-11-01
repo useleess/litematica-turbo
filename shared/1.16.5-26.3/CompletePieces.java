@@ -7,9 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
 
 import fi.dy.masa.litematica.data.DataManager;
 import fi.dy.masa.litematica.render.LitematicaRenderer;
@@ -17,7 +14,6 @@ import fi.dy.masa.litematica.render.schematic.ChunkRenderDispatcherLitematica;
 import fi.dy.masa.litematica.render.schematic.ChunkRendererSchematicVbo;
 import fi.dy.masa.litematica.schematic.placement.SchematicPlacement;
 import fi.dy.masa.litematica.schematic.placement.SchematicPlacementManager;
-import fi.dy.masa.malilib.util.IntBoundingBox;
 
 import com.litematicaturbo.core.CompleteCopy;
 import com.litematicaturbo.core.MemoryBudget;
@@ -41,7 +37,8 @@ public final class CompletePieces
         final int y;
         final int z;
         final double distance;
-        final List<IntBoundingBox> boxes;
+        /** The ghost's boxes, as Litematica holds them. */
+        final List<?> boxes;
         ChunkRendererSchematicVbo renderer;
         State state = State.NEW;
         int submitGeneration;
@@ -50,7 +47,7 @@ public final class CompletePieces
         int[] shift = {0, 0, 0};
         boolean deleted;
 
-        Piece(int x, int y, int z, double distance, List<IntBoundingBox> boxes)
+        Piece(int x, int y, int z, double distance, List<?> boxes)
         {
             this.x = x;
             this.y = y;
@@ -85,9 +82,10 @@ public final class CompletePieces
     {
     }
 
+    /** A piece's position (a multiple of 16 on each axis) as one number. */
     private static long key(int x, int y, int z)
     {
-        return BlockPos.asLong(x, y, z);
+        return ((long) (x >> 4) & 0x3FFFFFL) << 42 | ((long) (y >> 4) & 0xFFFFFL) << 22 | (long) (z >> 4) & 0x3FFFFFL;
     }
 
     /** A move of this placement starts; the ghosts were just taken from the world renderer (built at {@code ghostOrigins}). */
@@ -116,7 +114,7 @@ public final class CompletePieces
                 return;
             }
 
-            Entity camera = MinecraftClient.getInstance().getCameraEntity();
+            double[] camera = GhostRenderers.cameraPos();
 
             if (camera == null)
             {
@@ -127,13 +125,13 @@ public final class CompletePieces
             {
                 int[] at = ghostOrigins.get(i);
                 SCOPE.add(key(at[0], at[1], at[2]));
-                List<IntBoundingBox> boxes = ((CompletePiece) ghosts.get(i)).turbo$boxes();
+                List<?> boxes = ((CompletePiece) ghosts.get(i)).turbo$boxes();
 
                 if (boxes.isEmpty() == false)
                 {
-                    double dx = at[0] + 8 - camera.getX();
-                    double dy = at[1] + 8 - camera.getY();
-                    double dz = at[2] + 8 - camera.getZ();
+                    double dx = at[0] + 8 - camera[0];
+                    double dy = at[1] + 8 - camera[1];
+                    double dz = at[2] + 8 - camera[2];
                     Piece piece = new Piece(at[0], at[1], at[2], dx * dx + dy * dy + dz * dz, boxes);
                     PIECES.add(piece);
                     BY_POSITION.put(key(at[0], at[1], at[2]), piece);

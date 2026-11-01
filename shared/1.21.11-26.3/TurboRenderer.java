@@ -25,5 +25,7 @@ public interface TurboRenderer
 
     void turbo$setNeedsUpdate(boolean immediate);
 
+    void turbo$clearNeedsUpdate();
+
     void turbo$deleteGlResources();
 }

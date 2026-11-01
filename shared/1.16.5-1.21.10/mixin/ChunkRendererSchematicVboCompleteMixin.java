@@ -40,9 +40,10 @@ public abstract class ChunkRendererSchematicVboCompleteMixin implements Complete
     private volatile int turbo$dataGeneration;
 
     @Override
-    public void turbo$makeComplete(List<IntBoundingBox> boxes)
+    @SuppressWarnings("unchecked")
+    public void turbo$makeComplete(List<?> boxes)
     {
-        this.turbo$completeBoxes = new ArrayList<>(boxes);
+        this.turbo$completeBoxes = new ArrayList<>((List<IntBoundingBox>) boxes);
         this.turbo$complete = true;
     }
 
@@ -53,7 +54,7 @@ public abstract class ChunkRendererSchematicVboCompleteMixin implements Complete
     }
 
     @Override
-    public List<IntBoundingBox> turbo$boxes()
+    public List<?> turbo$boxes()
     {
         synchronized (this.boxes)
         {

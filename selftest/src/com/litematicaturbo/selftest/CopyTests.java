@@ -1,5 +1,7 @@
 package com.litematicaturbo.selftest;
 
+import java.io.File;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -11,7 +13,7 @@ import java.util.Set;
  * the old pieces shown shifted have holes; with the copy a second set of pieces built from every schematic block is shown
  * instead. Proved by COUNTING (never by time): the blocks the drawn pieces hold against the schematic's non-air blocks, the
  * pieces built and freed, and what pretended low memory and an error in the copy do. The lone test placement moves with a
- * long settle time, so the shifted view stays up while the test looks at it. Versions whose complete copy is still to come skip.
+ * long settle time, so the shifted view stays up while the test looks at it.
  */
 final class CopyTests
 {
@@ -23,19 +25,6 @@ final class CopyTests
 
     private CopyTests()
     {
-    }
-
-    private static boolean supported(Ctx ctx) throws Exception
-    {
-        try
-        {
-            ctx.turbo("CompletePieces").getMethod("keptCount");
-            return true;
-        }
-        catch (NoSuchMethodException e)
-        {
-            return false;
-        }
     }
 
     private static Object pieces(Ctx ctx) throws Exception
@@ -83,19 +72,30 @@ final class CopyTests
         return ctx.onMain(() -> new java.util.ArrayList<Object>((List<?>) Ctx.call(ctx.turbo("GhostMove"), "renderers")));
     }
 
-    /** The old pieces that overlap the lone placement's area (the other pieces in view belong to the standard test zones). */
+    /**
+     * The old pieces that overlap the lone placement's area (the other pieces in view belong to the standard test zones). A
+     * piece is 16 blocks high, or the whole world height in the newer versions: its bounding box tells.
+     */
     private static List<?> ghostsOfThePlacement(Ctx ctx, int[] start) throws Exception
     {
         List<Object> out = new java.util.ArrayList<>();
 
         for (Object r : ghosts(ctx))
         {
-            int[] at = ctx.onMain(() -> {
-                Object o = Ctx.call(r, "getOrigin");
-                return new int[] {(Integer) Ctx.call(o, "getX"), (Integer) Ctx.call(o, "getY"), (Integer) Ctx.call(o, "getZ")};
+            double[] box = ctx.onMain(() -> {
+                Object b = Ctx.call(r, "getBoundingBox");
+                double[] d = new double[6];
+                String[] names = {"minX", "minY", "minZ", "maxX", "maxY", "maxZ"};
+
+                for (int i = 0; i < 6; i++)
+                {
+                    d[i] = (Double) Ctx.getField(b, names[i]);
+                }
+
+                return d;
             });
 
-            if (at[0] > start[0] - 16 && at[0] < start[0] + 32 && at[1] > start[1] - 16 && at[1] < start[1] + 6 && at[2] > start[2] - 16 && at[2] < start[2] + 32)
+            if (box[0] < start[0] + 32 && box[3] > start[0] && box[1] < start[1] + 6 && box[4] > start[1] && box[2] < start[2] + 32 && box[5] > start[2])
             {
                 out.add(r);
             }
@@ -146,7 +146,7 @@ final class CopyTests
 
                         if (String.valueOf(state).contains("minecraft:air") == false)
                         {
-                            Ctx.call(world, "setBlockState", pos, match ? state : air, 18);
+                            Game.callAny(world, new String[] {"setBlockState", "setBlock"}, pos, match ? state : air, 18);
                         }
                     }
                 }
@@ -187,11 +187,6 @@ final class CopyTests
      */
     private static void scenario(Ctx ctx, boolean copyOn, boolean matching, Scenario body) throws Exception
     {
-        if (supported(ctx) == false)
-        {
-            throw SelfTest.skip("complete copy for this version range comes in a later step");
-        }
-
         MoveTests.f = WorldTests.fixture(ctx);
         MoveTests.guarded(ctx, () -> {
             Ctx.call(copy(ctx), "resetForTest");
@@ -367,21 +362,11 @@ final class CopyTests
             move(ctx, start);
             built(ctx);
             ctx.ticks(10);
-            Class<?> calls = ctx.cls(ctx.pkg + ".bench.BenchCalls");
-            Method shot = null;
-
-            for (Method m : calls.getDeclaredMethods())
-            {
-                if (m.getName().equals("screenshot") && m.getParameterCount() == 2)
-                {
-                    shot = m;
-                }
-            }
-
-            SelfTest.check(shot != null, "no screenshot call in " + calls.getName());
-            shot.setAccessible(true);
-            Method call = shot;
-            ctx.onMain(() -> call.invoke(null, ctx.client, "turbo-copy-moving.png"));
+            // The benchmark's screenshot call (every version has it; the benchmark itself is not started)
+            Constructor<?> make = ctx.cls(ctx.pkg + ".bench.TurboBench").getDeclaredConstructor(File.class);
+            make.setAccessible(true);
+            Object bench = make.newInstance(new File("unused"));
+            ctx.onMain(() -> Ctx.call(bench, "screenshot", "turbo-copy-moving.png"));
             ctx.ticks(5);
         }));
 

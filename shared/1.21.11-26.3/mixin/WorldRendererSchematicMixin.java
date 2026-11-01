@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.util.profiling.InactiveProfiler;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -29,6 +30,7 @@ import fi.dy.masa.litematica.render.schematic.WorldRendererSchematic;
 
 import com.litematicaturbo.shared.GhostMove;
 import com.litematicaturbo.shared.ChunkKeys;
+import com.litematicaturbo.shared.CompleteUploads;
 import com.litematicaturbo.shared.GhostRenderers;
 import com.litematicaturbo.shared.RebuildQueue;
 import com.litematicaturbo.shared.TurboDispatcher;
@@ -123,12 +125,13 @@ public abstract class WorldRendererSchematicMixin implements TurboWorldRenderer
     }
 
     // While a placement is moved, the block layers and the overlay draw the shifted ghosts (with the
-    // GPU uploaders they were detached with) instead of the real chunks, which are not rebuilt yet.
+    // GPU uploaders they were detached with) instead of the real chunks, which are not rebuilt yet;
+    // the block layers draw the complete copy's finished pieces (with their own uploaders) in place of theirs.
 
     @Inject(method = "prepareBlockLayers", at = @At("HEAD"))
     private void turbo$ghostsForLayers(CallbackInfoReturnable<Integer> cir)
     {
-        this.turbo$swapInGhosts();
+        this.turbo$swapInGhosts(GhostMove.blockRenderers());
     }
 
     @Inject(method = "prepareBlockLayers", at = @At("RETURN"))
@@ -140,7 +143,7 @@ public abstract class WorldRendererSchematicMixin implements TurboWorldRenderer
     @Inject(method = "renderBlockOverlay", at = @At("HEAD"))
     private void turbo$ghostsForOverlay(CallbackInfo ci)
     {
-        this.turbo$swapInGhosts();
+        this.turbo$swapInGhosts(GhostMove.renderers());
     }
 
     @Inject(method = "renderBlockOverlay", at = @At("RETURN"))
@@ -151,21 +154,28 @@ public abstract class WorldRendererSchematicMixin implements TurboWorldRenderer
 
     @Redirect(method = { "prepareBlockLayers", "renderBlockOverlay" }, expect = 2,
               at = @At(value = "INVOKE", target = "Lfi/dy/masa/litematica/render/schematic/ChunkRenderGpuDispatcher;addOrGetUploader(II)Lfi/dy/masa/litematica/render/schematic/ChunkRenderGpuUploader;"))
-    private ChunkRenderGpuUploader turbo$ghostUploader(ChunkRenderGpuDispatcher dispatcher, int chunkX, int chunkZ)
+    private ChunkRenderGpuUploader turbo$ghostUploader(ChunkRenderGpuDispatcher dispatcher, int chunkX, int chunkZ, @Local ChunkRendererSchematicVbo renderer)
     {
+        ChunkRenderGpuUploader own = ((CompleteUploads) renderer).turbo$completeUploader();
+
+        if (own != null)
+        {
+            return own;
+        }
+
         ChunkRenderGpuUploader ghost = GhostRenderers.ghostUploader(chunkX, chunkZ);
         return ghost != null ? ghost : ((ChunkRenderGpuDispatcherInvoker) dispatcher).turbo$addOrGetUploader(chunkX, chunkZ);
     }
 
     @Unique
-    private void turbo$swapInGhosts()
+    private void turbo$swapInGhosts(List<ChunkRendererSchematicVbo> shown)
     {
         if (GhostMove.isActive())
         {
             this.turbo$savedRenderInfos.clear();
             this.turbo$savedRenderInfos.addAll(this.renderInfos);
             this.renderInfos.clear();
-            this.renderInfos.addAll(GhostMove.renderers());
+            this.renderInfos.addAll(shown);
             GhostRenderers.setDrawingGhosts(true);
         }
     }

@@ -12,4 +12,9 @@ public interface TurboDispatcher
     boolean turbo$updateChunkNow(ChunkRendererSchematicVbo renderer);
 
     boolean turbo$updateChunkLater(ChunkRendererSchematicVbo renderer);
+
+    default boolean turbo$queueLater(ChunkRendererSchematicVbo renderer)
+    {
+        return this.turbo$updateChunkLater(renderer);
+    }
 }
