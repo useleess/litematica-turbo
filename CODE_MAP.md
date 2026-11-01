@@ -9,6 +9,7 @@ in the same change when files move or are added.
 |---|---|
 | `core/` | Version-free Java (no Minecraft, no Litematica): config, build threads, section slices, sparse block storage and memory budget, stats, the benchmark's script. Compiled into every version jar; unit tests in `core/src/test` (incl. `HygieneTest`). |
 | `shared/<first>-<last>/` | Game-side code several Fabric versions share, written once in package `com.litematicaturbo.shared`. A version uses every folder whose range holds it (both ends included). |
+| `shared/1.16.5-1.16.5/` | Batch drawing for Minecraft 1.16.5 only (`BatchDraw`, its mixins): the first render era; the other eras get their own range folder later. |
 | `shared/all/` | Game-side code every version uses (entry point, start-up, settings tab, ghost moving, mixin guard, the mixins that never changed). |
 | `versions/<mc>/` | The thin per-version layer of a Fabric version: only what differs there, plus `fabric.mod.json`, `litematica_turbo.mixins.json`, `lang/en_us.json`, `gradle.properties` (Minecraft / Litematica / MaLiLib versions). |
 | `versions/<mc>-forge`, `-neoforge` | Forge / NeoForge builds (for Forgematica): only the loader entry point, `mods.toml` and (where Forge's own classes need a patch) `litematica_turbo.forge.mixins.json`; all other code comes from the Fabric folder named by `fabric_source` in their `gradle.properties`. |
@@ -42,6 +43,13 @@ builds get the same code through their `fabric_source` folder.
   `LitematicaSchematicReadMixin` (`shared/1.16.5-1.21.4` File, `shared/1.21.10-26.3` Path) refuses a file whose unpacked
   size (`MemoryBudget`) cannot fit, with a red translated message. `CompactStorage` (core) holds the policy and the
   switch-off after an error (chat line via each `SettingsTicker`). Setting: "Compact storage" (`TurboConfig.compactStorage`).
+- **Batch drawing (1.16.5 so far):** `BatchBook` (core, no game code) holds the rules: 4 x 4 x 4 piece regions, a region is
+  made only after its pieces stayed unchanged 20 frames, one region and 4 MB read-back per frame, unused regions given back;
+  `BatchDrawing` (core) the setting check, the switch-off after an error (chat line via `SettingsTicker`) and the draw-call
+  counters the tests read. `shared/1.16.5-1.16.5`: `WorldRendererSchematicBatchMixin` takes over `renderBlockLayer` for the
+  opaque layers and `BatchDraw` copies the pieces' vertex buffers into a region buffer and draws a region with one
+  `glMultiDrawArrays`; `ChunkRendererSchematicVboBatchMixin` counts a piece's new built data. See-through layers, a placement being
+  moved and any error keep the stock drawing. Other eras (1.17.1-1.21.4 direct GL, 1.21.5+ render passes) reuse `BatchBook`.
 - **Moving a placement:** `GhostMove` + `GhostRenderers` keep showing the old chunks shifted until the new ones are built.
 - **Settings:** `TurboConfig` (core) holds the options; `TurboSettingsTab` + `TurboOptions` + `GuiConfigsMixin` add
   the Turbo tab to Litematica's config screen; `SettingsTicker` applies changes each tick. Option names are

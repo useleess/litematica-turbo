@@ -91,6 +91,7 @@ public final class SelfTest
         BuildTests.register(ctx, tests);
         NearTests.register(ctx, tests);
         EmptyTests.register(ctx, tests);
+        DrawTests.register(ctx, tests);
         MoveTests.register(ctx, tests);
         PlaceTests.register(ctx, tests);
         MemoryTests.register(ctx, tests);

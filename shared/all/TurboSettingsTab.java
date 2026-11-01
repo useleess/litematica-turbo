@@ -40,10 +40,12 @@ public final class TurboSettingsTab
             "Add Turbo's build statistics to the [Litematica] line in the F3 screen.", "Show F3 stats");
     public static final ConfigBoolean COMPACT_STORAGE = TurboOptions.bool("turboCompactStorage", true,
             "Keep huge, mostly empty schematics in little memory (only the parts that hold blocks use memory),\nand show a message instead of running out of memory when a file is too big.\nApplies to schematics loaded from now on.", "Compact storage for huge schematics");
+    public static final ConfigBoolean BATCH_DRAW = TurboOptions.bool("turboBatchDraw", true,
+            "Draw the built pieces of the schematic in groups (4 x 4 x 4 pieces), one call per group instead of one per piece.\nThe picture stays the same, the game has less to do. Works on Minecraft 1.16.5 for now.", "Batch drawing");
 
     public static final List<IConfigBase> OPTIONS = ImmutableList.of(
             ENABLED, BUILD_THREADS, SKIP_EMPTY_SECTIONS, ASYNC_NEAR_REBUILDS,
-            GHOST_MOVE, GHOST_SETTLE_MS, CATCH_UP_AUTO, CATCH_UP_BUDGET_MS, SHOW_STATS, COMPACT_STORAGE);
+            GHOST_MOVE, GHOST_SETTLE_MS, CATCH_UP_AUTO, CATCH_UP_BUDGET_MS, SHOW_STATS, COMPACT_STORAGE, BATCH_DRAW);
 
     /** Whether the Turbo tab is the one shown in Litematica's config menu. */
     public static boolean selected;
@@ -90,6 +92,7 @@ public final class TurboSettingsTab
             CATCH_UP_BUDGET_MS.setIntegerValue(c.catchUpBudgetMs);
             SHOW_STATS.setBooleanValue(c.showStats);
             COMPACT_STORAGE.setBooleanValue(c.compactStorage);
+            BATCH_DRAW.setBooleanValue(c.batchDraw);
         }
         finally
         {
@@ -118,6 +121,7 @@ public final class TurboSettingsTab
         c.catchUpBudgetMs = CATCH_UP_BUDGET_MS.getIntegerValue();
         c.showStats = SHOW_STATS.getBooleanValue();
         c.compactStorage = COMPACT_STORAGE.getBooleanValue();
+        c.batchDraw = BATCH_DRAW.getBooleanValue();
         c.save();
 
         if (c.ghostMoveEnabled() == false)

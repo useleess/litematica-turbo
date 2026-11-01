@@ -6,6 +6,8 @@ Collected here until the next release, then used as the GitHub / Modrinth notes.
 
 - Huge schematics that are mostly empty (for example 2000 x 300 x 2000 with scattered builds) now take memory only where they hold blocks, and a file that cannot fit in the memory Minecraft has shows a red message instead of running the game out of memory. Switch it off with "Compact storage for huge schematics" in the Turbo tab.
 
+- Minecraft 1.16.5 (Fabric and Forge): the schematic is drawn with far fewer draw calls, because the built pieces of a 4 x 4 x 4 block of pieces are drawn together; the picture is the same. Switch it off with "Batch drawing" in the Turbo tab. If it ever hits an error it turns itself off and tells you in chat.
+
 ### Fixes
 
 - Fixed a crash on Minecraft 1.21.11 and 26.x when chests, signs and other block entities of a schematic were drawn while Turbo rebuilt them (also when switching layer views, translucent or fluids).

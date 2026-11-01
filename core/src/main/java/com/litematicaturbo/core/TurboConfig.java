@@ -37,6 +37,8 @@ public final class TurboConfig
     public int catchUpBudgetMs = 8;
     /** Keep the blocks of huge, mostly empty schematic regions in sparse sections, and refuse files that cannot fit in memory. */
     public boolean compactStorage = true;
+    /** Draw the built opaque pieces of a 4 x 4 x 4 region with one call instead of one call each. */
+    public boolean batchDraw = true;
 
     private static Path configDir;
 
@@ -109,6 +111,11 @@ public final class TurboConfig
         return this.enabled && this.compactStorage;
     }
 
+    public boolean batchDrawEnabled()
+    {
+        return this.enabled && this.batchDraw;
+    }
+
     public boolean ghostMoveEnabled()
     {
         return this.enabled && this.ghostMove;
@@ -174,6 +181,7 @@ public final class TurboConfig
         this.catchUpAuto = bool(props, "catchUpAuto", this.catchUpAuto);
         this.catchUpBudgetMs = Math.max(1, integer(props, "catchUpBudgetMs", this.catchUpBudgetMs));
         this.compactStorage = bool(props, "compactStorage", this.compactStorage);
+        this.batchDraw = bool(props, "batchDraw", this.batchDraw);
     }
 
     /** Writes the settings back to the file they were loaded from. */
@@ -207,7 +215,9 @@ public final class TurboConfig
                     + "# catchUpBudgetMs: used when catchUpAuto=false - render-thread ms per tick for the re-copy (higher = faster, more stutter)\n"
                     + "catchUpBudgetMs=" + this.catchUpBudgetMs + "\n"
                     + "# compactStorage: keep huge, mostly empty schematics in little memory (and refuse files that cannot fit)\n"
-                    + "compactStorage=" + this.compactStorage + "\n";
+                    + "compactStorage=" + this.compactStorage + "\n"
+                    + "# batchDraw: draw the built pieces of a 4 x 4 x 4 region with one call (same picture, fewer calls)\n"
+                    + "batchDraw=" + this.batchDraw + "\n";
 
         try
         {

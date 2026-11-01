@@ -165,6 +165,14 @@ How a run goes (`Fixture`, built once on first use, the same for every version):
   blocks in the schematic world), `budget/too-big-file-gets-a-translated-message` (pretended low memory: nothing loaded,
   refusal counted, no crash; the setting off loads it), `safety/error-switches-off-and-loads-dense` (a fault in the sparse
   code: dense and unchanged, chat line, stays off), `messages/translated`.
+- `draw/` - batch drawing, Minecraft 1.16.5 (Fabric + Forge) only so far; every other version skips each test with "batch
+  drawing for this render era comes in a later job". Counted, never timed: `fewer-calls-per-frame` (draw calls per frame of
+  the schematic with the setting on are at most half of those with it off, same game, same camera; read from
+  `BatchDrawing`'s counters), `same-picture` (the frame read back from the game's main frame buffer with regions ready equals the
+  frame drawn piece by piece, up to the pixels the plain drawing itself varies by between two frames), `changed-block-shows-up`
+  (a block edited inside a ready region is visible, and the picture again equals the plain one), `setting-off-draws-piece-by-piece`
+  (region buffers freed, none made), `error-switches-off-and-draws-piece-by-piece` (a fault in the batch code: off for the
+  session, chat line, region buffers freed, same picture), `messages-translated`.
 - `place/` - a lone test placement (32 x 6 x 32, random blocks, one gold marker block) is added; the blocks in the schematic
   world (read back around the placement's origin) are exactly plain Litematica's, unrotated, rotated 90 / 180 / 270,
   mirrored, rotated + mirrored, and with a second placement laid over the first (`same-as-stock-*`, and `two-placements-overlapping-plain` / `-turbo`: every cell of two overlapping placements holds the block of one of them); the gold marker
@@ -202,6 +210,7 @@ test id prefixes that show it works. All of them run on every version in `versio
 | Empty space skipped when building, nothing visible lost | `empty/` |
 | Adding / rotating / mirroring / overlapping placements puts the same blocks into the world, faster | `place/` |
 | Huge, mostly empty schematics in little memory, a message for a file that cannot fit | `memory/` |
+| Batch drawing: far fewer draw calls, the same picture, a failing batch switches itself off (1.16.5; other versions skip) | `draw/` |
 | Smooth placement moving: ghost shifted, rebuilt once stopped, swapped in one frame, same end result | `move/` |
 | F3 `[Litematica]` line with Turbo numbers, can be switched off | `stats/` |
 | Fail-safe: a patch that does not fit switches Turbo off with a chat message, no crash | `safety/` |

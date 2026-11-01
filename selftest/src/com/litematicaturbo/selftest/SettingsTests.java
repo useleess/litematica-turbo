@@ -47,6 +47,7 @@ final class SettingsTests
         new Option("CATCH_UP_BUDGET_MS", "catchUpBudgetMs", 23),
         new Option("SHOW_STATS", "showStats", false),
         new Option("COMPACT_STORAGE", "compactStorage", false),
+        new Option("BATCH_DRAW", "batchDraw", false),
     };
 
     private SettingsTests()
