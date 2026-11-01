@@ -282,12 +282,12 @@ public final class CompletePieces
 
             p.submitGeneration = ((CompletePiece) p.renderer).turbo$dataGeneration();
 
-            if (dispatcher.updateChunkLater(p.renderer) == false)
+            if (((TurboDispatcher) dispatcher).turbo$queueLater(p.renderer) == false)
             {
                 break;
             }
 
-            p.renderer.clearNeedsUpdate();
+            ((TurboRenderer) p.renderer).turbo$clearNeedsUpdate();
             p.state = State.QUEUED;
             next++;
         }

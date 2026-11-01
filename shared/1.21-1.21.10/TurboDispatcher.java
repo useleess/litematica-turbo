@@ -1,5 +1,6 @@
 package com.litematicaturbo.shared;
 
+import net.minecraft.util.profiler.DummyProfiler;
 import net.minecraft.util.profiler.Profiler;
 
 import fi.dy.masa.litematica.render.schematic.ChunkRendererSchematicVbo;
@@ -16,4 +17,9 @@ public interface TurboDispatcher
     boolean turbo$updateChunkNow(ChunkRendererSchematicVbo renderer, Profiler profiler);
 
     boolean turbo$updateChunkLater(ChunkRendererSchematicVbo renderer, Profiler profiler);
+
+    default boolean turbo$queueLater(ChunkRendererSchematicVbo renderer)
+    {
+        return this.turbo$updateChunkLater(renderer, DummyProfiler.INSTANCE);
+    }
 }

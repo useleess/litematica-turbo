@@ -12,12 +12,13 @@ import fi.dy.masa.litematica.render.schematic.ChunkRenderWorkerLitematica;
 import fi.dy.masa.litematica.render.schematic.ChunkRendererSchematicVbo;
 
 import com.litematicaturbo.core.BuildStats;
+import com.litematicaturbo.shared.CompletePiece;
 import com.litematicaturbo.shared.TurboRenderer;
 
 /**
  * Runs each build/resort under the chunk's own lock, so a cancelled build still finishing on one
  * thread never overlaps a new build of the same chunk on another (they share scratch fields).
- * Also times builds for the F3 statistics.
+ * Also times builds of the view for the F3 statistics.
  */
 @Mixin(value = ChunkRenderWorkerLitematica.class, remap = false)
 public abstract class ChunkRenderWorkerLitematicaMixin
@@ -47,7 +48,11 @@ public abstract class ChunkRenderWorkerLitematicaMixin
         finally
         {
             lock.unlock();
-            BuildStats.recordBuild(System.nanoTime() - start, onMainThread);
+
+            if (((CompletePiece) renderer).turbo$isComplete() == false)
+            {
+                BuildStats.recordBuild(System.nanoTime() - start, onMainThread);
+            }
         }
     }
 

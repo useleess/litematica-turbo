@@ -23,6 +23,9 @@ public interface ChunkRendererSchematicVboInvoker
     @Invoker("setNeedsUpdate")
     void turbo$callSetNeedsUpdate(boolean immediate);
 
+    @Invoker("clearNeedsUpdate")
+    void turbo$callClearNeedsUpdate();
+
     @Invoker("deleteGlResources")
     void turbo$callDeleteGlResources();
 }

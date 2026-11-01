@@ -180,7 +180,7 @@ How a run goes (`Fixture`, built once on first use, the same for every version):
   `error-switches-off-and-draws-every-outline` (a fault in the check: off for the session, chat line, every outline
   drawn), `messages-translated`. The test world's zones B, F and E (9 - 11 chunks ahead, render distance 12) are far,
   zone N is near.
-- `copy/` - the complete copy while a placement moves (1.16.5 - 1.20.4; the other versions `skip` until their step comes).
+- `copy/` - the complete copy while a placement moves (1.16.5 - 1.21.10; 1.21.11 and newer `skip` until their step comes).
   Counted, never timed, on the lone test placement with a long settle time and a world that matches every second block of it:
   `drawn-pieces-hold-every-block` (the blocks of the pieces the block layers draw = the schematic's non-air blocks, no old
   piece left in the list), `off-keeps-the-holes` (setting off: no complete piece, the old pieces hold fewer blocks than the

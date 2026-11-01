@@ -38,6 +38,11 @@ public interface TurboRenderer
         ((ChunkRendererSchematicVboInvoker) this).turbo$callSetNeedsUpdate(immediate);
     }
 
+    default void turbo$clearNeedsUpdate()
+    {
+        ((ChunkRendererSchematicVboInvoker) this).turbo$callClearNeedsUpdate();
+    }
+
     default void turbo$deleteGlResources()
     {
         ((ChunkRendererSchematicVboInvoker) this).turbo$callDeleteGlResources();
