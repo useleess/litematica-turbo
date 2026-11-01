@@ -35,6 +35,8 @@ public final class TurboConfig
     public boolean catchUpAuto = true;
     /** Render-thread milliseconds per tick for copying the moved placement into the schematic world. */
     public int catchUpBudgetMs = 8;
+    /** Keep the blocks of huge, mostly empty schematic regions in sparse sections, and refuse files that cannot fit in memory. */
+    public boolean compactStorage = true;
 
     private static Path configDir;
 
@@ -102,6 +104,11 @@ public final class TurboConfig
         return this.threadingEnabled() && this.asyncNearRebuilds;
     }
 
+    public boolean compactStorageEnabled()
+    {
+        return this.enabled && this.compactStorage;
+    }
+
     public boolean ghostMoveEnabled()
     {
         return this.enabled && this.ghostMove;
@@ -166,6 +173,7 @@ public final class TurboConfig
         this.ghostSettleMs = Math.max(0, integer(props, "ghostSettleMs", this.ghostSettleMs));
         this.catchUpAuto = bool(props, "catchUpAuto", this.catchUpAuto);
         this.catchUpBudgetMs = Math.max(1, integer(props, "catchUpBudgetMs", this.catchUpBudgetMs));
+        this.compactStorage = bool(props, "compactStorage", this.compactStorage);
     }
 
     /** Writes the settings back to the file they were loaded from. */
@@ -197,7 +205,9 @@ public final class TurboConfig
                     + "# catchUpAuto: size the re-copy work after a move from the current frame time (smooth at any FPS)\n"
                     + "catchUpAuto=" + this.catchUpAuto + "\n"
                     + "# catchUpBudgetMs: used when catchUpAuto=false - render-thread ms per tick for the re-copy (higher = faster, more stutter)\n"
-                    + "catchUpBudgetMs=" + this.catchUpBudgetMs + "\n";
+                    + "catchUpBudgetMs=" + this.catchUpBudgetMs + "\n"
+                    + "# compactStorage: keep huge, mostly empty schematics in little memory (and refuse files that cannot fit)\n"
+                    + "compactStorage=" + this.compactStorage + "\n";
 
         try
         {

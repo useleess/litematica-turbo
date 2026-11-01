@@ -157,6 +157,14 @@ How a run goes (`Fixture`, built once on first use, the same for every version):
   `edit-leaves-other-chunks-alone`, `edit-border-both-chunks`, `many-edits-same-as-stock`, `edit-removed-restores`,
   and who builds it: `rebuild-off-render-thread` (near rebuilds on: the render thread built nothing),
   `async-off-builds-on-render-thread` (off: it did).
+- `memory/` - a test-made region of 512 x 128 x 512 with twenty small clusters of blocks is read into Litematica's block
+  container (counted in bytes, never timed): `sparse/far-fewer-bytes-than-dense` (sparse sections hold at most a twentieth
+  of the dense array; the setting off stores it densely), `sparse/same-blocks-as-dense` (every block and a sample of air
+  equal, saving gives the packed array it was read from), `sparse/edits-and-palette-growth-like-dense` (set blocks until
+  the palette widens), `place/same-blocks-as-plain-litematica` (a lone placement of a sparse-stored file leaves the same
+  blocks in the schematic world), `budget/too-big-file-gets-a-translated-message` (pretended low memory: nothing loaded,
+  refusal counted, no crash; the setting off loads it), `safety/error-switches-off-and-loads-dense` (a fault in the sparse
+  code: dense and unchanged, chat line, stays off), `messages/translated`.
 - `place/` - a lone test placement (32 x 6 x 32, random blocks, one gold marker block) is added; the blocks in the schematic
   world (read back around the placement's origin) are exactly plain Litematica's, unrotated, rotated 90 / 180 / 270,
   mirrored, rotated + mirrored, and with a second placement laid over the first (`same-as-stock-*`, and `two-placements-overlapping-plain` / `-turbo`: every cell of two overlapping placements holds the block of one of them); the gold marker
@@ -193,6 +201,7 @@ test id prefixes that show it works. All of them run on every version in `versio
 | No stutter standing in the schematic: nearby chunks rebuilt in the background, edits show up | `near/` |
 | Empty space skipped when building, nothing visible lost | `empty/` |
 | Adding / rotating / mirroring / overlapping placements puts the same blocks into the world, faster | `place/` |
+| Huge, mostly empty schematics in little memory, a message for a file that cannot fit | `memory/` |
 | Smooth placement moving: ghost shifted, rebuilt once stopped, swapped in one frame, same end result | `move/` |
 | F3 `[Litematica]` line with Turbo numbers, can be switched off | `stats/` |
 | Fail-safe: a patch that does not fit switches Turbo off with a chat message, no crash | `safety/` |

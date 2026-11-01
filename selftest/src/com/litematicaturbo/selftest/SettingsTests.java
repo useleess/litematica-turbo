@@ -46,6 +46,7 @@ final class SettingsTests
         new Option("CATCH_UP_AUTO", "catchUpAuto", false),
         new Option("CATCH_UP_BUDGET_MS", "catchUpBudgetMs", 23),
         new Option("SHOW_STATS", "showStats", false),
+        new Option("COMPACT_STORAGE", "compactStorage", false),
     };
 
     private SettingsTests()

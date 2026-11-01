@@ -8,6 +8,9 @@
   "config.name.turbocatchupauto": "Automatic catch-up",
   "config.name.turbocatchupbudgetms": "Catch-up budget (ms per tick)",
   "config.name.turboshowstats": "Show F3 stats",
+  "config.name.turbocompactstorage": "Compact storage for huge schematics",
   "litematica_turbo.gui.button.config_gui.turbo": "Turbo",
+  "litematica_turbo.message.out_of_memory": "[Litematica Turbo] This schematic is too big for the memory Minecraft has (%s MB), so it was not loaded. Give Minecraft more memory or use a smaller schematic.",
+  "litematica_turbo.message.storage_off": "[Litematica Turbo] Compact schematic storage hit an error (%s) and is off for this session. Schematics are stored the normal Litematica way.",
   "litematica_turbo.message.copy_off": "[Litematica Turbo] Fast placement copying hit an error (%s) and is off for this session. Placements are copied the normal Litematica way."
 }

@@ -93,6 +93,7 @@ public final class SelfTest
         EmptyTests.register(ctx, tests);
         MoveTests.register(ctx, tests);
         PlaceTests.register(ctx, tests);
+        MemoryTests.register(ctx, tests);
         CompatTests.register(ctx, tests);
         SafetyTests.register(ctx, tests);
 

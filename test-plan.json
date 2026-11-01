@@ -47,6 +47,11 @@
    "what": "adding a placement (also rotated / mirrored / overlapping) puts exactly the blocks plain Litematica puts into the schematic world"
   },
   {
+   "prefix": "memory/",
+   "min": 7,
+   "what": "huge, mostly empty schematics are kept in sparse sections: far fewer bytes than dense, the same blocks read, edited, saved and placed, a translated message instead of loading a file that cannot fit, a failing sparse storage switches off with a chat line"
+  },
+  {
    "prefix": "compat/",
    "min": 3,
    "what": "Litematica's own display options (layer view, translucent, fluids) give the same picture with Turbo; Turbo never changes Litematica's options"

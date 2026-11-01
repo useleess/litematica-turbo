@@ -23,6 +23,8 @@
     "GpuBufferCacheAccessor",
     "GuiConfigsMixin",
     "GuiConfigsTabListenerMixin",
+    "LitematicaBlockStateContainerMixin",
+    "LitematicaSchematicReadMixin",
     "SchematicPlacementManagerMixin",
     "SchematicPlacementMixin",
     "WorldRendererSchematicMixin",

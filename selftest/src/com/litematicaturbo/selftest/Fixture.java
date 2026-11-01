@@ -692,6 +692,12 @@ final class Fixture
      */
     Object placeLone(String name) throws Exception
     {
+        return this.placeLone(name, name);
+    }
+
+    /** Writes the 32 x 6 x 32 lone schematic file {@code name} holding the random blocks of {@code seed}. */
+    File writeLone(String name, String seed) throws Exception
+    {
         File dir = new File(System.getProperty("user.dir"), "schematics");
         Class<?> schematicClass = this.ctx.cls("fi.dy.masa.litematica.schematic.LitematicaSchematic");
         int dataVersion = (Integer) Ctx.getStatic(schematicClass, "MINECRAFT_DATA_VERSION");
@@ -706,7 +712,7 @@ final class Fixture
         palette.add(new String[] {"minecraft:air", ""});
         index.put("air", 0);
         int[] cells = new int[sx * sy * sz];
-        int[] rnd = this.lcg(name.hashCode());
+        int[] rnd = this.lcg(seed.hashCode());
 
         for (int i = 0; i < cells.length; i++)
         {
@@ -719,6 +725,12 @@ final class Fixture
         cells[(MARKER[1] * sz + MARKER[2]) * sx + MARKER[0]] = this.paletteIndex(index, palette, gold);
         File file = new File(dir, "turbo-test-" + name + ".litematic");
         WorldFiles.writeSchematic(file, dataVersion, version, "turbo " + name, sx, sy, sz, palette, cells);
+        return file;
+    }
+
+    Object placeLone(String name, String seed) throws Exception
+    {
+        File file = this.writeLone(name, seed);
         Object holder = Ctx.call(this.ctx.cls("fi.dy.masa.litematica.data.SchematicHolder"), "getInstance");
         Object schematic = this.load(holder, file);
         Class<?> placementClass = this.ctx.cls("fi.dy.masa.litematica.schematic.placement.SchematicPlacement");

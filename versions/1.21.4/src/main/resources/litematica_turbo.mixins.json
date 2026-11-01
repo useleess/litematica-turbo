@@ -16,6 +16,8 @@
     "ChunkRendererSchematicVboInvoker",
     "GuiConfigsMixin",
     "GuiConfigsTabListenerMixin",
+    "LitematicaBlockStateContainerMixin",
+    "LitematicaSchematicReadMixin",
     "SchematicPlacementManagerMixin",
     "SchematicPlacementManagerQueueMixin",
     "SchematicPlacementMixin",

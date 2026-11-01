@@ -38,10 +38,12 @@ public final class TurboSettingsTab
             "Used when Automatic catch-up is off: render-thread milliseconds per tick for\nre-copying a moved placement. Higher = finishes sooner but stutters.\nUp to ~16 stays smooth; 50 is stock Litematica.");
     public static final ConfigBoolean SHOW_STATS = TurboOptions.bool("turboShowStats", true,
             "Add Turbo's build statistics to the [Litematica] line in the F3 screen.", "Show F3 stats");
+    public static final ConfigBoolean COMPACT_STORAGE = TurboOptions.bool("turboCompactStorage", true,
+            "Keep huge, mostly empty schematics in little memory (only the parts that hold blocks use memory),\nand show a message instead of running out of memory when a file is too big.\nApplies to schematics loaded from now on.", "Compact storage for huge schematics");
 
     public static final List<IConfigBase> OPTIONS = ImmutableList.of(
             ENABLED, BUILD_THREADS, SKIP_EMPTY_SECTIONS, ASYNC_NEAR_REBUILDS,
-            GHOST_MOVE, GHOST_SETTLE_MS, CATCH_UP_AUTO, CATCH_UP_BUDGET_MS, SHOW_STATS);
+            GHOST_MOVE, GHOST_SETTLE_MS, CATCH_UP_AUTO, CATCH_UP_BUDGET_MS, SHOW_STATS, COMPACT_STORAGE);
 
     /** Whether the Turbo tab is the one shown in Litematica's config menu. */
     public static boolean selected;
@@ -87,6 +89,7 @@ public final class TurboSettingsTab
             CATCH_UP_AUTO.setBooleanValue(c.catchUpAuto);
             CATCH_UP_BUDGET_MS.setIntegerValue(c.catchUpBudgetMs);
             SHOW_STATS.setBooleanValue(c.showStats);
+            COMPACT_STORAGE.setBooleanValue(c.compactStorage);
         }
         finally
         {
@@ -114,6 +117,7 @@ public final class TurboSettingsTab
         c.catchUpAuto = CATCH_UP_AUTO.getBooleanValue();
         c.catchUpBudgetMs = CATCH_UP_BUDGET_MS.getIntegerValue();
         c.showStats = SHOW_STATS.getBooleanValue();
+        c.compactStorage = COMPACT_STORAGE.getBooleanValue();
         c.save();
 
         if (c.ghostMoveEnabled() == false)

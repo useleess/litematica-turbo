@@ -7,7 +7,7 @@ in the same change when files move or are added.
 
 | Folder | What |
 |---|---|
-| `core/` | Version-free Java (no Minecraft, no Litematica): config, build threads, section slices, stats, the benchmark's script. Compiled into every version jar; unit tests in `core/src/test` (incl. `HygieneTest`). |
+| `core/` | Version-free Java (no Minecraft, no Litematica): config, build threads, section slices, sparse block storage and memory budget, stats, the benchmark's script. Compiled into every version jar; unit tests in `core/src/test` (incl. `HygieneTest`). |
 | `shared/<first>-<last>/` | Game-side code several Fabric versions share, written once in package `com.litematicaturbo.shared`. A version uses every folder whose range holds it (both ends included). |
 | `shared/all/` | Game-side code every version uses (entry point, start-up, settings tab, ghost moving, mixin guard, the mixins that never changed). |
 | `versions/<mc>/` | The thin per-version layer of a Fabric version: only what differs there, plus `fabric.mod.json`, `litematica_turbo.mixins.json`, `lang/en_us.json`, `gradle.properties` (Minecraft / Litematica / MaLiLib versions). |
@@ -36,6 +36,12 @@ builds get the same code through their `fabric_source` folder.
   `SchematicPlacementManagerQueueMixin` (catch-up budget per tick). Forge 1.16.5 - 1.18.2 only: `ModelDataManagerMixin`
   (listed in `versions/<mc>-forge/.../litematica_turbo.forge.mixins.json`) stops Forge throwing when a block entity of
   the schematic world is removed.
+- **Huge schematics:** `CompactBlocks` (all) + `LitematicaBlockStateContainerMixin` give Litematica's block container a
+  `SparseBitArray` (16 x 16 x 16 sections from `SparseIntArray` in core, only where blocks are) instead of the dense packed
+  array when the array is big and mostly empty; the palette growing keeps it sparse; saving builds the packed array again.
+  `LitematicaSchematicReadMixin` (`shared/1.16.5-1.21.4` File, `shared/1.21.10-26.3` Path) refuses a file whose unpacked
+  size (`MemoryBudget`) cannot fit, with a red translated message. `CompactStorage` (core) holds the policy and the
+  switch-off after an error (chat line via each `SettingsTicker`). Setting: "Compact storage" (`TurboConfig.compactStorage`).
 - **Moving a placement:** `GhostMove` + `GhostRenderers` keep showing the old chunks shifted until the new ones are built.
 - **Settings:** `TurboConfig` (core) holds the options; `TurboSettingsTab` + `TurboOptions` + `GuiConfigsMixin` add
   the Turbo tab to Litematica's config screen; `SettingsTicker` applies changes each tick. Option names are

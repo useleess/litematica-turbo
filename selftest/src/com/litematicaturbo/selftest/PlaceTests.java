@@ -101,7 +101,7 @@ final class PlaceTests
         throw new SelfTest.Fail("the placed blocks never settled in the schematic world");
     }
 
-    private static int air(List<String> dump)
+    static int air(List<String> dump)
     {
         int n = 0;
 
@@ -144,7 +144,7 @@ final class PlaceTests
         return 0;
     }
 
-    private static String firstDifference(List<String> a, List<String> b)
+    static String firstDifference(List<String> a, List<String> b)
     {
         if (a.size() != b.size())
         {
@@ -194,6 +194,17 @@ final class PlaceTests
 
     private static List<String> placed(Ctx ctx, String label, boolean turbo, String rotation, String mirror, boolean second, String first) throws Exception
     {
+        return placed(ctx, label, turbo, rotation, mirror, second, first, first);
+    }
+
+    /** What a fresh lone placement of the file {@code first}, holding the blocks of {@code seed}, leaves in the schematic world. */
+    static List<String> placedFile(Ctx ctx, String label, String first, String seed) throws Exception
+    {
+        return placed(ctx, label, true, null, null, false, first, seed);
+    }
+
+    private static List<String> placed(Ctx ctx, String label, boolean turbo, String rotation, String mirror, boolean second, String first, String seed) throws Exception
+    {
         String key = label + (turbo ? "/turbo" : "/stock");
         List<String> existing = DUMPS.get(key);
 
@@ -208,7 +219,7 @@ final class PlaceTests
         placement = null;
         placement2 = null;
         f.awaitQuiet("the schematic world settled before placing");
-        placement = f.placeLone(first);
+        placement = f.placeLone(first, seed);
         int[] o = origin(ctx, placement);
 
         if (rotation != null)
@@ -235,12 +246,12 @@ final class PlaceTests
         return d;
     }
 
-    private interface Body
+    interface Body
     {
         void run() throws Exception;
     }
 
-    private static void guarded(Ctx ctx, Body body) throws Exception
+    static void guarded(Ctx ctx, Body body) throws Exception
     {
         f = WorldTests.fixture(ctx);
         f.zonesEnabled(false);
