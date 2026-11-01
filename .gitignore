@@ -21,3 +21,4 @@ build-selftest/
 .gradle-tmp/
 # written by range-check.py
 range-check.txt
+test-shots/

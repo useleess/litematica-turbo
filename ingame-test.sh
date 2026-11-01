@@ -97,6 +97,12 @@ run_version()
         echo "    crash report $(basename "$c"):"
         grep -v -E "^\s*$" "$c" | head -n 70 | cut -c 1-240 | sed 's/^/    # /'
     done
+    # the tests' screenshots outlive the throwaway game folder (the test box brings test-shots back)
+    for png in "$run"/screenshots/*.png; do
+        [ -f "$png" ] || continue
+        mkdir -p "$HERE/test-shots"
+        cp "$png" "$HERE/test-shots/$v-$(basename "$png")"
+    done
     rm -rf "$run"
     secs=$(( $(date +%s) - start ))
     summary=$(sed -n 's/.*SCOPE TESTS: \([0-9]*\) passed, \([0-9]*\) failed, \([0-9]*\) skipped.*/\1 \2 \3/p' "$log" | tail -n 1)
