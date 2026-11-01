@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component;
 import fi.dy.masa.malilib.interfaces.IClientTickHandler;
 
 import com.litematicaturbo.core.CompactStorage;
+import com.litematicaturbo.core.FarDetail;
 
 /** The settings tab's work on each client tick (see TurboSettingsTab), and its chat warning. */
 final class SettingsTicker implements IClientTickHandler
@@ -32,6 +33,13 @@ final class SettingsTicker implements IClientTickHandler
         if (storageFailure != null)
         {
             mc.gui.chatListener().handleSystemMessage(Component.translatable("litematica_turbo.message.storage_off", storageFailure).withStyle(ChatFormatting.GOLD), false);
+        }
+
+        String farFailure = FarDetail.takeFailureWarning(mc.player != null);
+
+        if (farFailure != null)
+        {
+            mc.gui.chatListener().handleSystemMessage(Component.translatable("litematica_turbo.message.far_off", farFailure).withStyle(ChatFormatting.GOLD), false);
         }
 
         TurboSettingsTab.applyPendingChanges();

@@ -95,7 +95,7 @@ the agent crashed); that version then shows `NO RESULT`.
   `config-read`, `config-complete`, `verify-clean` (`TurboMixinGuard.verify` finds nothing, settings tab patches
   fine), `turbo-on` (not switched off as incompatible), `live-renderer-patched` (the world renderer Litematica
   really uses is the patched class).
-- `settings/` - the Turbo tab. For each of the 9 options: `save/<key>` (changed through its malilib option as
+- `settings/` - the Turbo tab. For each option: `save/<key>` (changed through its malilib option as
   the tab does: TurboConfig follows at once, the file has the new value and still every other one, changing it
   back restores it) and `load/<key>` (a file with the value loads into TurboConfig, unset keys stay default, the
   file is rewritten with every option, the tab shows it, showing it saves nothing, the game's own file is not
@@ -173,6 +173,13 @@ How a run goes (`Fixture`, built once on first use, the same for every version):
   (a block edited inside a ready region is visible, and the picture again equals the plain one), `setting-off-draws-piece-by-piece`
   (region buffers freed, none made), `error-switches-off-and-draws-piece-by-piece` (a fault in the batch code: off for the
   session, chat line, region buffers freed, same picture), `messages-translated`.
+- `far/` - less detail far away, every version. Counted, never timed (`FarDetail`'s outline counters over about a second
+  of frames, same game, same camera): `outlines-left-out-far-away` (far pieces draw no outline lines with the setting on
+  and some with it off), `near-outlines-unchanged` (the near pieces' share of the outline draws is the same with the
+  setting on and off), `low-memory-switches-it-off` (pretended low memory: every outline drawn, back once memory is fine),
+  `error-switches-off-and-draws-every-outline` (a fault in the check: off for the session, chat line, every outline
+  drawn), `messages-translated`. The test world's zones B, F and E (9 - 11 chunks ahead, render distance 12) are far,
+  zone N is near.
 - `place/` - a lone test placement (32 x 6 x 32, random blocks, one gold marker block) is added; the blocks in the schematic
   world (read back around the placement's origin) are exactly plain Litematica's, unrotated, rotated 90 / 180 / 270,
   mirrored, rotated + mirrored, and with a second placement laid over the first (`same-as-stock-*`, and `two-placements-overlapping-plain` / `-turbo`: every cell of two overlapping placements holds the block of one of them); the gold marker
@@ -211,6 +218,7 @@ test id prefixes that show it works. All of them run on every version in `versio
 | Adding / rotating / mirroring / overlapping placements puts the same blocks into the world, faster | `place/` |
 | Huge, mostly empty schematics in little memory, a message for a file that cannot fit | `memory/` |
 | Batch drawing: far fewer draw calls, the same picture, a failing batch switches itself off (1.16.5 - 1.21.4; newer versions skip) | `draw/` |
+| Less detail far away: far pieces drawn without outline lines, near ones unchanged, off while memory is low, a failing check switches off | `far/` |
 | Smooth placement moving: ghost shifted, rebuilt once stopped, swapped in one frame, same end result | `move/` |
 | F3 `[Litematica]` line with Turbo numbers, can be switched off | `stats/` |
 | Fail-safe: a patch that does not fit switches Turbo off with a chat message, no crash | `safety/` |

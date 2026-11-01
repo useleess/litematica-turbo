@@ -30,6 +30,7 @@
     "WorldRendererSchematicMixin",
     "WorldRendererSchematicDetachMixin",
     "WorldRendererSchematicGhostMixin",
+    "WorldRendererSchematicFarMixin",
     "WorldRendererSchematicStatsMixin"
   ],
   "injectors": {

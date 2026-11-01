@@ -8,6 +8,8 @@ Collected here until the next release, then used as the GitHub / Modrinth notes.
 
 - Minecraft 1.16.5 - 1.21.4 (Fabric, Forge and NeoForge): the schematic is drawn with far fewer draw calls, because the built pieces of a 4 x 4 x 4 block of pieces are drawn together; the picture is the same. Switch it off with "Batch drawing" in the Turbo tab. If it ever hits an error it turns itself off and tells you in chat.
 
+- Schematic pieces far away (at least half your render distance) are drawn without their outline lines, which there are only a blur but cost as much as near ones; filled sides and blocks stay. Switch it off with "Less detail far away" in the Turbo tab; it also turns itself off while Minecraft is low on memory.
+
 ### Fixes
 
 - Fixed a crash on Minecraft 1.21.11 and 26.x when chests, signs and other block entities of a schematic were drawn while Turbo rebuilt them (also when switching layer views, translucent or fluids).

@@ -9,6 +9,7 @@ import fi.dy.masa.malilib.interfaces.IClientTickHandler;
 
 import com.litematicaturbo.core.BatchDrawing;
 import com.litematicaturbo.core.CompactStorage;
+import com.litematicaturbo.core.FarDetail;
 
 /** The settings tab's work on each client tick (see TurboSettingsTab), and the chat warnings of a switched-off Turbo. */
 final class SettingsTicker implements IClientTickHandler
@@ -48,6 +49,13 @@ final class SettingsTicker implements IClientTickHandler
         if (batchFailure != null)
         {
             mc.inGameHud.getChatHud().addMessage(new TranslatableText("litematica_turbo.message.batch_off", batchFailure).formatted(Formatting.GOLD));
+        }
+
+        String farFailure = FarDetail.takeFailureWarning(mc.player != null);
+
+        if (farFailure != null)
+        {
+            mc.inGameHud.getChatHud().addMessage(new TranslatableText("litematica_turbo.message.far_off", farFailure).formatted(Formatting.GOLD));
         }
 
         TurboSettingsTab.applyPendingChanges();

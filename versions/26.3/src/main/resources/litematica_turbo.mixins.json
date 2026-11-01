@@ -28,6 +28,7 @@
     "SchematicPlacementManagerMixin",
     "SchematicPlacementMixin",
     "WorldRendererSchematicMixin",
+    "WorldRendererSchematicFarMixin",
     "WorldRendererSchematicStatsMixin"
   ],
   "injectors": {

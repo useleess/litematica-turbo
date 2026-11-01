@@ -39,6 +39,8 @@ public final class TurboConfig
     public boolean compactStorage = true;
     /** Draw the built opaque pieces of a 4 x 4 x 4 region with one call instead of one call each. */
     public boolean batchDraw = true;
+    /** Leave out the outline lines of schematic pieces far away (see FarDetail). */
+    public boolean farDetail = true;
 
     private static Path configDir;
 
@@ -116,6 +118,11 @@ public final class TurboConfig
         return this.enabled && this.batchDraw;
     }
 
+    public boolean farDetailEnabled()
+    {
+        return this.enabled && this.farDetail;
+    }
+
     public boolean ghostMoveEnabled()
     {
         return this.enabled && this.ghostMove;
@@ -182,6 +189,7 @@ public final class TurboConfig
         this.catchUpBudgetMs = Math.max(1, integer(props, "catchUpBudgetMs", this.catchUpBudgetMs));
         this.compactStorage = bool(props, "compactStorage", this.compactStorage);
         this.batchDraw = bool(props, "batchDraw", this.batchDraw);
+        this.farDetail = bool(props, "farDetail", this.farDetail);
     }
 
     /** Writes the settings back to the file they were loaded from. */
@@ -217,7 +225,9 @@ public final class TurboConfig
                     + "# compactStorage: keep huge, mostly empty schematics in little memory (and refuse files that cannot fit)\n"
                     + "compactStorage=" + this.compactStorage + "\n"
                     + "# batchDraw: draw the built pieces of a 4 x 4 x 4 region with one call (same picture, fewer calls)\n"
-                    + "batchDraw=" + this.batchDraw + "\n";
+                    + "batchDraw=" + this.batchDraw + "\n"
+                    + "# farDetail: leave out the outline lines of schematic pieces far away (only a blur there); off by itself while memory is low\n"
+                    + "farDetail=" + this.farDetail + "\n";
 
         try
         {

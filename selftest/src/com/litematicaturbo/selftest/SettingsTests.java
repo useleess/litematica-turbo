@@ -48,6 +48,7 @@ final class SettingsTests
         new Option("SHOW_STATS", "showStats", false),
         new Option("COMPACT_STORAGE", "compactStorage", false),
         new Option("BATCH_DRAW", "batchDraw", false),
+        new Option("FAR_DETAIL", "farDetail", false),
     };
 
     private SettingsTests()

@@ -64,6 +64,16 @@ builds get the same code through their `fabric_source` folder.
   moved and any error keep the stock drawing (an error inside `drawRegions` costs that layer's region pieces for one frame).
   A new render era (1.21.10+) adds only its own `BatchDraw` (a `Gpu` + its drawing) and reuses `BatchRegions` (widen its
   folder range) and `BatchBook`.
+- **Less detail far away (every version):** `FarDetail` (core) holds the rules (a piece at least half the render distance
+  away, 3 pieces at least, is far; off while less than a quarter of Java's memory is free), the setting check, the
+  switch-off after an error (chat line via each `SettingsTicker`) and the outline counters the tests read. Every version's
+  `WorldRendererSchematic.renderBlockOverlay` asks each listed piece `hasOverlay()` and then its data
+  `isOverlayTypeEmpty(type)`, each frame: `WorldRendererSchematicFarMixin` notes the piece at the first call and answers
+  "empty" for the OUTLINE type of a far piece (`FarOutlines`, `shared/all`, catches an error). Nothing is rebuilt, so a
+  piece coming near gets its lines back in the next frame; filled sides and blocks are untouched. The mixin exists twice
+  only because Litematica moved the overlay type: nested in `ChunkRendererSchematicVbo` (`shared/1.16.5-1.20.4`), its own
+  class from 1.21 (`shared/1.21-26.3`). Camera and render distance come from Litematica's own fields (`lastCameraX/Z`,
+  `renderDistanceChunks`). Setting: "Less detail far away" (`TurboConfig.farDetail`).
 - **Moving a placement:** `GhostMove` + `GhostRenderers` keep showing the old chunks shifted until the new ones are built.
 - **Settings:** `TurboConfig` (core) holds the options; `TurboSettingsTab` + `TurboOptions` + `GuiConfigsMixin` add
   the Turbo tab to Litematica's config screen; `SettingsTicker` applies changes each tick. Option names are

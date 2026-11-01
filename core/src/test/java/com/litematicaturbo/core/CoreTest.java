@@ -168,6 +168,7 @@ public class CoreTest
         c.ghostSettleMs = 777;
         c.catchUpAuto = false;
         c.catchUpBudgetMs = 13;
+        c.farDetail = false;
         c.save(dir.resolve(TurboConfig.FILE_NAME));
 
         TurboConfig l = TurboConfig.load(dir);
@@ -180,6 +181,7 @@ public class CoreTest
         assertEquals(777, l.ghostSettleMs);
         assertFalse(l.catchUpAuto);
         assertEquals(13, l.catchUpBudgetMs);
+        assertFalse(l.farDetail);
     }
 
     @Test

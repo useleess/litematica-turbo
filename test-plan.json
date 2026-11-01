@@ -65,6 +65,11 @@
    "prefix": "render/",
    "min": 1,
    "what": "block entities drawn while Turbo rebuilds their chunks never crash the game"
+  },
+  {
+   "prefix": "far/",
+   "min": 5,
+   "what": "less detail far away: far pieces draw no outline lines with the setting on and some with it off, near pieces draw the same, low memory and an error (with a chat line) bring every outline back"
   }
  ]
 }
