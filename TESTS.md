@@ -165,8 +165,8 @@ How a run goes (`Fixture`, built once on first use, the same for every version):
   blocks in the schematic world), `budget/too-big-file-gets-a-translated-message` (pretended low memory: nothing loaded,
   refusal counted, no crash; the setting off loads it), `safety/error-switches-off-and-loads-dense` (a fault in the sparse
   code: dense and unchanged, chat line, stays off), `messages/translated`.
-- `draw/` - batch drawing, Minecraft 1.16.5 - 1.21.4 (Fabric, Forge, NeoForge); 1.21.10 and up skip each test with "batch
-  drawing for this render era comes in a later job". Counted, never timed: `fewer-calls-per-frame` (draw calls per frame of
+- `draw/` - batch drawing, Minecraft 1.16.5 - 1.21.4 (Fabric, Forge, NeoForge); 1.21.10 and up skip each test with "nothing to batch (Litematica already draws a layer with one multi-draw)";
+  Counted, never timed: `fewer-calls-per-frame` (draw calls per frame of
   the schematic with the setting on are at most half of those with it off, same game, same camera; read from
   `BatchDrawing`'s counters), `same-picture` (the frame read back from the game's main frame buffer with regions ready equals the
   frame drawn piece by piece, up to the pixels the plain drawing itself varies by between two frames), `changed-block-shows-up`

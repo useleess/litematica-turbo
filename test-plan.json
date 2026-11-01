@@ -59,7 +59,7 @@
   {
    "prefix": "draw/",
    "min": 6,
-   "what": "batch drawing (Minecraft 1.16.5 - 1.21.4; 1.21.10 and up skip): far fewer draw calls per frame, the same picture as drawing piece by piece, a changed block shows up, a failing batch switches off with a chat line"
+   "what": "batch drawing (Minecraft 1.16.5 - 1.21.4; 1.21.10 and up skip: Litematica already draws a layer with one multi-draw): far fewer draw calls per frame, the same picture as drawing piece by piece, a changed block shows up, a failing batch switches off with a chat line"
   },
   {
    "prefix": "render/",

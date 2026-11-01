@@ -133,7 +133,7 @@ final class DrawTests
         return (Long) Ctx.call(ctx.cls(DRAWING), what);
     }
 
-    /** Skips the test on a version whose render era has no batch drawing yet; otherwise gives it the test world and a clean start. */
+    /** Skips the test on a version whose render era draws a layer with one multi-draw already; otherwise gives it the test world and a clean start. */
     private static Fixture start(Ctx ctx) throws Exception
     {
         try
@@ -142,7 +142,7 @@ final class DrawTests
         }
         catch (ClassNotFoundException e)
         {
-            throw SelfTest.skip("batch drawing for this render era comes in a later job");
+            throw SelfTest.skip("nothing to batch on this render era: Litematica already draws a whole layer with one multi-draw");
         }
 
         Fixture f = WorldTests.fixture(ctx);
