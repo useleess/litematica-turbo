@@ -45,16 +45,16 @@ final class MoveTests
         List<int[]> before = new ArrayList<>();
     }
 
-    private static Fixture f;
-    private static Object placement;
+    static Fixture f;
+    static Object placement;
 
-    private static boolean ghostActive(Ctx ctx) throws Exception
+    static boolean ghostActive(Ctx ctx) throws Exception
     {
         return ctx.onMain(() -> (Boolean) Ctx.call(ctx.turbo("GhostMove"), "isActive"));
     }
 
     /** Moves the placement to this origin the way the game's move command does. */
-    private static void setOrigin(Ctx ctx, int x, int y, int z) throws Exception
+    static void setOrigin(Ctx ctx, int x, int y, int z) throws Exception
     {
         ctx.onMain(() -> {
             Object pos = f.game.blockPos(x, y, z);
@@ -74,7 +74,7 @@ final class MoveTests
         });
     }
 
-    private static int[] origin(Ctx ctx) throws Exception
+    static int[] origin(Ctx ctx) throws Exception
     {
         return ctx.onMain(() -> {
             Object o = Ctx.call(placement, "getOrigin");
@@ -82,13 +82,13 @@ final class MoveTests
         });
     }
 
-    private static String stateAt(Ctx ctx, int x, int y, int z) throws Exception
+    static String stateAt(Ctx ctx, int x, int y, int z) throws Exception
     {
         return ctx.onMain(() -> String.valueOf(Ctx.call(f.schematicWorld(), "getBlockState", f.game.blockPos(x, y, z))));
     }
 
     /** A fresh lone placement at its starting place, all built, Turbo (or plain Litematica) configured. */
-    private static int[] prepare(Ctx ctx, boolean turbo) throws Exception
+    static int[] prepare(Ctx ctx, boolean turbo) throws Exception
     {
         f.configure(turbo, 3, true, true);
 
@@ -129,7 +129,7 @@ final class MoveTests
         });
     }
 
-    private static void settle(Ctx ctx, Set<Long> chunks) throws Exception
+    static void settle(Ctx ctx, Set<Long> chunks) throws Exception
     {
         Set<Long> inView = new LinkedHashSet<>();
 
@@ -421,13 +421,13 @@ final class MoveTests
         });
     }
 
-    private interface Body
+    interface Body
     {
         void run() throws Exception;
     }
 
     /** Puts the lone placement away and the standard zones back, whatever happens. */
-    private static void guarded(Ctx ctx, Body body) throws Exception
+    static void guarded(Ctx ctx, Body body) throws Exception
     {
         f.zonesEnabled(false);
 

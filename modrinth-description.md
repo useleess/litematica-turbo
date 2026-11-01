@@ -6,6 +6,7 @@ Litematica builds every schematic chunk on the render thread, so loading a big s
 - **Multithreaded chunk builds** - schematic chunks are built in the background on several threads.
 - **No stutter near the schematic** - chunks next to you are rebuilt in the background too.
 - **Smooth placement moving** - while you scroll or nudge a placement, the already built schematic is shown moved along; it is rebuilt once you stop, and swapped in within one frame.
+- **Complete copy while moving** (1.16.5 - 1.20.4) - the moved picture is built in the background from every block, so it has no holes where the world already had the same blocks; it stays within a memory limit and is dropped first when memory gets tight.
 - **Skips empty space** when building chunks.
 - **F3 stats** on the `[Litematica]` line.
 

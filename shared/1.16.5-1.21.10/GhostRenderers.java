@@ -77,6 +77,7 @@ public final class GhostRenderers
     /** Every frame: catch-up slice, and switch to the real chunks once they are all rebuilt. */
     public static void tick(TurboWorldRenderer worldRenderer)
     {
+        CompletePieces.tick();
         long now = System.nanoTime();
 
         if (lastFrameNanos != 0)

@@ -44,10 +44,12 @@ public final class TurboSettingsTab
             "Draw the built pieces of the schematic in groups (4 x 4 x 4 pieces), one call per group instead of one per piece.\nThe picture stays the same, the game has less to do. Works on Minecraft 1.16.5 - 1.21.4.", "Batch drawing");
     public static final ConfigBoolean FAR_DETAIL = TurboOptions.bool("turboFarDetail", true,
             "Leave out the outline lines of schematic pieces at least half the render distance away:\nthere they are only a blur of thin lines but cost as much as near ones. Filled sides and blocks stay.\nSwitches itself off while Java memory is low.", "Less detail far away");
+    public static final ConfigBoolean COMPLETE_COPY = TurboOptions.bool("turboCompleteCopy", true,
+            "While a placement is moving, show a complete copy of it, built in the background from every schematic block,\ninstead of the old pieces, which have holes where the world already matched. Uses graphics memory;\nthe copy is dropped first when memory gets tight. Needs Smooth placement moving. Works on Minecraft 1.16.5 - 1.20.4.", "Complete copy while moving");
 
     public static final List<IConfigBase> OPTIONS = ImmutableList.of(
             ENABLED, BUILD_THREADS, SKIP_EMPTY_SECTIONS, ASYNC_NEAR_REBUILDS,
-            GHOST_MOVE, GHOST_SETTLE_MS, CATCH_UP_AUTO, CATCH_UP_BUDGET_MS, SHOW_STATS, COMPACT_STORAGE, BATCH_DRAW, FAR_DETAIL);
+            GHOST_MOVE, GHOST_SETTLE_MS, CATCH_UP_AUTO, CATCH_UP_BUDGET_MS, SHOW_STATS, COMPACT_STORAGE, BATCH_DRAW, FAR_DETAIL, COMPLETE_COPY);
 
     /** Whether the Turbo tab is the one shown in Litematica's config menu. */
     public static boolean selected;
@@ -96,6 +98,7 @@ public final class TurboSettingsTab
             COMPACT_STORAGE.setBooleanValue(c.compactStorage);
             BATCH_DRAW.setBooleanValue(c.batchDraw);
             FAR_DETAIL.setBooleanValue(c.farDetail);
+            COMPLETE_COPY.setBooleanValue(c.completeCopy);
         }
         finally
         {
@@ -126,11 +129,12 @@ public final class TurboSettingsTab
         c.compactStorage = COMPACT_STORAGE.getBooleanValue();
         c.batchDraw = BATCH_DRAW.getBooleanValue();
         c.farDetail = FAR_DETAIL.getBooleanValue();
+        c.completeCopy = COMPLETE_COPY.getBooleanValue();
         c.save();
 
         if (c.ghostMoveEnabled() == false)
         {
-            GhostMove.end();
+            GhostMove.endAndDropCopy();
         }
 
         reloadRenderers |= threadsChanged;

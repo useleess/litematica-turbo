@@ -39,7 +39,7 @@ public abstract class WorldRendererSchematicGhostMixin
     @Inject(method = BlockLayers.METHOD, at = @At("HEAD"))
     private void turbo$ghostsForLayer(CallbackInfoReturnable<Integer> cir)
     {
-        this.turbo$swapInGhosts();
+        this.turbo$swapInGhosts(GhostMove.blockRenderers());
     }
 
     @Inject(method = BlockLayers.METHOD, at = @At("RETURN"))
@@ -51,7 +51,7 @@ public abstract class WorldRendererSchematicGhostMixin
     @Inject(method = "renderBlockOverlay", at = @At("HEAD"))
     private void turbo$ghostsForOverlay(CallbackInfo ci)
     {
-        this.turbo$swapInGhosts();
+        this.turbo$swapInGhosts(GhostMove.renderers());
     }
 
     @Inject(method = "renderBlockOverlay", at = @At("RETURN"))
@@ -61,14 +61,14 @@ public abstract class WorldRendererSchematicGhostMixin
     }
 
     @Unique
-    private void turbo$swapInGhosts()
+    private void turbo$swapInGhosts(List<ChunkRendererSchematicVbo> shown)
     {
         if (GhostMove.isActive())
         {
             this.turbo$savedRenderInfos.clear();
             this.turbo$savedRenderInfos.addAll(this.renderInfos);
             this.renderInfos.clear();
-            this.renderInfos.addAll(GhostMove.renderers());
+            this.renderInfos.addAll(shown);
             this.turbo$savedSortX = this.lastTranslucentSortX;
             this.turbo$savedSortY = this.lastTranslucentSortY;
             this.turbo$savedSortZ = this.lastTranslucentSortZ;

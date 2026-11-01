@@ -41,6 +41,8 @@ public final class TurboConfig
     public boolean batchDraw = true;
     /** Leave out the outline lines of schematic pieces far away (see FarDetail). */
     public boolean farDetail = true;
+    /** While a placement moves, show a complete copy of it (every block) instead of the old pieces with holes (see CompleteCopy). */
+    public boolean completeCopy = true;
 
     private static Path configDir;
 
@@ -123,6 +125,11 @@ public final class TurboConfig
         return this.enabled && this.farDetail;
     }
 
+    public boolean completeCopyEnabled()
+    {
+        return this.ghostMoveEnabled() && this.completeCopy;
+    }
+
     public boolean ghostMoveEnabled()
     {
         return this.enabled && this.ghostMove;
@@ -190,6 +197,7 @@ public final class TurboConfig
         this.compactStorage = bool(props, "compactStorage", this.compactStorage);
         this.batchDraw = bool(props, "batchDraw", this.batchDraw);
         this.farDetail = bool(props, "farDetail", this.farDetail);
+        this.completeCopy = bool(props, "completeCopy", this.completeCopy);
     }
 
     /** Writes the settings back to the file they were loaded from. */
@@ -227,7 +235,9 @@ public final class TurboConfig
                     + "# batchDraw: draw the built pieces of a 4 x 4 x 4 region with one call (same picture, fewer calls)\n"
                     + "batchDraw=" + this.batchDraw + "\n"
                     + "# farDetail: leave out the outline lines of schematic pieces far away (only a blur there); off by itself while memory is low\n"
-                    + "farDetail=" + this.farDetail + "\n";
+                    + "farDetail=" + this.farDetail + "\n"
+                    + "# completeCopy: while a placement moves, show a complete copy of it (every block) instead of the old pieces with holes where the world matched; needs ghostMove\n"
+                    + "completeCopy=" + this.completeCopy + "\n";
 
         try
         {

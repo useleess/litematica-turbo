@@ -32,6 +32,11 @@
    "what": "F3 [Litematica] line"
   },
   {
+   "prefix": "copy/",
+   "min": 10,
+   "what": "complete copy while moving: the drawn pieces hold every schematic block, kept within the memory limits, freed when deselected, off after an error"
+  },
+  {
    "prefix": "settings/",
    "min": 15,
    "what": "Turbo tab: every setting saves, loads and applies right away"

@@ -19,21 +19,21 @@ public abstract class SchematicPlacementManagerMixin
     @Inject(method = "onPrePlacementChange", at = @At("HEAD"))
     private void turbo$otherChange(CallbackInfo ci)
     {
-        if (GhostMove.isActive() && GhostMove.isInSetOrigin() == false)
+        if (GhostMove.isInSetOrigin() == false)
         {
-            GhostMove.end();
+            GhostMove.endAndDropCopy();
         }
     }
 
     @Inject(method = "removeSchematicPlacement(Lfi/dy/masa/litematica/schematic/placement/SchematicPlacement;Z)Z", at = @At("HEAD"))
     private void turbo$placementRemoved(CallbackInfoReturnable<Boolean> cir)
     {
-        GhostMove.end();
+        GhostMove.endAndDropCopy();
     }
 
     @Inject(method = "addSchematicPlacement", at = @At("HEAD"))
     private void turbo$placementAdded(CallbackInfo ci)
     {
-        GhostMove.end();
+        GhostMove.endAndDropCopy();
     }
 }

@@ -180,6 +180,15 @@ How a run goes (`Fixture`, built once on first use, the same for every version):
   `error-switches-off-and-draws-every-outline` (a fault in the check: off for the session, chat line, every outline
   drawn), `messages-translated`. The test world's zones B, F and E (9 - 11 chunks ahead, render distance 12) are far,
   zone N is near.
+- `copy/` - the complete copy while a placement moves (1.16.5 - 1.20.4; the other versions `skip` until their step comes).
+  Counted, never timed, on the lone test placement with a long settle time and a world that matches every second block of it:
+  `drawn-pieces-hold-every-block` (the blocks of the pieces the block layers draw = the schematic's non-air blocks, no old
+  piece left in the list), `off-keeps-the-holes` (setting off: no complete piece, the old pieces hold fewer blocks than the
+  schematic), `pieces-built-nearest-first-and-kept` (pieces planned, all kept within the limit, one copy made),
+  `deselected-frees-the-pieces` (deselecting drops the copy, every piece's graphics buffers deleted), `low-java-memory-builds-none`
+  and `low-graphics-memory-builds-none` (pretended low memory: no copy, the old pieces shown), `memory-getting-tight-drops-the-copy`,
+  `error-switches-off-with-a-chat-line` (a fault in the copy: off for the session, chat line, moving goes on with the old pieces),
+  `screenshot-while-moving` (one picture, saved in the game folder's `screenshots/` for the reviewer), `messages-translated`.
 - `place/` - a lone test placement (32 x 6 x 32, random blocks, one gold marker block) is added; the blocks in the schematic
   world (read back around the placement's origin) are exactly plain Litematica's, unrotated, rotated 90 / 180 / 270,
   mirrored, rotated + mirrored, and with a second placement laid over the first (`same-as-stock-*`, and `two-placements-overlapping-plain` / `-turbo`: every cell of two overlapping placements holds the block of one of them); the gold marker
@@ -219,6 +228,7 @@ test id prefixes that show it works. All of them run on every version in `versio
 | Huge, mostly empty schematics in little memory, a message for a file that cannot fit | `memory/` |
 | Batch drawing: far fewer draw calls, the same picture, a failing batch switches itself off (1.16.5 - 1.21.4; newer versions skip) | `draw/` |
 | Less detail far away: far pieces drawn without outline lines, near ones unchanged, off while memory is low, a failing check switches off | `far/` |
+| Complete copy while moving: no holes in the moved view, kept within the memory limits, freed when deselected, a failing copy switches off | `copy/` |
 | Smooth placement moving: ghost shifted, rebuilt once stopped, swapped in one frame, same end result | `move/` |
 | F3 `[Litematica]` line with Turbo numbers, can be switched off | `stats/` |
 | Fail-safe: a patch that does not fit switches Turbo off with a chat message, no crash | `safety/` |
