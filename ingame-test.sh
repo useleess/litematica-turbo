@@ -6,6 +6,9 @@
 #                                               there are no server tests: plain ./ingame-test.sh = client tests
 #   FILTER=settings/,stats/f3 ./ingame-test.sh 1.21.4    only tests whose id starts with one of these
 #   FILTER=knownbug/ ./ingame-test.sh                    only the known, not yet fixed mod bugs
+#   ./ingame-test.sh client with=sodium,iris filter=sodium/ 1.21.4    the same game with Sodium and Iris added
+#                                               (versions in the table in gradle/with-mods.gradle; with Iris a
+#                                               shader pack is installed, the tests switch shaders on and off)
 #   LANES=1 ./ingame-test.sh                     one game at a time (default 2: the Fabric versions and the
 #                                               Forge / NeoForge versions side by side, two separate Gradle builds)
 #
@@ -28,11 +31,11 @@ JDK8="$(ls -d "$T"/jdk8/*/ | head -n 1)"
 [ "$1" = client ] && shift
 # filter=<prefix>[,<prefix>] among the arguments = FILTER (the test box runner passes arguments, not variables)
 for arg in "$@"; do
-    case "$arg" in filter=*) FILTER="${arg#filter=}"; shift_filter=1 ;; esac
+    case "$arg" in filter=*) FILTER="${arg#filter=}" ;; with=*) WITH="${arg#with=}" ;; esac
 done
 VERSIONS=""
 for arg in "$@"; do
-    case "$arg" in filter=*) ;; *) VERSIONS="$VERSIONS $arg" ;; esac
+    case "$arg" in filter=*|with=*) ;; *) VERSIONS="$VERSIONS $arg" ;; esac
 done
 VERSIONS="${VERSIONS# }"
 [ -n "$VERSIONS" ] || VERSIONS="$(ls versions)"
@@ -50,6 +53,15 @@ if ! "${JDK8}bin/javac" -nowarn -encoding UTF-8 -d "$WORK/classes" selftest/src/
     exit 1
 fi
 AGENT="$(cd "$WORK" && (pwd -W 2>/dev/null || pwd))/litematica-turbo-selftest.jar"
+# with=...iris: the shader pack the tests switch on - Miniature Shader (MIT licence, by mateuskreuch), downloaded for the run only
+SHADER_PACK=miniature-shader-2.19.zip
+case ",$WITH," in
+    *,iris,*) if ! curl -sfL -o "$WORK/$SHADER_PACK" "https://cdn.modrinth.com/data/UaS8ROxa/versions/LWmZ94RG/$SHADER_PACK"; then
+                  echo "all: NO RESULT (the test shader pack $SHADER_PACK could not be downloaded from Modrinth)"
+                  echo "SCOPE TESTS ALL: 0 passed, 0 failed, 0 skipped"
+                  exit 1
+              fi ;;
+esac
 
 # one version: build + start its client in test mode, mirror the protocol, keep the summary line
 run_version()
@@ -64,17 +76,28 @@ run_version()
         echo "$v: UNKNOWN VERSION (no $dir)" > "$WORK/results/$v"
         return
     fi
+    if [ -n "$WITH" ] && ! grep -q "^ *'$v' *:" gradle/with-mods.gradle; then
+        echo "$v: 0 passed, 0 failed, 0 skipped (no Sodium / Iris for $v: gradle/with-mods.gradle)" > "$WORK/results/$v"
+        return
+    fi
     log="$HERE/$dir/selftest.log"
     run="$dir/run-test"
     start=$(date +%s)
     filter=""
     [ -n "$FILTER" ] && filter="-PselftestFilter=$FILTER"
+    with=""
+    [ -n "$WITH" ] && with="-Pwith=$WITH"
     # a build that dies before the game reports anything (seen on the busy test box: a Gradle daemon or a
     # download that breaks off) is tried once more; a run whose tests started is never repeated
     for attempt in 1 2; do
         rm -rf "$run"
         mkdir -p "$run"
         printf 'soundCategory_master:0.0\npauseOnLostFocus:false\nonboardAccessibility:false\ntutorialStep:none\njoinedFirstServer:true\nrenderDistance:12\n' > "$run/options.txt"
+        # with Iris: the test shader pack is installed and chosen, shaders start switched off (the tests turn them on)
+        case ",$WITH," in
+            *,iris,*) mkdir -p "$run/config" "$run/shaderpacks"; cp "$WORK/$SHADER_PACK" "$run/shaderpacks/"
+                      printf 'shaderPack=%s\nenableShaders=false\ndisableUpdateMessage=true\n' "$SHADER_PACK" > "$run/config/iris.properties" ;;
+        esac
         # (Neo)Forge's mod-warning screen would block opening the test world
         case "$v" in
             *-forge|*-neoforge) mkdir -p "$run/config"; printf 'showLoadWarnings = false\n' | tee "$run/config/forge-client.toml" > "$run/config/neoforge-client.toml" ;;
@@ -82,7 +105,7 @@ run_version()
         : > "$log"
         echo "== $v: building and starting the game client (attempt $attempt, log: $dir/selftest.log)"
         # shellcheck disable=SC2086
-        (JAVA_HOME="$JDK25" timeout 2700 $gradle "$task" -Pmc="$v" -PselftestAgent="$AGENT" -PtestRunDir=run-test $filter "$JVMARGS" \
+        (JAVA_HOME="$JDK25" timeout 2700 $gradle "$task" -Pmc="$v" -PselftestAgent="$AGENT" -PtestRunDir=run-test $filter $with "$JVMARGS" \
             --console=plain > "$log" 2>&1) &
         pid=$!
         tail -n +1 -f "$log" --pid=$pid 2>/dev/null | sed -u -n 's/.*\(SCOPE-TEST .*\)/\1/p; s/.*\(SCOPE TESTS: .*\)/\1/p; s/.*\(SELFTEST .*\)/\1/p'

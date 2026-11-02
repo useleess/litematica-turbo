@@ -16,6 +16,7 @@
   "litematica_turbo.message.out_of_memory": "[Litematica Turbo] This schematic is too big for the memory Minecraft has (%s MB), so it was not loaded. Give Minecraft more memory or use a smaller schematic.",
   "litematica_turbo.message.storage_off": "[Litematica Turbo] Compact schematic storage hit an error (%s) and is off for this session. Schematics are stored the normal Litematica way.",
   "litematica_turbo.message.batch_off": "[Litematica Turbo] Batch drawing hit an error (%s) and is off for this session. The schematic is drawn piece by piece, as in normal Litematica.",
+  "litematica_turbo.message.batch_paused": "[Litematica Turbo] Batch drawing is paused while shaders from %s are on, because they draw the schematic differently. The schematic is drawn piece by piece, as in normal Litematica, and batch drawing comes back when the shaders are off.",
   "litematica_turbo.message.copy_off": "[Litematica Turbo] Fast placement copying hit an error (%s) and is off for this session. Placements are copied the normal Litematica way.",
   "litematica_turbo.message.far_off": "[Litematica Turbo] Less detail far away hit an error (%s) and is off for this session. Every outline is drawn, as in normal Litematica.",
   "litematica_turbo.message.complete_off": "[Litematica Turbo] The complete copy while moving hit an error (%s) and is off for this session. A moved placement shows the normal old pieces, as before."

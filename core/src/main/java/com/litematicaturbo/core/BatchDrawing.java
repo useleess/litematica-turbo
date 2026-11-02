@@ -14,6 +14,8 @@ public final class BatchDrawing
     private static volatile boolean warned;
     private static volatile boolean faultForTest;
     private static volatile boolean pausedForTest;
+    private static volatile String pausedBy;
+    private static volatile boolean pauseWarned;
     private static volatile long drawCalls;
     private static volatile long frames;
     private static volatile long batchedRegions;
@@ -24,7 +26,39 @@ public final class BatchDrawing
 
     public static boolean active()
     {
-        return TurboConfig.get().batchDrawEnabled() && failure == null;
+        return TurboConfig.get().batchDrawEnabled() && failure == null && pausedBy == null;
+    }
+
+    /**
+     * Asked once a frame: what, if anything, draws the world in a way batch drawing cannot follow (a shader pack). While
+     * there is one, batch drawing is paused (pieces are drawn one by one) and comes back by itself when it is gone.
+     */
+    public static void pauseFor(String who)
+    {
+        if (who == null ? pausedBy != null : who.equals(pausedBy) == false)
+        {
+            pausedBy = who;
+            pauseWarned = false;
+
+            if (who != null)
+            {
+                TurboLog.warn("Batch drawing is paused while shaders from " + who + " are on: they draw the schematic differently. Pieces are drawn one by one until they are off.");
+            }
+        }
+    }
+
+    /** The one chat message after batch drawing was paused by something; null when none is due. */
+    public static String takePauseWarning(boolean playerPresent)
+    {
+        String who = pausedBy;
+
+        if (pauseWarned == false && who != null && playerPresent)
+        {
+            pauseWarned = true;
+            return who;
+        }
+
+        return null;
     }
 
     /** One draw call of the schematic's block layers was issued. */
@@ -96,6 +130,8 @@ public final class BatchDrawing
         warned = false;
         faultForTest = false;
         pausedForTest = false;
+        pausedBy = null;
+        pauseWarned = false;
     }
 
     /** Batch drawing failed: it is off for the session; the caller draws the pieces one by one. */

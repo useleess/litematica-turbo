@@ -92,6 +92,7 @@ final class BatchRegions
         if (index == 0)
         {
             BatchDrawing.countFrame();
+            BatchDrawing.pauseFor(ShaderPacks.drawing());
         }
 
         if (BatchDrawing.pausedForTest())

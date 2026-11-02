@@ -29,6 +29,15 @@ final class Game
         this.ctx = ctx;
     }
 
+    /** The game's own screenshot (the benchmark's call, every version has it) into screenshots/<fileName> of the run folder. */
+    static void screenshot(Ctx ctx, String fileName) throws Exception
+    {
+        Constructor<?> make = ctx.cls(ctx.pkg + ".bench.TurboBench").getDeclaredConstructor(File.class);
+        make.setAccessible(true);
+        Object bench = make.newInstance(new File("unused"));
+        ctx.onMain(() -> Ctx.call(bench, "screenshot", fileName));
+    }
+
     // ---- name alternatives ----
 
     /** Calls the first of the methods named in names that exists with these arguments. */

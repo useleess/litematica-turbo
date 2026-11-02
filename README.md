@@ -41,6 +41,9 @@ One jar per Minecraft version, built into `versions/<mc>/build/libs/`.
   update), Turbo switches itself off for the session (stock behaviour) and says so in chat
   instead of crashing (`TurboMixinGuard`).
 
+Works next to **Sodium** and **Iris** (Fabric): the tests run with both, also with a shader pack on. Batch drawing
+pauses by itself while Iris shaders are on (with a chat line and a log line) and comes back when they are off.
+
 Settings: in game in Litematica's config menu, **Turbo** tab (applied live; thread count / on-off
 reload the schematic renderers once). Stored in `config/litematica_turbo.properties`.
 
@@ -55,6 +58,10 @@ Gradle runs on JDK 25 (toolchains for JDK 8/17/21/25 are set in `gradle.properti
 - Some: `./gradlew build -Pmc=1.20.4,1.21.4`
 
 ## Dev checks
+- Sodium / Iris runs: `./ingame-test.sh client with=sodium,iris filter=sodium/ <mc>...` (the versions of both come
+  from Modrinth, table in `gradle/with-mods.gradle`). Credits: Sodium (CaffeineMC, LGPL-3.0), Iris (IrisShaders,
+  LGPL-3.0) and the shader pack Miniature Shader (mateuskreuch, MIT) are only downloaded for those dev runs, never
+  shipped in a jar or kept in this repo.
 - `./audit.sh <mc>...` - loads every patched class; reports patches that did not apply.
 - `./make-bench-world.sh <mc> <jdk>` - creates the flat bench world with the vanilla server.
 - `./bench.sh <mc>...` - A/B benchmark (stock, then Turbo) with `main_storage.litematic`;

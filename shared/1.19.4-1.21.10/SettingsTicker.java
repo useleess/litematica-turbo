@@ -51,6 +51,13 @@ final class SettingsTicker implements IClientTickHandler
             mc.inGameHud.getChatHud().addMessage(Text.translatable("litematica_turbo.message.batch_off", batchFailure).formatted(Formatting.GOLD));
         }
 
+        String batchPause = BatchDrawing.takePauseWarning(mc.player != null);
+
+        if (batchPause != null)
+        {
+            mc.inGameHud.getChatHud().addMessage(Text.translatable("litematica_turbo.message.batch_paused", batchPause).formatted(Formatting.GOLD));
+        }
+
         String farFailure = FarDetail.takeFailureWarning(mc.player != null);
 
         if (farFailure != null)

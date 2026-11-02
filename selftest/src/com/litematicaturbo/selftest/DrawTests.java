@@ -35,7 +35,7 @@ final class DrawTests
     }
 
     /** The frame as the game drew it: width, height, RGBA bytes. */
-    private static final class Shot
+    static final class Shot
     {
         final int width;
         final int height;
@@ -46,6 +46,29 @@ final class DrawTests
             this.width = width;
             this.height = height;
             this.rgba = rgba;
+        }
+
+        /** A screenshot the game saved (works where the frame cannot be read back with GL calls, e.g. 26.x). */
+        static Shot read(java.io.File png) throws java.io.IOException
+        {
+            java.awt.image.BufferedImage image = javax.imageio.ImageIO.read(png);
+            SelfTest.check(image != null, "the screenshot " + png.getAbsolutePath() + " is no readable image");
+            byte[] rgba = new byte[image.getWidth() * image.getHeight() * 4];
+            int i = 0;
+
+            for (int y = 0; y < image.getHeight(); y++)
+            {
+                for (int x = 0; x < image.getWidth(); x++)
+                {
+                    int argb = image.getRGB(x, y);
+                    rgba[i++] = (byte) (argb >> 16);
+                    rgba[i++] = (byte) (argb >> 8);
+                    rgba[i++] = (byte) argb;
+                    rgba[i++] = (byte) (argb >> 24);
+                }
+            }
+
+            return new Shot(image.getWidth(), image.getHeight(), rgba);
         }
 
         /** How many pixels differ from the other frame by more than the tolerance. */

@@ -98,6 +98,7 @@ public final class SelfTest
         PlaceTests.register(ctx, tests);
         MemoryTests.register(ctx, tests);
         CompatTests.register(ctx, tests);
+        SodiumTests.register(ctx, tests);
         SafetyTests.register(ctx, tests);
 
         List<String> prefixes = new ArrayList<>();

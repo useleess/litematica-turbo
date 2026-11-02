@@ -12,6 +12,8 @@ Collected here until the next release, then used as the GitHub / Modrinth notes.
 
 - Moving a placement now shows a complete copy of it (Minecraft 1.16.5 - 26.3, Fabric, Forge and NeoForge): it is built in the background from every block, nearest first, so the moved view has no holes where the world already had the same blocks. It uses graphics memory within a limit and is dropped first when memory gets tight. Switch it off with "Complete copy while moving" in the Turbo tab; if it ever hits an error it turns itself off and tells you in chat.
 
+- Turbo now runs next to Sodium and Iris (Fabric, 1.16.5 - 26.3) and is tested with them, also with a shader pack on. With Iris shaders on, batch drawing pauses by itself (shaders draw the schematic differently), tells you in chat and comes back when shaders are off.
+
 ### Fixes
 
 - Fixed a crash on Minecraft 1.21.11 and 26.x when chests, signs and other block entities of a schematic were drawn while Turbo rebuilt them (also when switching layer views, translucent or fluids).

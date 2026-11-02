@@ -53,6 +53,27 @@ SCOPE TESTS ALL: 1210 passed, 0 failed, 0 skipped
 
 Exit code 0 only when every version reached its summary and no test failed.
 
+### Sodium and Iris (`sodium/`)
+
+Runs started with `with=sodium` or `with=sodium,iris` load those mods next to Turbo (every version that has them;
+the others answer `0 passed, 0 failed, 0 skipped` with the reason). `gradle/with-mods.gradle` holds the version table
+(per version folder the newest Sodium / Iris built for it, Fabric and NeoForge, downloaded from Modrinth for that run
+only, with their nested libraries). With Iris the script downloads the shader pack Miniature Shader (MIT, Modrinth) into
+the throwaway run folder and chooses it in `config/iris.properties` with shaders off; the tests switch shaders on and
+off through Iris's own API, and then make Litematica's renderers anew, as on joining a world with shaders on.
+
+```sh
+"../../discord-bot/.venv/Scripts/python.exe" ../../discord-bot/testbox.py run . ingame-test.sh client with=sodium,iris filter=sodium/ 1.16.5 1.20.4 1.21.4 1.21.10 1.21.11 26.3
+"../../discord-bot/.venv/Scripts/python.exe" ../../discord-bot/testbox.py run . ingame-test.sh client with=sodium filter=build/,draw/,far/,copy/,move/ 1.21.4
+```
+
+Without the mods every `sodium/` test skips with the reason. With them: the schematic is drawn (outlines counted, draw
+calls on batch eras, the game's own screenshot full of colour), each speed-up passes the body of its own group's test,
+no GL error line in the game log, no Turbo feature switched itself off (state and chat), screenshots (`sodium.png`,
+`sodium-iris-shaders.png`, brought back in `test-shots/`), shaders on and off again, switching shaders mid-game does to
+the schematic exactly what it does to plain Litematica (`shaders-toggle-like-stock`), and batch drawing pausing while
+shaders are on (`shaders-pause-batch-drawing`, batch eras).
+
 ## Output protocol
 
 Printed by the game to its real stdout:
@@ -235,6 +256,7 @@ test id prefixes that show it works. All of them run on every version in `versio
 | Settings tab in Litematica's config menu: every option saves, loads, applies at once; file format | `settings/` |
 | Every patch applies on this Litematica version (compatibility) | `audit/` |
 | Litematica's own options (translucent, fluids, layer view) still give the same picture; Turbo leaves Litematica's options alone | `compat/` |
+| Works next to Sodium and Iris (shaders on and off); batch drawing pauses while shaders are on | `sodium/` (only in runs with `with=sodium[,iris]`; skip otherwise) |
 | Test world opens without a pop-up in the way | `harness/popup/` |
 | Known, not yet fixed mod bugs | `knownbug/` (see "Known bugs") |
 

@@ -81,6 +81,9 @@ dependencies {
     }
 }
 
+// -Pwith=sodium,iris: more mods in the dev client (gradle/with-mods.gradle)
+apply from: rootProject.file('gradle/with-mods.gradle')
+
 processResources {
     def props = ['version': rootProject.mod_version]
     inputs.properties props
@@ -112,6 +115,9 @@ loom {
                 vmArg "-javaagent:${project.selftestAgent}"
                 vmArg '-Dlitematicaturbo.selftest=client'
                 vmArg "-Dlitematicaturbo.selftest.filter=${project.findProperty('selftestFilter') ?: ''}"
+            }
+            if (project.hasProperty('withMods')) {
+                vmArg "-Dlitematicaturbo.with=${project.withMods}"
             }
             // -PtestRunDir=<folder>: a throwaway game folder for a test run (relative to the version folder)
             if (project.hasProperty('testRunDir')) {

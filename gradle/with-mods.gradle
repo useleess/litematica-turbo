@@ -1,0 +1,77 @@
+// Extra mods for a dev client run: -Pwith=sodium,iris (ingame-test.sh ... with=sodium,iris). Only such runs get them;
+// normal runs and every release jar are unchanged. Applied by gradle/version.gradle (Fabric) and forge/version.gradle
+// (Forge / NeoForge).
+//
+// Version table: per version folder the newest release of each built for it (Modrinth version ids, checked
+// 2026-11-01; Iris's own dependency pins the Sodium named here). Sodium / Iris have no Forge builds and no NeoForge
+// build for 1.20.4. To move a version on, change its ids here and nowhere else.
+// No Iris (null) where Iris itself fails in the test client, Turbo or not (the run then skips the shader tests):
+//  - 1.16.5, Iris 1.4.5 (1turazSM): the game reaches the title screen but MaLiLib's start-up (which starts Turbo) never runs.
+//  - 26.2 / 26.3, Iris 1.11.4 (gxZWWnKH) / 1.11.7 (vTN4NRGW): the first frame with a shader pack on crashes inside Iris
+//    (26.2 a draw with too few samplers, 26.3 "Missing uniform InSampler" in its CenterDepthSampler), also with
+//    Litematica's drawing switched off. Try a newer Iris here before each release.
+def withTable = [
+    '1.16.5'          : [sodium: 'YAGZ1cCS', iris: null],
+    '1.17.1'          : [sodium: 'Fz37KqRh', iris: 'pkGrlTNQ'],
+    '1.18.2'          : [sodium: '74Y5Z8fo', iris: 'ogIRhnAJ'],
+    '1.19.4'          : [sodium: 'b4hTi3mo', iris: 'wN6PuLPa'],
+    '1.20.1'          : [sodium: 'OihdIimA', iris: 's5eFLITc'],
+    '1.20.4'          : [sodium: '4GyXKCLd', iris: 'hq98tuSS'],
+    '1.21'            : [sodium: 'u1OEbNKx', iris: 'zsoi0dso'],
+    '1.21.4'          : [sodium: 'c3YkZvne', iris: 'Ca054sTe'],
+    '1.21.10'         : [sodium: 'sFfidWgd', iris: 'a98UkgML'],
+    '1.21.11'         : [sodium: 'rkdTcxoT', iris: 'ka9PDlsN'],
+    '26.2'            : [sodium: 'xJZxADzI', iris: null],
+    '26.3'            : [sodium: 'bAZQdGpg', iris: null],
+    '1.21.1-neoforge' : [sodium: 'uMOpc5uV', iris: 'KduFYu4t'],
+    '1.21.4-neoforge' : [sodium: 'XgEfENfn', iris: 'FNc0XYTL'],
+    '1.21.10-neoforge': [sodium: 'PdQpfqPZ', iris: 'aBn2niiX'],
+    '1.21.11-neoforge': [sodium: 'sC6wj32u', iris: '6zJsI0eO'],
+    '26.2-neoforge'   : [sodium: 'DmnNKsfS', iris: 'k55HdONq'],
+]
+
+def wanted = (project.findProperty('with') ?: '').toString().split(',').collect { it.trim() }.findAll { it }
+if (wanted) {
+    def row = withTable[project.name]
+    def fabric = plugins.hasPlugin('dev.architectury.loom') == false && plugins.hasPlugin('dev.architectury.loom-no-remap') == false
+    def remap = fabric ? plugins.hasPlugin('net.fabricmc.fabric-loom-remap') : plugins.hasPlugin('dev.architectury.loom-no-remap') == false
+    def runtime = remap ? 'modLocalRuntime' : 'localRuntime'
+    def dir = layout.buildDirectory.dir('with-mods').get().asFile
+    if (row == null || !row.keySet().containsAll(wanted)) {
+        throw new GradleException("-Pwith=${wanted.join(',')}: not every one of them is in gradle/with-mods.gradle for ${project.name}")
+    }
+    // what the run really gets: -Dlitematicaturbo.with (the tests skip what is not in it)
+    ext.withMods = wanted.findAll { row[it] != null }.join(',')
+    wanted.findAll { row[it] == null }.each { logger.warn("-Pwith=${it}: left out for ${project.name} (see the table in gradle/with-mods.gradle)") }
+    wanted.findAll { row[it] != null }.each { name ->
+        def id = row[name]
+        // a plain download, not a resolved configuration (resolving one here locks Loom's own repositories, 1.16.5)
+        def jar = new File(dir, "${name}-${id}.jar")
+        if (!jar.exists()) {
+            jar.parentFile.mkdirs()
+            new URL("https://api.modrinth.com/maven/maven/modrinth/${name}/${id}/${name}-${id}.jar").withInputStream { i -> jar.withOutputStream { it << i } }
+        }
+        dependencies.add(runtime, files(jar))
+        // The dev client does not open a mod's nested jars, but Iris needs its libraries (jcpp, glsl-transformer, ...)
+        // and NeoForge Sodium its Fabric API ports: they go on the run's class path as they are (on Fabric without
+        // the Fabric API modules, the dev client has Fabric API already). NeoForge sees a plain library (no mods.toml,
+        // no FMLModType) only as a forgeRuntimeLibrary.
+        new java.util.zip.ZipFile(jar).withCloseable { zip ->
+            zip.entries().findAll { e -> e.name ==~ /META-INF\/(jars|jarjar)\/[^\/]+\.jar/ && !(fabric && e.name.contains('/fabric-')) }.each { e ->
+                def out = new File(dir, "${name}-nested/" + e.name.tokenize('/').last())
+                if (!out.exists()) {
+                    out.parentFile.mkdirs()
+                    zip.getInputStream(e).withCloseable { i -> out.withOutputStream { it << i } }
+                }
+                if (fabric) {
+                    dependencies.add('localRuntime', files(out))
+                } else if (new java.util.jar.JarFile(out).withCloseable { lib -> lib.getEntry('META-INF/neoforge.mods.toml') == null && lib.getEntry('META-INF/mods.toml') == null && lib.manifest?.mainAttributes?.getValue('FMLModType') == null }) {
+                    dependencies.add('localRuntime', files(out))
+                    dependencies.add('forgeRuntimeLibrary', files(out))
+                } else {
+                    dependencies.add(runtime, files(out))
+                }
+            }
+        }
+    }
+}

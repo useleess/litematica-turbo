@@ -1,7 +1,5 @@
 package com.litematicaturbo.selftest;
 
-import java.io.File;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -362,11 +360,7 @@ final class CopyTests
             move(ctx, start);
             built(ctx);
             ctx.ticks(10);
-            // The benchmark's screenshot call (every version has it; the benchmark itself is not started)
-            Constructor<?> make = ctx.cls(ctx.pkg + ".bench.TurboBench").getDeclaredConstructor(File.class);
-            make.setAccessible(true);
-            Object bench = make.newInstance(new File("unused"));
-            ctx.onMain(() -> Ctx.call(bench, "screenshot", "turbo-copy-moving.png"));
+            Game.screenshot(ctx, "turbo-copy-moving.png");
             ctx.ticks(5);
         }));
 

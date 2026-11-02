@@ -125,6 +125,9 @@ dependencies {
     compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
 }
 
+// -Pwith=sodium,iris: more mods in the dev client (gradle/with-mods.gradle)
+apply from: rootProject.file('../gradle/with-mods.gradle')
+
 loom {
     if (neo == false) {
         forge {
@@ -143,6 +146,9 @@ loom {
                 vmArg "-javaagent:${project.selftestAgent}"
                 vmArg '-Dlitematicaturbo.selftest=client'
                 vmArg "-Dlitematicaturbo.selftest.filter=${project.findProperty('selftestFilter') ?: ''}"
+            }
+            if (project.hasProperty('withMods')) {
+                vmArg "-Dlitematicaturbo.with=${project.withMods}"
             }
             // -PtestRunDir=<folder>: a throwaway game folder for a test run (relative to the version folder)
             if (project.hasProperty('testRunDir')) {

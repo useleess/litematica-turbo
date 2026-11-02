@@ -72,6 +72,11 @@
    "what": "block entities drawn while Turbo rebuilds their chunks never crash the game"
   },
   {
+   "prefix": "sodium/",
+   "min": 15,
+   "what": "next to Sodium (and Iris with a shader pack on): the schematic is drawn, every speed-up works as its own tests prove, no GL errors, no feature switched off, shader switching like plain Litematica, screenshots; in a run without Sodium these skip"
+  },
+  {
    "prefix": "far/",
    "min": 5,
    "what": "less detail far away: far pieces draw no outline lines with the setting on and some with it off, near pieces draw the same, low memory and an error (with a chat line) bring every outline back"

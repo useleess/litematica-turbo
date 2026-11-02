@@ -245,6 +245,31 @@ public class BatchBookTest
     }
 
     @Test
+    public void aShaderPackPausesBatchDrawingWithOneChatLineAndItComesBackWhenTheyAreOff()
+    {
+        assertTrue(BatchDrawing.active());
+        assertNull(BatchDrawing.takePauseWarning(true));
+        BatchDrawing.pauseFor("Iris");
+        assertFalse(BatchDrawing.active());
+        assertNull(BatchDrawing.failure());
+        assertNull(BatchDrawing.takePauseWarning(false));
+        assertEquals("Iris", BatchDrawing.takePauseWarning(true));
+        assertNull(BatchDrawing.takePauseWarning(true));
+
+        BatchDrawing.pauseFor("Iris");
+        assertNull(BatchDrawing.takePauseWarning(true));
+
+        BatchDrawing.pauseFor(null);
+        assertTrue(BatchDrawing.active());
+        assertNull(BatchDrawing.takePauseWarning(true));
+
+        BatchDrawing.pauseFor("Iris");
+        assertEquals("Iris", BatchDrawing.takePauseWarning(true));
+        BatchDrawing.resetForTest();
+        assertTrue(BatchDrawing.active());
+    }
+
+    @Test
     public void aTestFaultThrowsUntilItIsCleared()
     {
         BatchDrawing.checkFaultForTest();

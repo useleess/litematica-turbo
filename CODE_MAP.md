@@ -17,6 +17,7 @@ in the same change when files move or are added.
 | `versions/<mc>-forge`, `-neoforge` | Forge / NeoForge builds (for Forgematica): only the loader entry point, `mods.toml` and (where Forge's own classes need a patch) `litematica_turbo.forge.mixins.json`; all other code comes from the Fabric folder named by `fabric_source` in their `gradle.properties`. |
 | `forge/` | The separate Gradle build for those (Architectury Loom can't share a build with Fabric Loom). `forge/version.gradle` = their shared setup. |
 | `gradle/` | `version.gradle` (setup of every Fabric version: dependencies, dev-client switches), `shared-sources.gradle` (copies `shared/` into a version). |
+| `gradle/with-mods.gradle` | The version table of Sodium / Iris (Fabric and NeoForge) for runs with `-Pwith=sodium,iris`: adds them and their nested libraries to the dev client only; applied by both `gradle/version.gradle` and `forge/version.gradle`. |
 | `selftest/` | The in-game test agent (a `-javaagent` jar, never in a release jar). Test groups `*Tests.java`, runner `SelfTest`. |
 | `icon/`, `gallery/` | Mod icon (+ `make-icon.py`, which draws it), store screenshots. |
 
@@ -74,6 +75,11 @@ builds get the same code through their `fabric_source` folder.
   only because Litematica moved the overlay type: nested in `ChunkRendererSchematicVbo` (`shared/1.16.5-1.20.4`), its own
   class from 1.21 (`shared/1.21-26.3`). Camera and render distance come from Litematica's own fields (`lastCameraX/Z`,
   `renderDistanceChunks`). Setting: "Less detail far away" (`TurboConfig.farDetail`).
+- **Shader packs (Iris):** `ShaderPacks` (`shared/1.16.5-1.21.4`) asks Iris by name (no link at compile time) whether a
+  shader pack is in use; `BatchRegions.start` hands the answer to `BatchDrawing.pauseFor` once a frame. While one is on,
+  batch drawing is paused (not an error: `failure()` stays null), the tickers print `litematica_turbo.message.batch_paused`
+  once and the log gets a warning; it comes back by itself. Sodium alone needs nothing: every other feature was
+  proved next to Sodium and Iris by the `sodium/` tests. Newer render eras have no batch drawing, so nothing pauses there.
 - **Moving a placement:** `GhostMove` + `GhostRenderers` keep showing the old chunks shifted until the new ones are built.
 - **Complete copy while moving (every version):** Litematica's pieces leave out blocks that already match the world, so
   the shifted old pieces have holes. `CompleteCopy` (core) holds the rules: the byte limit (the smaller of an eighth of Java's
