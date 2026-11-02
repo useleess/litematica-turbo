@@ -354,6 +354,7 @@ final class SodiumTests
         needs(ctx, "iris");
         freshStart(ctx);
         switchShaders(ctx, true);
+        Fixture.Sig.shaderPackOn = true;
 
         try
         {
@@ -361,6 +362,7 @@ final class SodiumTests
         }
         finally
         {
+            Fixture.Sig.shaderPackOn = false;
             switchShaders(ctx, false);
         }
     }

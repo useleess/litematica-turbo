@@ -55,13 +55,23 @@ final class Fixture
          */
         private static final java.util.regex.Pattern OVERLAY_COUNT = java.util.regex.Pattern.compile("(?i).*overlay[^=]*=.*[0-9].*|.*overlay.*primitiveCenters.*|.*[.](generation|capacity)=-?[0-9]+$|.*this[$]0[.].*");
 
+        /**
+         * With an Iris shader pack on, the vertex format of a block buffer (plain, or Iris's extended one with mc_Entity ...)
+         * depends on whether the build happened inside Iris's world-render phase. Seen in two runs, in opposite directions:
+         * plain Litematica itself had the plain format in one and the extended one in the other. The geometry is still compared.
+         */
+        private static final java.util.regex.Pattern BUFFER_FORMAT = java.util.regex.Pattern.compile(".*drawParameters[.]format=.*");
+
+        /** Set while the test shader pack is on (SodiumTests.withShaders). */
+        static volatile boolean shaderPackOn;
+
         Sig(List<String> all)
         {
             List<String> lines = new java.util.ArrayList<>();
 
             for (String l : all)
             {
-                if (OVERLAY_COUNT.matcher(l).matches() == false)
+                if (OVERLAY_COUNT.matcher(l).matches() == false && (shaderPackOn == false || BUFFER_FORMAT.matcher(l).matches() == false))
                 {
                     lines.add(l);
                 }
@@ -652,10 +662,35 @@ final class Fixture
 
             if (System.currentTimeMillis() > deadline)
             {
-                throw new SelfTest.Fail("Litematica could not load the test schematic " + file + " (" + now + " bytes, " + (file.exists() ? "exists" : "missing") + ")");
+                throw new SelfTest.Fail("Litematica could not load the test schematic " + file + " (" + now + " bytes, " + (file.exists() ? "exists" : "missing") + "); " + this.loadErrorsInLog() + "; chat: " + SafetyTests.chatText(this.ctx));
             }
 
             Thread.sleep(500);
+        }
+    }
+
+    /** The last log lines that name a schematic load problem: why Litematica gave back nothing. */
+    private String loadErrorsInLog()
+    {
+        try
+        {
+            List<String> hits = new ArrayList<>();
+
+            for (String line : java.nio.file.Files.readAllLines(new File("logs/latest.log").toPath(), java.nio.charset.StandardCharsets.UTF_8))
+            {
+                String l = line.toLowerCase();
+
+                if (l.contains("litematic") && (l.contains("error") || l.contains("warn") || l.contains("exception") || l.contains("fail")))
+                {
+                    hits.add(line.trim());
+                }
+            }
+
+            return "log: " + hits.subList(Math.max(0, hits.size() - 6), hits.size());
+        }
+        catch (Exception e)
+        {
+            return "log unreadable: " + e;
         }
     }
 

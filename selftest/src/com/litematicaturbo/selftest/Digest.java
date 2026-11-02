@@ -134,6 +134,29 @@ final class Digest
         return HASH.matcher(o.getClass().getSimpleName()).replaceAll("") + (text.length() > 160 ? text.substring(0, 160) : text);
     }
 
+    /**
+     * The sort data of a translucent buffer lists the centre of every quad (x, y, z) in the order the quads were added,
+     * and that order follows the camera and the moment of the build, in plain Litematica as well. The same set of quads
+     * is what is drawn, so the centres are hashed in sorted order.
+     */
+    private static int quadCentersHash(float[] centers)
+    {
+        if (centers.length % 3 != 0)
+        {
+            return Arrays.hashCode(centers);
+        }
+
+        List<String> quads = new ArrayList<>();
+
+        for (int i = 0; i < centers.length; i += 3)
+        {
+            quads.add(centers[i] + "," + centers[i + 1] + "," + centers[i + 2]);
+        }
+
+        Collections.sort(quads);
+        return quads.hashCode();
+    }
+
     private static void walk(String path, Object o, int depth, IdentityHashMap<Object, Boolean> path_, List<String> out)
     {
         if (out.size() >= MAX_LINES)
@@ -167,7 +190,8 @@ final class Digest
             int hash;
             int length;
 
-            if (o instanceof float[]) { hash = Arrays.hashCode((float[]) o); length = ((float[]) o).length; }
+            if (o instanceof float[] && path.endsWith("primitiveCenters")) { hash = quadCentersHash((float[]) o); length = ((float[]) o).length; }
+            else if (o instanceof float[]) { hash = Arrays.hashCode((float[]) o); length = ((float[]) o).length; }
             else if (o instanceof int[]) { hash = Arrays.hashCode((int[]) o); length = ((int[]) o).length; }
             else if (o instanceof long[]) { hash = Arrays.hashCode((long[]) o); length = ((long[]) o).length; }
             else if (o instanceof byte[]) { hash = Arrays.hashCode((byte[]) o); length = ((byte[]) o).length; }

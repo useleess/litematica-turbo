@@ -81,6 +81,14 @@ Litematica's drawing off as well). The reasons and per-version fixes (1.20.1's L
 1.21.1-neoforge) stand next to the table; NeoForge runs switch off the dev-only Blaze3D validation layer
 (`neoforge-client.toml`), which Iris trips at start-up.
 
+Two comparisons are looser by design, each shown by failed runs on a busy box: (1) the sort data of a translucent buffer
+(`primitiveCenters`, the centre of each quad) is compared as a set, not in order, because the order follows the camera
+and the build moment in plain Litematica as well (same quads drawn); (2) while the shader pack is on, a block buffer's
+vertex format line is not compared: plain Litematica itself had the plain format in one run and Iris's extended one in
+another (opposite directions between two runs), so it does not follow Turbo; the geometry lines are still compared.
+A schematic that cannot be loaded now fails with the matching game-log lines and chat text, to find the cause of the
+rare 26.2 load failure on a loaded box.
+
 ## Output protocol
 
 Printed by the game to its real stdout:
