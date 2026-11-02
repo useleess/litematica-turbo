@@ -629,25 +629,46 @@ final class Fixture
         }
     }
 
+    /**
+     * Litematica's load of a schematic file. On a box that is short of memory or disk speed the read can fail for a while
+     * (the file is not yet complete on disk, the game is stalled): ask again until the file is readable, up to a minute.
+     */
     private Object load(Object holder, File file) throws Exception
     {
-        Object schematic;
+        long deadline = System.currentTimeMillis() + 60_000L;
+        long size = -1;
 
+        while (true)
+        {
+            long now = file.length();
+            boolean settled = now > 0 && now == size;
+            size = now;
+            Object schematic = settled ? this.tryLoad(holder, file) : null;
+
+            if (schematic != null)
+            {
+                return schematic;
+            }
+
+            if (System.currentTimeMillis() > deadline)
+            {
+                throw new SelfTest.Fail("Litematica could not load the test schematic " + file + " (" + now + " bytes, " + (file.exists() ? "exists" : "missing") + ")");
+            }
+
+            Thread.sleep(500);
+        }
+    }
+
+    private Object tryLoad(Object holder, File file) throws Exception
+    {
         try
         {
-            schematic = this.ctx.onMain(() -> Ctx.call(holder, "getOrLoad", file));
+            return this.ctx.onMain(() -> Ctx.call(holder, "getOrLoad", file));
         }
         catch (NoSuchMethodException e)
         {
-            schematic = this.ctx.onMain(() -> Ctx.call(holder, "getOrLoad", file.toPath()));
+            return this.ctx.onMain(() -> Ctx.call(holder, "getOrLoad", file.toPath()));
         }
-
-        if (schematic == null)
-        {
-            throw new SelfTest.Fail("Litematica could not load the test schematic " + file);
-        }
-
-        return schematic;
     }
 
     // ---- a lone placement for the move tests ----

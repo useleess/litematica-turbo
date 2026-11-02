@@ -140,6 +140,8 @@ final class CompatTests
                 f.renderersMayBeMissing = true;
                 setMode(ctx, mode);
                 setLayer(ctx, y);
+                // Turbo's builds of the layer view must be over before the reload to plain Litematica clears the build buffers they write to
+                f.awaitIdle("the layer view '" + name + "' built before the comparison", f.allChunks(), null);
                 Fixture.Capture stock = staged("plain Litematica", () -> f.captureNew("layer-" + name + "-stock", false, 0, true, true));
                 Fixture.Capture turbo = staged("Turbo", () -> f.captureNew("layer-" + name + "-turbo", true, 3, true, true));
                 WorldTests.same(stock, turbo, f.allChunks(), "layer view '" + name + "'");
@@ -160,10 +162,10 @@ final class CompatTests
             }
             finally
             {
-                f.renderersMayBeMissing = false;
                 setMode(ctx, "ALL");
                 f.configure(true, 3, true, true);
-                ctx.ticks(40);
+                f.awaitIdle("the full view back after layer view '" + name + "'", f.allChunks(), null);
+                f.renderersMayBeMissing = false;
             }
         });
     }

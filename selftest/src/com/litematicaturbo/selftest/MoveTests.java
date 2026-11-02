@@ -151,6 +151,7 @@ final class MoveTests
         Object config = Ctx.call(f.configClass, "get");
         Ctx.setField(config, "ghostMove", true);
         Ctx.setField(config, "ghostSettleMs", 250);
+        Ctx.setField(config, "completeCopy", true);
         Ctx.setField(config, "catchUpAuto", true);
         Ctx.setField(config, "catchUpBudgetMs", 8);
     }
@@ -300,6 +301,24 @@ final class MoveTests
     /** The two runs of a scenario and the check that they end the same. */
     private static Run[] both(Ctx ctx, int stepMs, int[][] steps) throws Exception
     {
+        try
+        {
+            return bothOnce(ctx, stepMs, steps);
+        }
+        catch (SelfTest.Fail first)
+        {
+            // The order of the quads of translucent blocks follows the build moment; once more before calling it a difference
+            if (first.getMessage().contains("differs between 'stock-moved' and 'turbo-moved'") == false)
+            {
+                throw first;
+            }
+
+            return bothOnce(ctx, stepMs, steps);
+        }
+    }
+
+    private static Run[] bothOnce(Ctx ctx, int stepMs, int[][] steps) throws Exception
+    {
         Run turbo = run(ctx, true, stepMs, steps, null);
         Run stock = run(ctx, false, stepMs, steps, null);
         sameFinal(stock, turbo);
@@ -398,22 +417,7 @@ final class MoveTests
         tests.add("move/same-as-stock-" + name, () -> {
             f = WorldTests.fixture(ctx);
             guarded(ctx, () -> {
-                Run[] r;
-
-                try
-                {
-                    r = both(ctx, stepMs, steps);
-                }
-                catch (SelfTest.Fail first)
-                {
-                    // The order of the quads of translucent blocks follows the build moment; once more before calling it a difference
-                    if (first.getMessage().contains("differs between 'stock-moved' and 'turbo-moved'") == false)
-                    {
-                        throw first;
-                    }
-
-                    r = both(ctx, stepMs, steps);
-                }
+                Run[] r = both(ctx, stepMs, steps);
 
                 SelfTest.check(r[1].markerNew.contains("gold_block"), "the marker block is not at the new place: " + r[1].markerNew);
                 SelfTest.check(r[1].markerOld.contains("gold_block") == false, "the marker block is still at the old place");
@@ -550,6 +554,8 @@ final class MoveTests
             guarded(ctx, () -> {
                 Object config = Ctx.call(f.configClass, "get");
                 Ctx.setField(config, "ghostSettleMs", 1500);
+                // the complete copy builds pieces in the background while the view is held (it is tested by its own tests); only the real rebuild must wait
+                Ctx.setField(config, "completeCopy", false);
                 Run r = run(ctx, true, 0, new int[][] {{7, 0, 0}}, run -> {
                     long builds = f.stats("totalBuilds");
                     Thread.sleep(700);
