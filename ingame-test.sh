@@ -102,6 +102,11 @@ run_version()
         case "$v" in
             *-forge|*-neoforge) mkdir -p "$run/config"; printf 'showLoadWarnings = false\n' | tee "$run/config/forge-client.toml" > "$run/config/neoforge-client.toml" ;;
         esac
+        # NeoForge's dev runs check every GPU call (Blaze3D validation layer, 1.21.5 on); Iris's draws trip it at start-up,
+        # a check the released game never makes
+        case "$v" in
+            *-neoforge) printf 'enableB3DValidationLayer = false\n' >> "$run/config/neoforge-client.toml" ;;
+        esac
         : > "$log"
         echo "== $v: building and starting the game client (attempt $attempt, log: $dir/selftest.log)"
         # shellcheck disable=SC2086
@@ -110,15 +115,15 @@ run_version()
         pid=$!
         tail -n +1 -f "$log" --pid=$pid 2>/dev/null | sed -u -n 's/.*\(SCOPE-TEST .*\)/\1/p; s/.*\(SCOPE TESTS: .*\)/\1/p; s/.*\(SELFTEST .*\)/\1/p'
         wait $pid
-        grep -q "SCOPE-TEST " "$log" && break
+        grep -a -q "SCOPE-TEST " "$log" && break
         echo "== $v: attempt $attempt ended before the tests started:"
-        grep -E -A3 "What went wrong|Exception|Error:|error:" "$log" | head -n 12 | sed 's/^/    | /'
+        grep -a -E -A3 "What went wrong|Exception|Error:|error:" "$log" | head -n 12 | sed 's/^/    | /'
     done
     # a crashed game: its crash report (the throwaway copy and the report go away with it)
     for c in "$run"/crash-reports/*.txt; do
         [ -f "$c" ] || continue
         echo "    crash report $(basename "$c"):"
-        grep -v -E "^\s*$" "$c" | head -n 70 | cut -c 1-240 | sed 's/^/    # /'
+        grep -a -v -E "^\s*$" "$c" | head -n 70 | cut -c 1-240 | sed 's/^/    # /'
     done
     # the tests' screenshots outlive the throwaway game folder (the test box brings test-shots back)
     for png in "$run"/screenshots/*.png; do
@@ -133,9 +138,9 @@ run_version()
         echo "$v: NO RESULT after ${secs} s (build or game failed: see $dir/selftest.log)" > "$WORK/results/$v"
         # what the game was doing when it ended (the log goes with the throwaway copy on the test box)
         # the game's own last lines (not Gradle's failure text) and every error / crash line
-        sed '/^FAILURE: Build failed/,$d' "$log" | grep -v "SCOPE-TEST pass" | tail -n 30 | cut -c 1-240 | sed 's/^/    | /'
+        sed '/^FAILURE: Build failed/,$d' "$log" | grep -a -v "SCOPE-TEST pass" | tail -n 30 | cut -c 1-240 | sed 's/^/    | /'
         echo "    errors:"
-        grep -E "Exception|Error|Crash|crash|hs_err|insufficient memory|Killed|exit code|halt" "$log" | grep -v "SCOPE-TEST" \
+        grep -a -E "Exception|Error|Crash|crash|hs_err|insufficient memory|Killed|exit code|halt" "$log" | grep -a -v "SCOPE-TEST" \
             | tail -n 20 | cut -c 1-240 | sed 's/^/    ! /'
     else
         set -- $summary

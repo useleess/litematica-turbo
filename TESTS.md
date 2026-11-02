@@ -74,6 +74,13 @@ no GL error line in the game log, no Turbo feature switched itself off (state an
 the schematic exactly what it does to plain Litematica (`shaders-toggle-like-stock`), and batch drawing pausing while
 shaders are on (`shaders-pause-batch-drawing`, batch eras).
 
+Every version in the table runs at release (one box run per version). Where Iris itself cannot run in the dev game the
+table names no Iris and the run skips the 7 shader tests (Sodium's 8 still run): 1.16.5 and 1.17.1 (MaLiLib, and so
+Turbo, never starts with Iris there), 26.2, 26.3 and 26.2-neoforge (Iris crashes on the first frame with a shader pack,
+Litematica's drawing off as well). The reasons and per-version fixes (1.20.1's LWJGL check, the Sodium build of
+1.21.1-neoforge) stand next to the table; NeoForge runs switch off the dev-only Blaze3D validation layer
+(`neoforge-client.toml`), which Iris trips at start-up.
+
 ## Output protocol
 
 Printed by the game to its real stdout:

@@ -6,16 +6,22 @@
 // 2026-11-01; Iris's own dependency pins the Sodium named here). Sodium / Iris have no Forge builds and no NeoForge
 // build for 1.20.4. To move a version on, change its ids here and nowhere else.
 // No Iris (null) where Iris itself fails in the test client, Turbo or not (the run then skips the shader tests):
-//  - 1.16.5, Iris 1.4.5 (1turazSM): the game reaches the title screen but MaLiLib's start-up (which starts Turbo) never runs.
+//  - 1.16.5, Iris 1.4.5 (1turazSM) and 1.17.1, Iris 1.6.4 (pkGrlTNQ): the game reaches the title screen but MaLiLib's
+//    start-up (which starts Turbo) never runs; with Sodium alone it does.
 //  - 26.2 / 26.3, Iris 1.11.4 (gxZWWnKH) / 1.11.7 (vTN4NRGW): the first frame with a shader pack on crashes inside Iris
 //    (26.2 a draw with too few samplers, 26.3 "Missing uniform InSampler" in its CenterDepthSampler), also with
-//    Litematica's drawing switched off. Try a newer Iris here before each release.
+//    Litematica's drawing switched off; 26.2-neoforge, Iris k55HdONq, crashes the same way. Try a newer Iris here
+//    before each release.
+// 1.21.1-neoforge stays on Sodium 0.6.13 / Iris 1.8.12: the 0.8 NeoForge Sodium is a wrapper whose classes (its API,
+// e.g. VertexSerializer) sit in a nested jar the dev client does not load.
+// jvm: extra game arguments for such a run. 1.20.1: Sodium 0.5 refuses the dev game's LWJGL 3.3.2 snapshot (it wants
+// the 3.3.1 the released game ships); the check is Sodium's own switch for exactly that.
 def withTable = [
     '1.16.5'          : [sodium: 'YAGZ1cCS', iris: null],
-    '1.17.1'          : [sodium: 'Fz37KqRh', iris: 'pkGrlTNQ'],
+    '1.17.1'          : [sodium: 'Fz37KqRh', iris: null],
     '1.18.2'          : [sodium: '74Y5Z8fo', iris: 'ogIRhnAJ'],
     '1.19.4'          : [sodium: 'b4hTi3mo', iris: 'wN6PuLPa'],
-    '1.20.1'          : [sodium: 'OihdIimA', iris: 's5eFLITc'],
+    '1.20.1'          : [sodium: 'OihdIimA', iris: 's5eFLITc', jvm: ['-Dsodium.checks.issue2561=false']],
     '1.20.4'          : [sodium: '4GyXKCLd', iris: 'hq98tuSS'],
     '1.21'            : [sodium: 'u1OEbNKx', iris: 'zsoi0dso'],
     '1.21.4'          : [sodium: 'c3YkZvne', iris: 'Ca054sTe'],
@@ -23,11 +29,11 @@ def withTable = [
     '1.21.11'         : [sodium: 'rkdTcxoT', iris: 'ka9PDlsN'],
     '26.2'            : [sodium: 'xJZxADzI', iris: null],
     '26.3'            : [sodium: 'bAZQdGpg', iris: null],
-    '1.21.1-neoforge' : [sodium: 'uMOpc5uV', iris: 'KduFYu4t'],
+    '1.21.1-neoforge' : [sodium: 'Pb3OXVqC', iris: 't3ruzodq'],
     '1.21.4-neoforge' : [sodium: 'XgEfENfn', iris: 'FNc0XYTL'],
     '1.21.10-neoforge': [sodium: 'PdQpfqPZ', iris: 'aBn2niiX'],
     '1.21.11-neoforge': [sodium: 'sC6wj32u', iris: '6zJsI0eO'],
-    '26.2-neoforge'   : [sodium: 'DmnNKsfS', iris: 'k55HdONq'],
+    '26.2-neoforge'   : [sodium: 'DmnNKsfS', iris: null],
 ]
 
 def wanted = (project.findProperty('with') ?: '').toString().split(',').collect { it.trim() }.findAll { it }
@@ -37,11 +43,12 @@ if (wanted) {
     def remap = fabric ? plugins.hasPlugin('net.fabricmc.fabric-loom-remap') : plugins.hasPlugin('dev.architectury.loom-no-remap') == false
     def runtime = remap ? 'modLocalRuntime' : 'localRuntime'
     def dir = layout.buildDirectory.dir('with-mods').get().asFile
-    if (row == null || !row.keySet().containsAll(wanted)) {
+    if (row == null || !(row.keySet() - 'jvm').containsAll(wanted)) {
         throw new GradleException("-Pwith=${wanted.join(',')}: not every one of them is in gradle/with-mods.gradle for ${project.name}")
     }
     // what the run really gets: -Dlitematicaturbo.with (the tests skip what is not in it)
     ext.withMods = wanted.findAll { row[it] != null }.join(',')
+    loom.runs.matching { it.name == 'client' }.configureEach { run -> (row.jvm ?: []).each { run.vmArg(it) } }
     wanted.findAll { row[it] == null }.each { logger.warn("-Pwith=${it}: left out for ${project.name} (see the table in gradle/with-mods.gradle)") }
     wanted.findAll { row[it] != null }.each { name ->
         def id = row[name]
