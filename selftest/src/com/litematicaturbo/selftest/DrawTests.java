@@ -488,6 +488,30 @@ final class DrawTests
             }
         });
 
+        tests.add("draw/missing-buffer-leaves-that-piece-to-litematica", () -> {
+            start(ctx);
+
+            try
+            {
+                awaitRegions(ctx);
+                batch(ctx, false);
+                ctx.ticks(5);
+                SelfTest.equal(0, Ctx.call(ctx.turbo("BatchDraw"), "regionCount"), "region buffers kept with the setting off");
+                // the buffers of the first pieces read back go missing, as when Litematica drops one while a region is made
+                Ctx.call(ctx.cls(DRAWING), "setBuffersGoneForTest", 2);
+                batch(ctx, true);
+                awaitRegions(ctx);
+                SelfTest.equal(0, Ctx.call(ctx.cls(DRAWING), "buffersGoneForTest"), "no region was made while the buffers were missing");
+                Object failure = Ctx.call(ctx.cls(DRAWING), "failure");
+                SelfTest.check(failure == null, "a missing vertex buffer switched batch drawing off: " + failure);
+                samePicture(ctx, "batched frame after missing buffers");
+            }
+            finally
+            {
+                finish(ctx);
+            }
+        });
+
         tests.add("draw/messages-translated", () -> {
             start(ctx);
             String lang = AuditTests.resource(ctx.cls(DRAWING).getClassLoader(), "assets/litematica_turbo/lang/en_us.json");

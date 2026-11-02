@@ -29,6 +29,7 @@
     "PlacementManagerDaemonExecutorMixin",
     "SchematicPlacementManagerHoldMixin",
     "SchematicPlacementManagerMixin",
+    "SchematicPlacementManagerVisibleMixin",
     "SchematicPlacementMixin",
     "WorldRendererSchematicCompleteMixin",
     "WorldRendererSchematicFarMixin",

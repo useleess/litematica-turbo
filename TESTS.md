@@ -200,7 +200,9 @@ How a run goes (`Fixture`, built once on first use, the same for every version):
   frame drawn piece by piece, up to the pixels the plain drawing itself varies by between two frames), `changed-block-shows-up`
   (a block edited inside a ready region is visible, and the picture again equals the plain one), `setting-off-draws-piece-by-piece`
   (region buffers freed, none made), `error-switches-off-and-draws-piece-by-piece` (a fault in the batch code: off for the
-  session, chat line, region buffers freed, same picture), `messages-translated`.
+  session, chat line, region buffers freed, same picture), `missing-buffer-leaves-that-piece-to-litematica` (two pieces'
+  vertex buffers go missing while regions are made, as when Litematica drops one: batch drawing stays on, the regions are
+  made, same picture), `messages-translated`.
 - `far/` - less detail far away, every version. Counted, never timed (`FarDetail`'s outline counters over about a second
   of frames, same game, same camera): `outlines-left-out-far-away` (far pieces draw no outline lines with the setting on
   and some with it off), `near-outlines-unchanged` (the near pieces' share of the outline draws is the same with the

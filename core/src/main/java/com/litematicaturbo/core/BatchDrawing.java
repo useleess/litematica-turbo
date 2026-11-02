@@ -13,6 +13,7 @@ public final class BatchDrawing
     private static volatile String failure;
     private static volatile boolean warned;
     private static volatile boolean faultForTest;
+    private static volatile int buffersGoneForTest;
     private static volatile boolean pausedForTest;
     private static volatile String pausedBy;
     private static volatile boolean pauseWarned;
@@ -123,12 +124,37 @@ public final class BatchDrawing
         }
     }
 
+    /** Tests make the next n pieces' vertex buffers go missing while a region is made, as when Litematica drops one at that moment. */
+    public static void setBuffersGoneForTest(int n)
+    {
+        buffersGoneForTest = n;
+    }
+
+    /** How many of the missing buffers a test asked for are still to come. */
+    public static int buffersGoneForTest()
+    {
+        return buffersGoneForTest;
+    }
+
+    /** True (and one less to come) when a test asked for a missing buffer. Render thread only. */
+    public static boolean takeBufferGoneForTest()
+    {
+        if (buffersGoneForTest <= 0)
+        {
+            return false;
+        }
+
+        buffersGoneForTest--;
+        return true;
+    }
+
     /** Back to the start of a session (tests only). */
     public static void resetForTest()
     {
         failure = null;
         warned = false;
         faultForTest = false;
+        buffersGoneForTest = 0;
         pausedForTest = false;
         pausedBy = null;
         pauseWarned = false;

@@ -42,6 +42,9 @@ public final class BatchDraw
 
     private static final BatchRegions.Gpu GPU = new BatchRegions.Gpu()
     {
+        /** The buffers sizes found, by piece: read uses these, as Litematica may drop a piece's buffer in between. */
+        private final Map<ChunkRendererSchematicVbo, VertexBuffer> found = new IdentityHashMap<>();
+
         @Override
         public boolean has(ChunkRendererSchematicVbo piece, RenderLayer layer)
         {
@@ -58,11 +61,22 @@ public final class BatchDraw
         public int[] sizes(List<ChunkRendererSchematicVbo> pieces, RenderLayer layer, int stride)
         {
             int[] sizes = new int[pieces.size()];
+            this.found.clear();
             GL30.glBindVertexArray(vertexArray());
 
             for (int i = 0; i < sizes.length; i++)
             {
-                GL15.glBindBuffer(GL31.GL_COPY_READ_BUFFER, BatchCalls.id(vertexBuffer(pieces.get(i), layer)));
+                ChunkRendererSchematicVbo piece = pieces.get(i);
+                VertexBuffer buffer = BatchDrawing.takeBufferGoneForTest() ? null : vertexBuffer(piece, layer);
+
+                if (buffer == null)
+                {
+                    sizes[i] = -1;
+                    continue;
+                }
+
+                this.found.put(piece, buffer);
+                GL15.glBindBuffer(GL31.GL_COPY_READ_BUFFER, BatchCalls.id(buffer));
                 sizes[i] = GL15.glGetBufferParameteri(GL31.GL_COPY_READ_BUFFER, GL15.GL_BUFFER_SIZE) / stride;
             }
 
@@ -75,7 +89,7 @@ public final class BatchDraw
         @Override
         public void read(ChunkRendererSchematicVbo piece, RenderLayer layer, ByteBuffer data)
         {
-            GL15.glBindBuffer(GL31.GL_COPY_READ_BUFFER, BatchCalls.id(vertexBuffer(piece, layer)));
+            GL15.glBindBuffer(GL31.GL_COPY_READ_BUFFER, BatchCalls.id(this.found.get(piece)));
             GL15.glGetBufferSubData(GL31.GL_COPY_READ_BUFFER, 0, data);
             GL15.glBindBuffer(GL31.GL_COPY_READ_BUFFER, 0);
         }

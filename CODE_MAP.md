@@ -37,6 +37,8 @@ builds get the same code through their `fabric_source` folder.
   `BoxCellIterator` skip empty 16-high sections; `RebuildQueue` moves near rebuilds off the render thread.
   1.21 - 1.21.10 keep buffer builders per chunk renderer: `ChunkRendererSchematicVboClearMixin` clears a renderer only
   under its build lock, so a reload (Iris shader switch, F3+A) never ends a buffer a build thread is still filling.
+  1.21.11 - 26.3: `SchematicPlacementManagerVisibleMixin` keeps Litematica's "visible chunks changed" flag set when one of
+  its background threads loads a chunk while the render thread lists them, so that chunk is not left without a renderer.
 - **Placing:** `SchematicCopy` + `SchematicPlacingUtils*Mixin` (faster copy into the schematic world; a call that
   throws switches the copy off for the session, `SettingsTicker` tells the player), `PlacementQueue` /
   `SchematicPlacementManagerQueueMixin` (catch-up budget per tick). Forge 1.16.5 - 1.18.2 only: `ModelDataManagerMixin`

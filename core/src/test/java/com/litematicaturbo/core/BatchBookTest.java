@@ -245,6 +245,21 @@ public class BatchBookTest
     }
 
     @Test
+    public void aTestMakesExactlyTheAskedNumberOfBuffersGoMissing()
+    {
+        assertFalse(BatchDrawing.takeBufferGoneForTest());
+        BatchDrawing.setBuffersGoneForTest(2);
+        assertTrue(BatchDrawing.takeBufferGoneForTest());
+        assertTrue(BatchDrawing.takeBufferGoneForTest());
+        assertFalse(BatchDrawing.takeBufferGoneForTest());
+        assertEquals(0, BatchDrawing.buffersGoneForTest());
+
+        BatchDrawing.setBuffersGoneForTest(1);
+        BatchDrawing.resetForTest();
+        assertFalse(BatchDrawing.takeBufferGoneForTest());
+    }
+
+    @Test
     public void aShaderPackPausesBatchDrawingWithOneChatLineAndItComesBackWhenTheyAreOff()
     {
         assertTrue(BatchDrawing.active());

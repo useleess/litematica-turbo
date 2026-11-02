@@ -35,10 +35,13 @@ final class BatchRegions
         /** The bytes per vertex of the layer. */
         int stride(RenderLayer layer);
 
-        /** How many vertices each piece's layer buffer holds. */
+        /**
+         * How many vertices each piece's layer buffer holds; -1 for a piece whose buffer is gone by now (Litematica
+         * dropped or closed it after the piece was listed). Remembers the buffers found for read.
+         */
         int[] sizes(List<ChunkRendererSchematicVbo> pieces, RenderLayer layer, int stride);
 
-        /** Reads the piece's whole layer buffer into the data's position .. limit. */
+        /** Reads the whole layer buffer sizes found for the piece into the data's position .. limit. */
         void read(ChunkRendererSchematicVbo piece, RenderLayer layer, ByteBuffer data);
 
         /** Puts the data into the region's GL buffer. */
@@ -153,6 +156,20 @@ final class BatchRegions
     {
         boolean quiet = see(index, group);
         BatchBook.Region<ChunkRendererSchematicVbo> region = BOOK.region(index, key);
+        List<ChunkRendererSchematicVbo> held = held(region, group);
+
+        if (group.size() > 1 && held.size() < group.size() && quiet && BOOK.mayMake())
+        {
+            region = make(index, layer, key, group, region, gpu);
+            held = held(region, group);
+        }
+
+        return new Pick(region, held);
+    }
+
+    /** The pieces of the group the region holds as they are now; Litematica draws the others. */
+    private static List<ChunkRendererSchematicVbo> held(BatchBook.Region<ChunkRendererSchematicVbo> region, List<ChunkRendererSchematicVbo> group)
+    {
         List<ChunkRendererSchematicVbo> held = new ArrayList<>(group.size());
 
         for (ChunkRendererSchematicVbo piece : group)
@@ -163,13 +180,7 @@ final class BatchRegions
             }
         }
 
-        if (group.size() > 1 && held.size() < group.size() && quiet && BOOK.mayMake())
-        {
-            region = make(index, layer, key, group, region, gpu);
-            held = region != null ? group : new ArrayList<>();
-        }
-
-        return new Pick(region, held);
+        return held;
     }
 
     /** The region is drawn this frame. */
@@ -218,7 +229,7 @@ final class BatchRegions
 
         for (int size : sizes)
         {
-            total += size;
+            total += Math.max(size, 0);
         }
 
         if (total == 0)
@@ -245,6 +256,12 @@ final class BatchRegions
         {
             ChunkRendererSchematicVbo piece = all.get(i);
             int count = sizes[i];
+
+            if (count < 0)
+            {
+                continue; // its buffer is gone: not held, so Litematica draws it and a later region takes it in
+            }
+
             BlockPos at = piece.getOrigin();
             region.add(piece, at.asLong(), version(piece), vertexAt, count);
 
