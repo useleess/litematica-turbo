@@ -2,6 +2,9 @@ package com.litematicaturbo.selftest;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * build/: the core promise - Turbo changes when and where schematic chunks are built, never what is built. The
@@ -217,6 +220,59 @@ final class BuildTests
             Object config = Ctx.call(f.configClass, "get");
             Object cpu = Ctx.getStatic(f.configClass, "CPU_COUNT");
             SelfTest.equal(Ctx.call(config, "resolveBuildThreads", cpu), automatic, "build threads for the automatic setting");
+        });
+
+        tests.add("build/reload-waits-for-a-running-build", () -> {
+            Fixture f = WorldTests.fixture(ctx);
+            f.awaitQuiet("before the reload");
+            Object renderer = f.anyRenderer();
+
+            try
+            {
+                Ctx.field(renderer.getClass(), "builderCache");
+            }
+            catch (NoSuchFieldException e)
+            {
+                throw SelfTest.skip("this Litematica keeps no buffer builders per chunk renderer: clearing one never touches a running build");
+            }
+
+            Thread renderThread = ctx.onMain(Thread::currentThread);
+            ReentrantLock build = (ReentrantLock) Ctx.call(renderer, "turbo$buildLock");
+            CompletableFuture<Void> reload;
+            boolean waited;
+            // this thread stands for a build thread in the middle of that chunk; a reload (shaders switched, F3+A) clears it
+            build.lock();
+
+            try
+            {
+                reload = CompletableFuture.runAsync(() -> {
+                    try
+                    {
+                        f.reloadLikeTheTab();
+                    }
+                    catch (Exception e)
+                    {
+                        throw new java.util.concurrent.CompletionException(e);
+                    }
+                });
+                long deadline = System.currentTimeMillis() + 30_000L;
+
+                while (build.hasQueuedThread(renderThread) == false && reload.isDone() == false && System.currentTimeMillis() < deadline)
+                {
+                    Thread.sleep(5);
+                }
+
+                waited = build.hasQueuedThread(renderThread);
+            }
+            finally
+            {
+                build.unlock();
+            }
+
+            reload.get(120, TimeUnit.SECONDS);
+            f.reload();
+            f.awaitQuiet("after the reload");
+            SelfTest.check(waited, "the renderers were reloaded while a build of one of their chunks was still running (its buffers ended from two threads)");
         });
 
         tests.add("build/overlay-same", () -> {

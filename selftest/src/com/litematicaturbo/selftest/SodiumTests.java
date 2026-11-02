@@ -23,6 +23,8 @@ final class SodiumTests
     private static final Pattern SWITCHED_OFF = Pattern.compile("litematica_turbo\\.message\\.\\w+_off");
     private static int switchedOffInChatAtStart;
     private static final String[] IRIS_API = {"net.irisshaders.iris.api.v0.IrisApi", "net.coderbot.iris.api.v0.IrisApi"};
+    /** The last 12 bytes of every PNG: the empty IEND chunk (length 0, type, CRC). */
+    private static final byte[] PNG_END = {0, 0, 0, 0, 'I', 'E', 'N', 'D', (byte) 0xAE, 0x42, 0x60, (byte) 0x82};
 
     private SodiumTests()
     {
@@ -224,22 +226,53 @@ final class SodiumTests
         rerun(tests, "build/threads-4-same");
     }
 
-    /** The game's own screenshot, saved for review (the test box brings it back) and read back for the checks. */
+    /**
+     * The game's own screenshot, saved for review (the test box brings it back) and read back for the checks. The camera
+     * looks at the zones again first: tiling other game windows on the test box moves the grabbed cursor and turns it.
+     */
     private static DrawTests.Shot shoot(Ctx ctx, String name) throws Exception
     {
+        Fixture f = WorldTests.fixture(ctx);
+        ctx.onMain(() -> {
+            f.aim();
+            return null;
+        });
+        ctx.ticks(3);
         File file = new File("screenshots", name);
         file.delete();
         Game.screenshot(ctx, name);
         long deadline = System.currentTimeMillis() + 15_000L;
 
-        while (file.length() == 0 && System.currentTimeMillis() < deadline)
+        while (written(file) == false && System.currentTimeMillis() < deadline)
         {
             ctx.ticks(2);
         }
 
-        SelfTest.check(file.length() > 0, "the game saved no screenshot " + file.getAbsolutePath());
-        ctx.ticks(5);
+        SelfTest.check(written(file), "the game saved no complete screenshot " + file.getAbsolutePath() + " (" + file.length() + " bytes)");
         return DrawTests.Shot.read(file);
+    }
+
+    /** The game writes the PNG on a worker thread: it is complete once it ends with the IEND chunk. */
+    private static boolean written(File png)
+    {
+        byte[] tail = new byte[PNG_END.length];
+
+        try (java.io.RandomAccessFile in = new java.io.RandomAccessFile(png, "r"))
+        {
+            if (in.length() < tail.length)
+            {
+                return false;
+            }
+
+            in.seek(in.length() - tail.length);
+            in.readFully(tail);
+            return Arrays.equals(tail, PNG_END);
+        }
+        catch (java.io.IOException notYet)
+        {
+            // not there yet, or still held by the game's writer: the caller keeps waiting until its deadline
+            return false;
+        }
     }
 
     // ---- Iris ----

@@ -840,6 +840,22 @@ final class Fixture
         });
     }
 
+    /** One chunk renderer now in view. */
+    Object anyRenderer() throws Exception
+    {
+        return this.ctx.onMain(() -> {
+            for (List<Object> column : this.renderersOnMain().values())
+            {
+                if (column.isEmpty() == false)
+                {
+                    return column.get(0);
+                }
+            }
+
+            throw new SelfTest.Fail("no schematic chunk renderer is in view");
+        });
+    }
+
     // ---- configurations, captures ----
 
     /**

@@ -17,6 +17,7 @@
     "RenderUtilsMixin",
     "ChunkRenderDispatcherSchematicAccessor",
     "ChunkRenderTaskSchematicInvoker",
+    "ChunkRendererSchematicVboClearMixin",
     "ChunkRendererSchematicVboInvoker",
     "GuiConfigsMixin",
     "GuiConfigsTabListenerMixin",
