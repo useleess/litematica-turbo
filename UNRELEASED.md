@@ -16,7 +16,7 @@ Collected here until the next release, then used as the GitHub / Modrinth notes.
 
 ### Fixes
 
-- Fixed a crash on Minecraft 1.21.11 and 26.x when chests, signs and other block entities of a schematic were drawn while Turbo rebuilt them (also when switching layer views, translucent or fluids).
+- Fixed a crash on Minecraft 1.21.11 and 26.x when chests, signs and other block entities of a schematic were drawn while Turbo rebuilt them (also when switching layer views, translucent or fluids). (#1)
 - Fixed a schematic chunk now and then staying invisible on Minecraft 1.21.11 and 26.x when Litematica finished loading it at the moment the visible chunks were listed (a Litematica timing issue Turbo now covers).
 - Fixed batch drawing turning itself off now and then (Minecraft 1.16.5 - 1.21.4, seen with Sodium) when Litematica dropped a piece's graphics buffer at the wrong moment: that piece is now drawn the normal way and batch drawing stays on.
 - Fixed a rare crash or broken schematic pieces on Minecraft 1.21 - 1.21.10 when switching Iris shaders on or off (or reloading with F3+A) while the schematic was still being built.
