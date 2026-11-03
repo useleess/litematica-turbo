@@ -133,11 +133,14 @@ final class MoveTests
     {
         Set<Long> inView = new LinkedHashSet<>();
 
-        // the renderers of a new placement's chunks appear within a few frames
-        for (int tries = 0; tries < 400 && inView.isEmpty(); tries++)
+        // the renderers of a new placement's chunks appear within a few frames, not all in the same one (a busy test box
+        // once gave only 3 of them): wait for all of them, or until no new one came for 2 s
+        for (int tries = 0, still = 0; tries < 400 && inView.size() < chunks.size() && (inView.isEmpty() || still < 40); tries++)
         {
+            int before = inView.size();
             inView.addAll(chunks);
             inView.retainAll(f.renderedKeys());
+            still = inView.size() == before ? still + 1 : 0;
             Thread.sleep(50);
         }
 

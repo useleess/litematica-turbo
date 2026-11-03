@@ -107,6 +107,11 @@ run_version()
         case "$v" in
             *-neoforge) printf 'enableB3DValidationLayer = false\n' >> "$run/config/neoforge-client.toml" ;;
         esac
+        # NeoForge's early loading window crashed twice in a row on the busy test box (1.20.4: its memory bar drew a
+        # null text) before the game even loaded: the test games start without it
+        case "$v" in
+            *-neoforge) printf 'earlyWindowControl = false\n' > "$run/config/fml.toml" ;;
+        esac
         : > "$log"
         echo "== $v: building and starting the game client (attempt $attempt, log: $dir/selftest.log)"
         # shellcheck disable=SC2086
