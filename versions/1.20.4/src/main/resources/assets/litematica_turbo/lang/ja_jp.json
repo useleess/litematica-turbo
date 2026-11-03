@@ -1,0 +1,23 @@
+{
+  "config.name.turboenabled": "Turboを有効にする",
+  "config.name.turbobuildthreads": "ビルドスレッド数",
+  "config.name.turboskipemptysections": "空のセクションをスキップ",
+  "config.name.turboasyncnearrebuilds": "近くの再構築をバックグラウンドで実行",
+  "config.name.turboghostmove": "配置の移動をスムーズにする",
+  "config.name.turboghostsettlems": "移動後の再構築遅延 (ms)",
+  "config.name.turbocatchupauto": "自動キャッチアップ",
+  "config.name.turbocatchupbudgetms": "キャッチアップの処理時間 (1ティックあたりms)",
+  "config.name.turboshowstats": "F3統計を表示",
+  "config.name.turbocompactstorage": "巨大な回路図のコンパクト保存",
+  "config.name.turbobatchdraw": "一括描画",
+  "config.name.turbofardetail": "遠くの詳細を減らす",
+  "config.name.turbocompletecopy": "移動中も完全にコピー",
+  "litematica_turbo.gui.button.config_gui.turbo": "Turbo",
+  "litematica_turbo.message.out_of_memory": "[Litematica Turbo] この回路図は、Minecraftに割り当てられたメモリ (%s MB) には大きすぎるため、読み込まれませんでした。Minecraftにより多くのメモリを割り当てるか、より小さい回路図を使用してください。",
+  "litematica_turbo.message.storage_off": "[Litematica Turbo] コンパクトな回路図保存でエラーが発生 (%s) したため、このセッションでは無効になっています。回路図は通常のLitematicaの方法で保存されます。",
+  "litematica_turbo.message.batch_off": "[Litematica Turbo] 一括描画でエラーが発生 (%s) したため、このセッションでは無効になっています。回路図は通常のLitematicaと同様に1ピースずつ描画されます。",
+  "litematica_turbo.message.batch_paused": "[Litematica Turbo] %s のシェーダーが有効な間は、回路図を別の方法で描画するため、一括描画は一時停止しています。回路図は通常のLitematicaと同様に1ピースずつ描画され、シェーダーを無効にすると一括描画は再開されます。",
+  "litematica_turbo.message.copy_off": "[Litematica Turbo] 高速配置コピーでエラーが発生 (%s) したため、このセッションでは無効になっています。配置は通常のLitematicaの方法でコピーされます。",
+  "litematica_turbo.message.far_off": "[Litematica Turbo] 遠くの詳細を減らす機能でエラーが発生 (%s) したため、このセッションでは無効になっています。すべてのアウトラインが通常のLitematicaと同様に描画されます。",
+  "litematica_turbo.message.complete_off": "[Litematica Turbo] 移動中の完全コピーでエラーが発生 (%s) したため、このセッションでは無効になっています。移動した配置は、以前と同じく通常の古いピースとして表示されます。"
+}

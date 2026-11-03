@@ -1,0 +1,23 @@
+{
+  "config.name.turboenabled": "Turbo ativado",
+  "config.name.turbobuildthreads": "Threads de construção",
+  "config.name.turboskipemptysections": "Pular seções vazias",
+  "config.name.turboasyncnearrebuilds": "Reconstruções próximas em segundo plano",
+  "config.name.turboghostmove": "Movimentação suave da colocação",
+  "config.name.turboghostsettlems": "Atraso de reconstrução após mover (ms)",
+  "config.name.turbocatchupauto": "Recuperação automática",
+  "config.name.turbocatchupbudgetms": "Orçamento de recuperação (ms por tick)",
+  "config.name.turboshowstats": "Mostrar estatísticas do F3",
+  "config.name.turbocompactstorage": "Armazenamento compacto para esquemas enormes",
+  "config.name.turbobatchdraw": "Desenho em lote",
+  "config.name.turbofardetail": "Menos detalhe ao longe",
+  "config.name.turbocompletecopy": "Cópia completa ao mover",
+  "litematica_turbo.gui.button.config_gui.turbo": "Turbo",
+  "litematica_turbo.message.out_of_memory": "[Litematica Turbo] Este esquema é grande demais para a memória que o Minecraft tem (%s MB), então não foi carregado. Dê mais memória ao Minecraft ou use um esquema menor.",
+  "litematica_turbo.message.storage_off": "[Litematica Turbo] O armazenamento compacto de esquemas teve um erro (%s) e está desativado nesta sessão. Os esquemas são armazenados do jeito normal do Litematica.",
+  "litematica_turbo.message.batch_off": "[Litematica Turbo] O desenho em lote teve um erro (%s) e está desativado nesta sessão. O esquema é desenhado peça por peça, como no Litematica normal.",
+  "litematica_turbo.message.batch_paused": "[Litematica Turbo] O desenho em lote está pausado enquanto os shaders de %s estão ativados, pois eles desenham o esquema de outra forma. O esquema é desenhado peça por peça, como no Litematica normal, e o desenho em lote volta quando os shaders forem desativados.",
+  "litematica_turbo.message.copy_off": "[Litematica Turbo] A cópia rápida de colocações teve um erro (%s) e está desativada nesta sessão. As colocações são copiadas do jeito normal do Litematica.",
+  "litematica_turbo.message.far_off": "[Litematica Turbo] O recurso de menos detalhe ao longe teve um erro (%s) e está desativado nesta sessão. Todos os contornos são desenhados, como no Litematica normal.",
+  "litematica_turbo.message.complete_off": "[Litematica Turbo] A cópia completa ao mover teve um erro (%s) e está desativada nesta sessão. Uma colocação movida mostra as peças antigas normais, como antes."
+}

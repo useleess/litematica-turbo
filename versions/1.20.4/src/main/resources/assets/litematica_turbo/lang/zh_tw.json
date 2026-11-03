@@ -1,0 +1,23 @@
+{
+  "config.name.turboenabled": "啟用 Turbo",
+  "config.name.turbobuildthreads": "建構執行緒數",
+  "config.name.turboskipemptysections": "略過空白區段",
+  "config.name.turboasyncnearrebuilds": "在背景重建附近區塊",
+  "config.name.turboghostmove": "平滑放置移動",
+  "config.name.turboghostsettlems": "移動後重建延遲（毫秒）",
+  "config.name.turbocatchupauto": "自動追趕",
+  "config.name.turbocatchupbudgetms": "追趕預算（每刻毫秒數）",
+  "config.name.turboshowstats": "顯示 F3 統計資訊",
+  "config.name.turbocompactstorage": "大型投影的精簡儲存",
+  "config.name.turbobatchdraw": "批次繪製",
+  "config.name.turbofardetail": "遠處減少細節",
+  "config.name.turbocompletecopy": "移動時完整複製",
+  "litematica_turbo.gui.button.config_gui.turbo": "Turbo",
+  "litematica_turbo.message.out_of_memory": "[Litematica Turbo] 此投影對 Minecraft 的記憶體來說太大（%s MB），因此未載入。請為 Minecraft 分配更多記憶體，或改用較小的投影。",
+  "litematica_turbo.message.storage_off": "[Litematica Turbo] 精簡投影儲存發生錯誤（%s），本次遊戲階段已關閉。投影將以一般 Litematica 的方式儲存。",
+  "litematica_turbo.message.batch_off": "[Litematica Turbo] 批次繪製發生錯誤（%s），本次遊戲階段已關閉。投影將如一般 Litematica 那樣逐塊繪製。",
+  "litematica_turbo.message.batch_paused": "[Litematica Turbo] 開啟 %s 的光影時，批次繪製已暫停，因為這些光影繪製投影的方式不同。投影將如一般 Litematica 那樣逐塊繪製，關閉光影後批次繪製會恢復。",
+  "litematica_turbo.message.copy_off": "[Litematica Turbo] 快速放置複製發生錯誤（%s），本次遊戲階段已關閉。放置項目將以一般 Litematica 的方式複製。",
+  "litematica_turbo.message.far_off": "[Litematica Turbo] 遠處減少細節發生錯誤（%s），本次遊戲階段已關閉。每個輪廓都會繪製，與一般 Litematica 相同。",
+  "litematica_turbo.message.complete_off": "[Litematica Turbo] 移動時完整複製發生錯誤（%s），本次遊戲階段已關閉。移動後的放置項目會顯示一般的舊區塊，與先前相同。"
+}

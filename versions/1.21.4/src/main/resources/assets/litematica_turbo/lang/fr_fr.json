@@ -1,0 +1,23 @@
+{
+  "config.name.turboenabled": "Turbo activé",
+  "config.name.turbobuildthreads": "Threads de construction",
+  "config.name.turboskipemptysections": "Ignorer les sections vides",
+  "config.name.turboasyncnearrebuilds": "Reconstruction proche en arrière-plan",
+  "config.name.turboghostmove": "Placement fluide lors du déplacement",
+  "config.name.turboghostsettlems": "Délai de reconstruction après déplacement (ms)",
+  "config.name.turbocatchupauto": "Rattrapage automatique",
+  "config.name.turbocatchupbudgetms": "Budget de rattrapage (ms par tick)",
+  "config.name.turboshowstats": "Afficher les stats F3",
+  "config.name.turbocompactstorage": "Stockage compact pour les schémas énormes",
+  "config.name.turbobatchdraw": "Dessin par lots",
+  "config.name.turbofardetail": "Moins de détails au loin",
+  "config.name.turbocompletecopy": "Copie complète pendant le déplacement",
+  "litematica_turbo.gui.button.config_gui.turbo": "Turbo",
+  "litematica_turbo.message.out_of_memory": "[Litematica Turbo] Ce schéma est trop volumineux pour la mémoire dont dispose Minecraft (%s Mo), il n'a donc pas été chargé. Donnez plus de mémoire à Minecraft ou utilisez un schéma plus petit.",
+  "litematica_turbo.message.storage_off": "[Litematica Turbo] Le stockage compact des schémas a rencontré une erreur (%s) et est désactivé pour cette session. Les schémas sont stockés de la manière normale de Litematica.",
+  "litematica_turbo.message.batch_off": "[Litematica Turbo] Le dessin par lots a rencontré une erreur (%s) et est désactivé pour cette session. Le schéma est dessiné pièce par pièce, comme dans Litematica normal.",
+  "litematica_turbo.message.batch_paused": "[Litematica Turbo] Le dessin par lots est suspendu pendant que les shaders de %s sont activés, car ils dessinent le schéma différemment. Le schéma est dessiné pièce par pièce, comme dans Litematica normal, et le dessin par lots reviendra lorsque les shaders seront désactivés.",
+  "litematica_turbo.message.copy_off": "[Litematica Turbo] La copie rapide des placements a rencontré une erreur (%s) et est désactivée pour cette session. Les placements sont copiés de la manière normale de Litematica.",
+  "litematica_turbo.message.far_off": "[Litematica Turbo] Le moins de détails au loin a rencontré une erreur (%s) et est désactivé pour cette session. Chaque contour est dessiné, comme dans Litematica normal.",
+  "litematica_turbo.message.complete_off": "[Litematica Turbo] La copie complète pendant le déplacement a rencontré une erreur (%s) et est désactivée pour cette session. Un placement déplacé affiche les anciennes pièces normales, comme avant."
+}

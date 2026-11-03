@@ -1,0 +1,23 @@
+{
+  "config.name.turboenabled": "Turbo を有効化",
+  "config.name.turbobuildthreads": "ビルドスレッド数",
+  "config.name.turboskipemptysections": "空のセクションをスキップ",
+  "config.name.turboasyncnearrebuilds": "近くの再構築をバックグラウンドで実行",
+  "config.name.turboghostmove": "設置の移動をなめらかに",
+  "config.name.turboghostsettlems": "移動後の再構築までの遅延 (ms)",
+  "config.name.turbocatchupauto": "自動追いつき処理",
+  "config.name.turbocatchupbudgetms": "追いつき処理の上限 (ms/tick)",
+  "config.name.turboshowstats": "F3 統計を表示",
+  "config.name.turbocompactstorage": "巨大なスキーマティックの省メモリ保存",
+  "config.name.turbobatchdraw": "バッチ描画",
+  "config.name.turbofardetail": "遠くの描画を簡略化",
+  "config.name.turbocompletecopy": "移動中の完全コピー",
+  "litematica_turbo.gui.button.config_gui.turbo": "Turbo",
+  "litematica_turbo.message.out_of_memory": "[Litematica Turbo] このスキーマティックは Minecraft に割り当てられたメモリ (%s MB) には大きすぎるため、読み込まれませんでした。Minecraft のメモリを増やすか、より小さいスキーマティックを使ってください。",
+  "litematica_turbo.message.storage_off": "[Litematica Turbo] 省メモリ保存でエラー (%s) が発生したため、このセッションでは無効になっています。スキーマティックは通常の Litematica の方法で保存されます。",
+  "litematica_turbo.message.batch_off": "[Litematica Turbo] バッチ描画でエラー (%s) が発生したため、このセッションでは無効になっています。スキーマティックは通常の Litematica と同じく、ひとつずつ描画されます。",
+  "litematica_turbo.message.batch_paused": "[Litematica Turbo] %s のシェーダーが有効な間は、スキーマティックの描画方法が異なるためバッチ描画を一時停止しています。スキーマティックは通常の Litematica と同じくひとつずつ描画され、シェーダーを無効にするとバッチ描画が再開されます。",
+  "litematica_turbo.message.copy_off": "[Litematica Turbo] 高速設置コピーでエラー (%s) が発生したため、このセッションでは無効になっています。設置はいつもの Litematica の方法でコピーされます。",
+  "litematica_turbo.message.far_off": "[Litematica Turbo] 遠くの簡略化描画でエラー (%s) が発生したため、このセッションでは無効になっています。すべてのアウトラインが通常の Litematica と同じく描画されます。",
+  "litematica_turbo.message.complete_off": "[Litematica Turbo] 移動中の完全コピーでエラー (%s) が発生したため、このセッションでは無効になっています。移動した設置は以前と同じく、通常の古いピースで表示されます。"
+}

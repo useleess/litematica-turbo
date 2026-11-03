@@ -1,0 +1,23 @@
+{
+  "config.name.turboenabled": "Turbo attivo",
+  "config.name.turbobuildthreads": "Thread di costruzione",
+  "config.name.turboskipemptysections": "Salta le sezioni vuote",
+  "config.name.turboasyncnearrebuilds": "Ricostruzioni vicine in background",
+  "config.name.turboghostmove": "Spostamento fluido del posizionamento",
+  "config.name.turboghostsettlems": "Ritardo di ricostruzione dopo lo spostamento (ms)",
+  "config.name.turbocatchupauto": "Recupero automatico",
+  "config.name.turbocatchupbudgetms": "Budget di recupero (ms per tick)",
+  "config.name.turboshowstats": "Mostra statistiche F3",
+  "config.name.turbocompactstorage": "Archiviazione compatta per schemi enormi",
+  "config.name.turbobatchdraw": "Disegno a lotti",
+  "config.name.turbofardetail": "Meno dettagli a distanza",
+  "config.name.turbocompletecopy": "Copia completa durante lo spostamento",
+  "litematica_turbo.gui.button.config_gui.turbo": "Turbo",
+  "litematica_turbo.message.out_of_memory": "[Litematica Turbo] Questo schema è troppo grande per la memoria di cui dispone Minecraft (%s MB), quindi non è stato caricato. Assegna più memoria a Minecraft oppure usa uno schema più piccolo.",
+  "litematica_turbo.message.storage_off": "[Litematica Turbo] L'archiviazione compatta degli schemi ha generato un errore (%s) ed è disattivata per questa sessione. Gli schemi vengono salvati nel modo normale di Litematica.",
+  "litematica_turbo.message.batch_off": "[Litematica Turbo] Il disegno a lotti ha generato un errore (%s) ed è disattivato per questa sessione. Lo schema viene disegnato pezzo per pezzo, come in Litematica normale.",
+  "litematica_turbo.message.batch_paused": "[Litematica Turbo] Il disegno a lotti è in pausa mentre sono attivi gli shader di %s, perché disegnano lo schema in modo diverso. Lo schema viene disegnato pezzo per pezzo, come in Litematica normale, e il disegno a lotti torna quando gli shader sono disattivati.",
+  "litematica_turbo.message.copy_off": "[Litematica Turbo] La copia veloce dei posizionamenti ha generato un errore (%s) ed è disattivata per questa sessione. I posizionamenti vengono copiati nel modo normale di Litematica.",
+  "litematica_turbo.message.far_off": "[Litematica Turbo] Il meno dettaglio a distanza ha generato un errore (%s) ed è disattivato per questa sessione. Ogni contorno viene disegnato, come in Litematica normale.",
+  "litematica_turbo.message.complete_off": "[Litematica Turbo] La copia completa durante lo spostamento ha generato un errore (%s) ed è disattivata per questa sessione. Un posizionamento spostato mostra i normali pezzi vecchi, come prima."
+}

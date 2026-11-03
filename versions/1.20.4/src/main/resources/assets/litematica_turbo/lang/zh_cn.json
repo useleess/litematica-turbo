@@ -1,0 +1,23 @@
+{
+  "config.name.turboenabled": "启用 Turbo",
+  "config.name.turbobuildthreads": "构建线程数",
+  "config.name.turboskipemptysections": "跳过空区段",
+  "config.name.turboasyncnearrebuilds": "在后台重建附近区块",
+  "config.name.turboghostmove": "平滑移动放置",
+  "config.name.turboghostsettlems": "移动后重建延迟（毫秒）",
+  "config.name.turbocatchupauto": "自动追赶",
+  "config.name.turbocatchupbudgetms": "追赶预算（每刻毫秒数）",
+  "config.name.turboshowstats": "显示 F3 统计信息",
+  "config.name.turbocompactstorage": "为超大投影使用紧凑存储",
+  "config.name.turbobatchdraw": "批量绘制",
+  "config.name.turbofardetail": "远处减少细节",
+  "config.name.turbocompletecopy": "移动时完整复制",
+  "litematica_turbo.gui.button.config_gui.turbo": "Turbo",
+  "litematica_turbo.message.out_of_memory": "[Litematica Turbo] 此投影对于 Minecraft 的内存（%s MB）来说太大，因此未加载。请为 Minecraft 分配更多内存，或使用更小的投影。",
+  "litematica_turbo.message.storage_off": "[Litematica Turbo] 紧凑投影存储出现错误（%s），本次游戏会话中已关闭。投影将按 Litematica 的常规方式存储。",
+  "litematica_turbo.message.batch_off": "[Litematica Turbo] 批量绘制出现错误（%s），本次游戏会话中已关闭。投影将像普通 Litematica 一样逐块绘制。",
+  "litematica_turbo.message.batch_paused": "[Litematica Turbo] 开启 %s 光影时批量绘制已暂停，因为这些光影绘制投影的方式不同。投影将像普通 Litematica 一样逐块绘制，关闭光影后批量绘制会恢复。",
+  "litematica_turbo.message.copy_off": "[Litematica Turbo] 快速放置复制出现错误（%s），本次游戏会话中已关闭。放置内容将按 Litematica 的常规方式复制。",
+  "litematica_turbo.message.far_off": "[Litematica Turbo] 远处减少细节出现错误（%s），本次游戏会话中已关闭。所有轮廓都将像普通 Litematica 一样绘制。",
+  "litematica_turbo.message.complete_off": "[Litematica Turbo] 移动时完整复制出现错误（%s），本次游戏会话中已关闭。移动后的放置将像以前一样显示普通的旧部件。"
+}

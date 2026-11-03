@@ -1,0 +1,23 @@
+{
+  "config.name.turboenabled": "Турбо включено",
+  "config.name.turbobuildthreads": "Потоки строительства",
+  "config.name.turboskipemptysections": "Пропускать пустые секции",
+  "config.name.turboasyncnearrebuilds": "Фоновая перестройка рядом",
+  "config.name.turboghostmove": "Плавное перемещение размещения",
+  "config.name.turboghostsettlems": "Задержка перестройки после перемещения (мс)",
+  "config.name.turbocatchupauto": "Автоматическое догоняние",
+  "config.name.turbocatchupbudgetms": "Бюджет догоняния (мс за тик)",
+  "config.name.turboshowstats": "Показывать статистику F3",
+  "config.name.turbocompactstorage": "Компактное хранение для огромных схем",
+  "config.name.turbobatchdraw": "Пакетная отрисовка",
+  "config.name.turbofardetail": "Меньше деталей вдали",
+  "config.name.turbocompletecopy": "Полная копия при перемещении",
+  "litematica_turbo.gui.button.config_gui.turbo": "Турбо",
+  "litematica_turbo.message.out_of_memory": "[Litematica Turbo] Эта схема слишком большая для памяти, которую выделено Minecraft (%s МБ), поэтому она не загружена. Выделите Minecraft больше памяти или используйте схему меньшего размера.",
+  "litematica_turbo.message.storage_off": "[Litematica Turbo] Компактное хранение схем выдало ошибку (%s) и отключено на время этой сессии. Схемы хранятся обычным способом Litematica.",
+  "litematica_turbo.message.batch_off": "[Litematica Turbo] Пакетная отрисовка выдала ошибку (%s) и отключена на время этой сессии. Схема отрисовывается по частям, как в обычной Litematica.",
+  "litematica_turbo.message.batch_paused": "[Litematica Turbo] Пакетная отрисовка приостановлена, пока включены шейдеры из %s, так как они отрисовывают схему иначе. Схема отрисовывается по частям, как в обычной Litematica, а пакетная отрисовка вернётся, когда шейдеры выключены.",
+  "litematica_turbo.message.copy_off": "[Litematica Turbo] Быстрое копирование размещений выдало ошибку (%s) и отключено на время этой сессии. Размещения копируются обычным способом Litematica.",
+  "litematica_turbo.message.far_off": "[Litematica Turbo] Меньше деталей вдали выдало ошибку (%s) и отключено на время этой сессии. Каждый контур отрисовывается, как в обычной Litematica.",
+  "litematica_turbo.message.complete_off": "[Litematica Turbo] Полная копия при перемещении выдала ошибку (%s) и отключена на время этой сессии. Перемещённое размещение показывает обычные старые части, как раньше."
+}

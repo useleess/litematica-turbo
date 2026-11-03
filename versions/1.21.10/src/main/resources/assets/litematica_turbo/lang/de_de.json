@@ -1,0 +1,23 @@
+{
+  "config.name.turboenabled": "Turbo aktiviert",
+  "config.name.turbobuildthreads": "Bau-Threads",
+  "config.name.turboskipemptysections": "Leere Abschnitte überspringen",
+  "config.name.turboasyncnearrebuilds": "Nahe Neuaufbauten im Hintergrund",
+  "config.name.turboghostmove": "Flüssiges Verschieben der Platzierung",
+  "config.name.turboghostsettlems": "Neuaufbau-Verzögerung nach dem Verschieben (ms)",
+  "config.name.turbocatchupauto": "Automatisches Aufholen",
+  "config.name.turbocatchupbudgetms": "Aufhol-Budget (ms pro Tick)",
+  "config.name.turboshowstats": "F3-Statistiken anzeigen",
+  "config.name.turbocompactstorage": "Kompakte Speicherung für riesige Schemas",
+  "config.name.turbobatchdraw": "Stapelweises Zeichnen",
+  "config.name.turbofardetail": "Weniger Details in der Ferne",
+  "config.name.turbocompletecopy": "Vollständige Kopie beim Verschieben",
+  "litematica_turbo.gui.button.config_gui.turbo": "Turbo",
+  "litematica_turbo.message.out_of_memory": "[Litematica Turbo] Dieses Schema ist zu groß für den Arbeitsspeicher, den Minecraft hat (%s MB), daher wurde es nicht geladen. Gib Minecraft mehr Arbeitsspeicher oder verwende ein kleineres Schema.",
+  "litematica_turbo.message.storage_off": "[Litematica Turbo] Die kompakte Schema-Speicherung hat einen Fehler (%s) verursacht und ist für diese Sitzung deaktiviert. Schemas werden auf die übliche Litematica-Weise gespeichert.",
+  "litematica_turbo.message.batch_off": "[Litematica Turbo] Das stapelweise Zeichnen hat einen Fehler (%s) verursacht und ist für diese Sitzung deaktiviert. Das Schema wird Stück für Stück gezeichnet, wie im normalen Litematica.",
+  "litematica_turbo.message.batch_paused": "[Litematica Turbo] Das stapelweise Zeichnen ist pausiert, solange Shader von %s aktiv sind, da diese das Schema anders zeichnen. Das Schema wird Stück für Stück gezeichnet, wie im normalen Litematica, und das stapelweise Zeichnen kehrt zurück, sobald die Shader aus sind.",
+  "litematica_turbo.message.copy_off": "[Litematica Turbo] Das schnelle Kopieren der Platzierungen hat einen Fehler (%s) verursacht und ist für diese Sitzung deaktiviert. Platzierungen werden auf die übliche Litematica-Weise kopiert.",
+  "litematica_turbo.message.far_off": "[Litematica Turbo] Die Reduzierung der Details in der Ferne hat einen Fehler (%s) verursacht und ist für diese Sitzung deaktiviert. Jeder Umriss wird gezeichnet, wie im normalen Litematica.",
+  "litematica_turbo.message.complete_off": "[Litematica Turbo] Die vollständige Kopie beim Verschieben hat einen Fehler (%s) verursacht und ist für diese Sitzung deaktiviert. Eine verschobene Platzierung zeigt wie zuvor die normalen alten Teile."
+}

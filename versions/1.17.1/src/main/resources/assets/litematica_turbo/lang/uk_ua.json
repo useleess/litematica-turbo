@@ -1,0 +1,23 @@
+{
+  "config.name.turboenabled": "Турбо увімкнено",
+  "config.name.turbobuildthreads": "Потоки побудови",
+  "config.name.turboskipemptysections": "Пропускати порожні секції",
+  "config.name.turboasyncnearrebuilds": "Фонове перебудовування поблизу",
+  "config.name.turboghostmove": "Плавне переміщення розміщення",
+  "config.name.turboghostsettlems": "Затримка перебудови після переміщення (мс)",
+  "config.name.turbocatchupauto": "Автоматичне наздоганяння",
+  "config.name.turbocatchupbudgetms": "Бюджет наздоганяння (мс за такт)",
+  "config.name.turboshowstats": "Показувати статистику F3",
+  "config.name.turbocompactstorage": "Компактне зберігання для величезних схем",
+  "config.name.turbobatchdraw": "Пакетне малювання",
+  "config.name.turbofardetail": "Менше деталей вдалині",
+  "config.name.turbocompletecopy": "Повне копіювання під час переміщення",
+  "litematica_turbo.gui.button.config_gui.turbo": "Турбо",
+  "litematica_turbo.message.out_of_memory": "[Litematica Turbo] Ця схема занадто велика для пам'яті, яку має Minecraft (%s МБ), тому її не завантажено. Виділіть Minecraft більше пам'яті або використовуйте меншу схему.",
+  "litematica_turbo.message.storage_off": "[Litematica Turbo] Компактне зберігання схем викликало помилку (%s) і вимкнене для цього сеансу. Схеми зберігаються звичайним способом Litematica.",
+  "litematica_turbo.message.batch_off": "[Litematica Turbo] Пакетне малювання викликало помилку (%s) і вимкнене для цього сеансу. Схема малюється по частинах, як у звичайній Litematica.",
+  "litematica_turbo.message.batch_paused": "[Litematica Turbo] Пакетне малювання призупинено, поки увімкнені шейдери з %s, бо вони малюють схему інакше. Схема малюється по частинах, як у звичайній Litematica, а пакетне малювання повертається, коли шейдери вимкнено.",
+  "litematica_turbo.message.copy_off": "[Litematica Turbo] Швидке копіювання розміщень викликало помилку (%s) і вимкнене для цього сеансу. Розміщення копіюються звичайним способом Litematica.",
+  "litematica_turbo.message.far_off": "[Litematica Turbo] Менше деталей вдалині викликало помилку (%s) і вимкнене для цього сеансу. Кожен контур малюється, як у звичайній Litematica.",
+  "litematica_turbo.message.complete_off": "[Litematica Turbo] Повне копіювання під час переміщення викликало помилку (%s) і вимкнене для цього сеансу. Переміщене розміщення показує звичайні старі частини, як раніше."
+}

@@ -1,0 +1,23 @@
+{
+  "config.name.turboenabled": "터보 사용",
+  "config.name.turbobuildthreads": "빌드 스레드",
+  "config.name.turboskipemptysections": "빈 섹션 건너뛰기",
+  "config.name.turboasyncnearrebuilds": "근처 재구성 백그라운드 처리",
+  "config.name.turboghostmove": "부드러운 배치 이동",
+  "config.name.turboghostsettlems": "이동 후 재구성 지연 시간 (ms)",
+  "config.name.turbocatchupauto": "자동 따라잡기",
+  "config.name.turbocatchupbudgetms": "따라잡기 예산 (틱당 ms)",
+  "config.name.turboshowstats": "F3 통계 표시",
+  "config.name.turbocompactstorage": "거대 설계도용 압축 저장소",
+  "config.name.turbobatchdraw": "일괄 그리기",
+  "config.name.turbofardetail": "멀리 있는 세부 묘사 줄이기",
+  "config.name.turbocompletecopy": "이동 중 전체 복사",
+  "litematica_turbo.gui.button.config_gui.turbo": "터보",
+  "litematica_turbo.message.out_of_memory": "[Litematica Turbo] 이 설계도는 마인크래프트에 할당된 메모리(%s MB)에 비해 너무 커서 불러오지 않았습니다. 마인크래프트에 메모리를 더 주거나 더 작은 설계도를 사용하세요.",
+  "litematica_turbo.message.storage_off": "[Litematica Turbo] 압축 설계도 저장소에서 오류(%s)가 발생하여 이번 세션 동안 꺼졌습니다. 설계도는 일반 Litematica 방식으로 저장됩니다.",
+  "litematica_turbo.message.batch_off": "[Litematica Turbo] 일괄 그리기에서 오류(%s)가 발생하여 이번 세션 동안 꺼졌습니다. 설계도는 일반 Litematica처럼 조각 단위로 그려집니다.",
+  "litematica_turbo.message.batch_paused": "[Litematica Turbo] %s 셰이더가 켜져 있는 동안에는 설계도를 다르게 그리기 때문에 일괄 그리기가 일시 중지됩니다. 설계도는 일반 Litematica처럼 조각 단위로 그려지며, 셰이더를 끄면 일괄 그리기가 다시 돌아옵니다.",
+  "litematica_turbo.message.copy_off": "[Litematica Turbo] 빠른 배치 복사에서 오류(%s)가 발생하여 이번 세션 동안 꺼졌습니다. 배치는 일반 Litematica 방식으로 복사됩니다.",
+  "litematica_turbo.message.far_off": "[Litematica Turbo] 멀리 있는 세부 묘사 줄이기에서 오류(%s)가 발생하여 이번 세션 동안 꺼졌습니다. 모든 외곽선이 일반 Litematica처럼 그려집니다.",
+  "litematica_turbo.message.complete_off": "[Litematica Turbo] 이동 중 전체 복사에서 오류(%s)가 발생하여 이번 세션 동안 꺼졌습니다. 이동된 배치는 전과 같이 일반 이전 조각으로 표시됩니다."
+}

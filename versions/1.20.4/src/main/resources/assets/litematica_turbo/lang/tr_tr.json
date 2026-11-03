@@ -1,0 +1,23 @@
+{
+  "config.name.turboenabled": "Turbo etkin",
+  "config.name.turbobuildthreads": "Yapı iş parçacıkları",
+  "config.name.turboskipemptysections": "Boş bölümleri atla",
+  "config.name.turboasyncnearrebuilds": "Yakın yeniden yapıları arka planda yap",
+  "config.name.turboghostmove": "Yerleştirmeyi taşırken yumuşak hareket",
+  "config.name.turboghostsettlems": "Taşıdıktan sonra yeniden yapma gecikmesi (ms)",
+  "config.name.turbocatchupauto": "Otomatik yetişme",
+  "config.name.turbocatchupbudgetms": "Yetişme bütçesi (tick başına ms)",
+  "config.name.turboshowstats": "F3 istatistiklerini göster",
+  "config.name.turbocompactstorage": "Çok büyük şematikler için kompakt depolama",
+  "config.name.turbobatchdraw": "Toplu çizim",
+  "config.name.turbofardetail": "Uzaktaki ayrıntıyı azalt",
+  "config.name.turbocompletecopy": "Taşırken tam kopya",
+  "litematica_turbo.gui.button.config_gui.turbo": "Turbo",
+  "litematica_turbo.message.out_of_memory": "[Litematica Turbo] Bu şematik, Minecraft'ın sahip olduğu bellek (%s MB) için çok büyük olduğundan yüklenmedi. Minecraft'a daha fazla bellek verin veya daha küçük bir şematik kullanın.",
+  "litematica_turbo.message.storage_off": "[Litematica Turbo] Kompakt şematik depolama bir hatayla karşılaştı (%s) ve bu oturum için kapalı. Şematikler normal Litematica yöntemiyle saklanır.",
+  "litematica_turbo.message.batch_off": "[Litematica Turbo] Toplu çizim bir hatayla karşılaştı (%s) ve bu oturum için kapalı. Şematik, normal Litematica'da olduğu gibi parça parça çizilir.",
+  "litematica_turbo.message.batch_paused": "[Litematica Turbo] Şematikleri farklı çizdikleri için %s shader'ları açıkken toplu çizim duraklatıldı. Şematik, normal Litematica'da olduğu gibi parça parça çizilir ve shader'lar kapatıldığında toplu çizim geri döner.",
+  "litematica_turbo.message.copy_off": "[Litematica Turbo] Hızlı yerleştirme kopyalama bir hatayla karşılaştı (%s) ve bu oturum için kapalı. Yerleştirmeler normal Litematica yöntemiyle kopyalanır.",
+  "litematica_turbo.message.far_off": "[Litematica Turbo] Uzaktaki ayrıntıyı azaltma bir hatayla karşılaştı (%s) ve bu oturum için kapalı. Her kontur, normal Litematica'da olduğu gibi çizilir.",
+  "litematica_turbo.message.complete_off": "[Litematica Turbo] Taşırken tam kopya bir hatayla karşılaştı (%s) ve bu oturum için kapalı. Taşınan yerleştirme, daha önce olduğu gibi normal eski parçaları gösterir."
+}

@@ -1,0 +1,23 @@
+{
+  "config.name.turboenabled": "Turbo aktiverad",
+  "config.name.turbobuildthreads": "Bygg-trådar",
+  "config.name.turboskipemptysections": "Hoppa över tomma sektioner",
+  "config.name.turboasyncnearrebuilds": "Bakgrundsomritning nära",
+  "config.name.turboghostmove": "Jämn placering vid förflyttning",
+  "config.name.turboghostsettlems": "Ombyggnadsfördröjning efter förflyttning (ms)",
+  "config.name.turbocatchupauto": "Automatisk upphämtning",
+  "config.name.turbocatchupbudgetms": "Upphämtningsbudget (ms per tick)",
+  "config.name.turboshowstats": "Visa F3-statistik",
+  "config.name.turbocompactstorage": "Kompakt lagring för enorma scheman",
+  "config.name.turbobatchdraw": "Batchritning",
+  "config.name.turbofardetail": "Mindre detalj på långt avstånd",
+  "config.name.turbocompletecopy": "Komplett kopia vid förflyttning",
+  "litematica_turbo.gui.button.config_gui.turbo": "Turbo",
+  "litematica_turbo.message.out_of_memory": "[Litematica Turbo] Detta schema är för stort för minnet Minecraft har (%s MB), så det laddades inte. Ge Minecraft mer minne eller använd ett mindre schema.",
+  "litematica_turbo.message.storage_off": "[Litematica Turbo] Kompakt schemalagring fick ett fel (%s) och är avstängd för den här sessionen. Scheman lagras på vanligt Litematica-sätt.",
+  "litematica_turbo.message.batch_off": "[Litematica Turbo] Batchritning fick ett fel (%s) och är avstängd för den här sessionen. Schemat ritas bit för bit, som i vanlig Litematica.",
+  "litematica_turbo.message.batch_paused": "[Litematica Turbo] Batchritning är pausad medan shaders från %s är på, eftersom de ritar schemat på ett annat sätt. Schemat ritas bit för bit, som i vanlig Litematica, och batchritning kommer tillbaka när shaders är av.",
+  "litematica_turbo.message.copy_off": "[Litematica Turbo] Snabb kopiering av placeringar fick ett fel (%s) och är avstängd för den här sessionen. Placeringar kopieras på vanligt Litematica-sätt.",
+  "litematica_turbo.message.far_off": "[Litematica Turbo] Mindre detalj på långt avstånd fick ett fel (%s) och är avstängd för den här sessionen. Varje kontur ritas, som i vanlig Litematica.",
+  "litematica_turbo.message.complete_off": "[Litematica Turbo] Komplett kopia vid förflyttning fick ett fel (%s) och är avstängd för den här sessionen. En förflyttad placering visar de vanliga gamla bitarna, som förut."
+}

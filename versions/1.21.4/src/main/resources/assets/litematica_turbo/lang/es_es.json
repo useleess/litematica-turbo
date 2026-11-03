@@ -1,0 +1,23 @@
+{
+  "config.name.turboenabled": "Turbo activado",
+  "config.name.turbobuildthreads": "Hilos de construcción",
+  "config.name.turboskipemptysections": "Omitir secciones vacías",
+  "config.name.turboasyncnearrebuilds": "Reconstrucciones cercanas en segundo plano",
+  "config.name.turboghostmove": "Movimiento suave de la colocación",
+  "config.name.turboghostsettlems": "Retraso de reconstrucción tras mover (ms)",
+  "config.name.turbocatchupauto": "Puesta al día automática",
+  "config.name.turbocatchupbudgetms": "Presupuesto de puesta al día (ms por tick)",
+  "config.name.turboshowstats": "Mostrar estadísticas de F3",
+  "config.name.turbocompactstorage": "Almacenamiento compacto para esquemas enormes",
+  "config.name.turbobatchdraw": "Dibujado por lotes",
+  "config.name.turbofardetail": "Menos detalle a distancia",
+  "config.name.turbocompletecopy": "Copia completa al mover",
+  "litematica_turbo.gui.button.config_gui.turbo": "Turbo",
+  "litematica_turbo.message.out_of_memory": "[Litematica Turbo] Este esquema es demasiado grande para la memoria que tiene Minecraft (%s MB), así que no se ha cargado. Asigna más memoria a Minecraft o usa un esquema más pequeño.",
+  "litematica_turbo.message.storage_off": "[Litematica Turbo] El almacenamiento compacto de esquemas ha dado un error (%s) y está desactivado en esta sesión. Los esquemas se guardan de la forma normal de Litematica.",
+  "litematica_turbo.message.batch_off": "[Litematica Turbo] El dibujado por lotes ha dado un error (%s) y está desactivado en esta sesión. El esquema se dibuja pieza a pieza, como en Litematica normal.",
+  "litematica_turbo.message.batch_paused": "[Litematica Turbo] El dibujado por lotes está en pausa mientras los shaders de %s están activados, porque dibujan el esquema de otra forma. El esquema se dibuja pieza a pieza, como en Litematica normal, y el dibujado por lotes vuelve cuando los shaders se desactiven.",
+  "litematica_turbo.message.copy_off": "[Litematica Turbo] La copia rápida de colocaciones ha dado un error (%s) y está desactivada en esta sesión. Las colocaciones se copian de la forma normal de Litematica.",
+  "litematica_turbo.message.far_off": "[Litematica Turbo] El menor detalle a distancia ha dado un error (%s) y está desactivado en esta sesión. Se dibuja cada contorno, como en Litematica normal.",
+  "litematica_turbo.message.complete_off": "[Litematica Turbo] La copia completa al mover ha dado un error (%s) y está desactivada en esta sesión. Una colocación movida muestra las piezas antiguas normales, como antes."
+}
