@@ -15,6 +15,7 @@ import fi.dy.masa.litematica.render.schematic.ChunkRenderTaskSchematic;
 import fi.dy.masa.litematica.render.schematic.ChunkRenderWorkerLitematica;
 import fi.dy.masa.litematica.render.schematic.ChunkRendererSchematicVbo;
 
+import com.litematicaturbo.core.BuildErrors;
 import com.litematicaturbo.core.BuildStats;
 import com.litematicaturbo.shared.CompletePiece;
 import com.litematicaturbo.shared.DroppedBuilds;
@@ -42,6 +43,11 @@ public abstract class ChunkRenderWorkerLitematicaMixin
 
         try
         {
+            if (onRenderThread == false)
+            {
+                BuildErrors.checkFaultForTest();
+            }
+
             ((ChunkRendererSchematicVboInvoker) renderer).turbo$rebuildChunk(task, pack);
         }
         catch (RuntimeException e)

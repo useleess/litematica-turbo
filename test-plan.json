@@ -8,7 +8,7 @@
   },
   {
    "prefix": "build/",
-   "min": 15,
+   "min": 16,
    "what": "multithreaded chunk builds give exactly the same schematic geometry as Litematica alone"
   },
   {

@@ -2,6 +2,7 @@ package com.litematicaturbo.core;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * An error on one of Turbo's build threads. The build of that chunk is dropped (the chunk keeps its last finished
@@ -16,6 +17,7 @@ public final class BuildErrors
     private static volatile int dropped;
     private static volatile String lastReason;
     private static volatile boolean warned;
+    private static final AtomicBoolean FAULT_FOR_TEST = new AtomicBoolean();
 
     private BuildErrors()
     {
@@ -55,11 +57,27 @@ public final class BuildErrors
         return null;
     }
 
+    /** Tests make the next build on a build thread fail once, as a broken vertex writer would. */
+    public static void armFaultForTest()
+    {
+        FAULT_FOR_TEST.set(true);
+    }
+
+    /** Called by a build thread before it builds: throws the armed test fault, once. */
+    public static void checkFaultForTest()
+    {
+        if (FAULT_FOR_TEST.getAndSet(false))
+        {
+            throw new IllegalStateException("test fault in the chunk build");
+        }
+    }
+
     /** Back to the start of a session (tests only). */
     public static void resetForTest()
     {
         dropped = 0;
         lastReason = null;
         warned = false;
+        FAULT_FOR_TEST.set(false);
     }
 }

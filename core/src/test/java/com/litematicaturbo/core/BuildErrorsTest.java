@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.After;
 import org.junit.Test;
@@ -45,5 +46,24 @@ public class BuildErrorsTest
         }
 
         assertFalse(BuildErrors.mayRebuild());
+    }
+
+    @Test
+    public void theArmedTestFaultFiresOnce()
+    {
+        BuildErrors.checkFaultForTest();
+        BuildErrors.armFaultForTest();
+
+        try
+        {
+            BuildErrors.checkFaultForTest();
+            fail("the armed fault did not fire");
+        }
+        catch (IllegalStateException expected)
+        {
+            assertTrue(expected.getMessage().contains("chunk build"));
+        }
+
+        BuildErrors.checkFaultForTest();
     }
 }

@@ -37,6 +37,41 @@ final class BuildTests
         WorldTests.same(stock, turbo, WorldTests.zones(f, "B"), "block-entity chunks");
     }
 
+    private static int count(String text, String part)
+    {
+        int n = 0;
+
+        for (int i = text.indexOf(part); i >= 0; i = text.indexOf(part, i + part.length()))
+        {
+            ++n;
+        }
+
+        return n;
+    }
+
+    /** Lines of the game log that carry the forced build error. */
+    private static int faultLines()
+    {
+        try
+        {
+            int n = 0;
+
+            for (String line : java.nio.file.Files.readAllLines(new java.io.File("logs/latest.log").toPath(), java.nio.charset.StandardCharsets.UTF_8))
+            {
+                if (line.contains("test fault in the chunk build"))
+                {
+                    ++n;
+                }
+            }
+
+            return n;
+        }
+        catch (java.io.IOException e)
+        {
+            throw new SelfTest.Fail("the game log cannot be read: " + e);
+        }
+    }
+
     static void register(Ctx ctx, SelfTest.Tests tests)
     {
         tests.add("build/baseline-repeatable", () -> {
@@ -188,6 +223,42 @@ final class BuildTests
                 SelfTest.check(c.builds <= Math.max(stock.builds, chunks) + 2,
                                n + " threads: " + c.builds + " builds for " + chunks + " chunks, plain Litematica needed " + stock.builds + " (chunks built twice)");
             }
+        });
+
+        tests.add("build/error-drops-the-build-and-rebuilds", () -> {
+            Class<?> errors;
+
+            try
+            {
+                ctx.turbo("DroppedBuilds");
+                errors = ctx.cls("com.litematicaturbo.core.BuildErrors");
+            }
+            catch (ClassNotFoundException e)
+            {
+                throw SelfTest.skip("this version has no dropped-build guard");
+            }
+
+            Fixture f = WorldTests.fixture(ctx);
+            Fixture.Capture normal = WorldTests.turbo(f);
+            String key = "litematica_turbo.message.build_dropped";
+            Ctx.call(errors, "resetForTest");
+            String chatBefore = SafetyTests.chatText(ctx);
+            int logBefore = faultLines();
+            Ctx.call(errors, "armFaultForTest");
+            Fixture.Capture faulted = f.captureNew("t3-build-fault", true, 3, true, true);
+            ctx.ticks(10);
+            SelfTest.check(ctx.onMain(() -> ctx.client != null), "the client is gone after the build error");
+            SelfTest.equal(1, (Integer) Ctx.call(errors, "dropped"), "builds dropped after one forced error");
+            WorldTests.same(normal, faulted, f.allChunks(), "the build after the dropped one");
+            String chat = SafetyTests.chatText(ctx);
+            // the chat is kept in several lists on some versions, so "once" is shown by a second dropped build adding nothing
+            SelfTest.check(count(chat, key) > count(chatBefore, key), "no chat line tells the player about the dropped build: " + chat);
+            Ctx.call(errors, "armFaultForTest");
+            f.captureNew("t3-build-fault-again", true, 3, true, true);
+            ctx.ticks(10);
+            SelfTest.equal(2, (Integer) Ctx.call(errors, "dropped"), "builds dropped after a second forced error");
+            SelfTest.equal(count(chat, key), count(SafetyTests.chatText(ctx), key), "chat lines about dropped builds after a second one (the player is told once)");
+            SelfTest.check(faultLines() > logBefore, "the game log has no stack of the dropped build");
         });
 
         tests.add("build/render-thread-time-drops", () -> {
