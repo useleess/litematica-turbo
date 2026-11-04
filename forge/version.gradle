@@ -191,6 +191,13 @@ if (project.hasProperty('pack_format')) {
 }
 
 processResources {
+    // the language files come from the Fabric version's folder (see above), so a Forge / NeoForge version has none of its own:
+    // the release judge relies on this check that every jar really gets them
+    doLast {
+        if (!new File(destinationDir, 'assets/litematica_turbo/lang/en_us.json').isFile()) {
+            throw new GradleException("$project.name: no English language file in the jar (looked in $fabricSource)")
+        }
+    }
     def props = ['version': modVersion,
                  'forgematica_mod_id': project.findProperty('forgematica_mod_id') ?: 'forgematica']
     inputs.properties props
