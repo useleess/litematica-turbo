@@ -73,8 +73,8 @@
   },
   {
    "prefix": "sodium/",
-   "min": 15,
-   "what": "next to Sodium (and Iris with a shader pack on): the schematic is drawn, every speed-up works as its own tests prove, no GL errors, no feature switched off, shader switching like plain Litematica, screenshots; in a run without Sodium these skip"
+   "min": 16,
+   "what": "next to Sodium (and Iris with a shader pack on): the schematic is drawn, every speed-up works as its own tests prove, no GL errors, no feature switched off, shader switching like plain Litematica and while chunks are building (the buffer builder Iris extends always fills what its format asks for), screenshots; in a run without Sodium these skip"
   },
   {
    "prefix": "far/",

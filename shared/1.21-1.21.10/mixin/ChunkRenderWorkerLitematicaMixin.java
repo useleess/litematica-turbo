@@ -13,6 +13,7 @@ import fi.dy.masa.litematica.render.schematic.ChunkRendererSchematicVbo;
 
 import com.litematicaturbo.core.BuildStats;
 import com.litematicaturbo.shared.CompletePiece;
+import com.litematicaturbo.shared.DroppedBuilds;
 import com.litematicaturbo.shared.TurboRenderer;
 
 /**
@@ -38,11 +39,17 @@ public abstract class ChunkRenderWorkerLitematicaMixin
         }
         catch (RuntimeException e)
         {
-            // The chunk renderer was discarded (world unloaded, out of range) while this
-            // cancelled build was still running on a worker; its result is thrown away anyway.
-            if (onMainThread || ((ChunkRenderTaskSchematicInvoker) task).turbo$isFinished() == false)
+            if (onMainThread)
             {
                 throw e;
+            }
+
+            // A finished task: the chunk renderer was discarded (world unloaded, out of range) while this cancelled
+            // build was still running on a worker; its result is thrown away anyway. Any other error on a build thread
+            // (another mod's vertex writer, a broken block model) drops this build and builds the chunk again.
+            if (((ChunkRenderTaskSchematicInvoker) task).turbo$isFinished() == false)
+            {
+                DroppedBuilds.drop((TurboRenderer) renderer, e);
             }
         }
         finally

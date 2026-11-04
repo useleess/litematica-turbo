@@ -7,6 +7,7 @@ import net.minecraft.util.Formatting;
 import fi.dy.masa.malilib.interfaces.IClientTickHandler;
 
 import com.litematicaturbo.core.BatchDrawing;
+import com.litematicaturbo.core.BuildErrors;
 import com.litematicaturbo.core.CompactStorage;
 import com.litematicaturbo.core.CompleteCopy;
 import com.litematicaturbo.core.FarDetail;
@@ -70,6 +71,13 @@ final class SettingsTicker implements IClientTickHandler
         if (completeFailure != null)
         {
             mc.inGameHud.getChatHud().addMessage(Text.translatable("litematica_turbo.message.complete_off", completeFailure).formatted(Formatting.GOLD));
+        }
+
+        String buildDropped = BuildErrors.takeWarning(mc.player != null);
+
+        if (buildDropped != null)
+        {
+            mc.inGameHud.getChatHud().addMessage(Text.translatable("litematica_turbo.message.build_dropped", buildDropped).formatted(Formatting.GOLD));
         }
 
         TurboSettingsTab.applyPendingChanges();

@@ -139,6 +139,29 @@ final class SodiumTests
         return found;
     }
 
+    /** How many lines of the game log report Iris's "Missing elements in vertex" (a buffer builder with a format it was not filled for). */
+    private static int missingElementLines()
+    {
+        int n = 0;
+
+        try
+        {
+            for (String line : Files.readAllLines(new File("logs/latest.log").toPath(), StandardCharsets.UTF_8))
+            {
+                if (line.contains("Missing elements in vertex"))
+                {
+                    ++n;
+                }
+            }
+        }
+        catch (java.io.IOException e)
+        {
+            throw new SelfTest.Fail("the game log cannot be read: " + e);
+        }
+
+        return n;
+    }
+
     /** The last log lines that mention Iris or shaders (what to read when the pack does not load). */
     private static String irisLog()
     {
@@ -347,6 +370,23 @@ final class SodiumTests
         return "drawn with shaders on: " + on + ", after they went off: " + off;
     }
 
+    /**
+     * Whether Turbo makes the block buffers' vertex format follow the shader pack in this render era (IrisBlockBuffers), so a
+     * Turbo run and a plain one must have the same format; elsewhere Iris's own timing decides it and the format is not compared.
+     */
+    private static boolean formatFollowsShaders(Ctx ctx)
+    {
+        try
+        {
+            ctx.turbo("IrisBlockBuffers");
+            return true;
+        }
+        catch (ClassNotFoundException e)
+        {
+            return false;
+        }
+    }
+
     /** The body with the test shader pack on; shaders are off again afterwards. */
     private static void withShaders(Ctx ctx, SelfTest.Body body) throws Exception
     {
@@ -354,7 +394,7 @@ final class SodiumTests
         needs(ctx, "iris");
         freshStart(ctx);
         switchShaders(ctx, true);
-        Fixture.Sig.shaderPackOn = true;
+        Fixture.Sig.ignoreBufferFormat = formatFollowsShaders(ctx) == false;
 
         try
         {
@@ -362,7 +402,7 @@ final class SodiumTests
         }
         finally
         {
-            Fixture.Sig.shaderPackOn = false;
+            Fixture.Sig.ignoreBufferFormat = false;
             switchShaders(ctx, false);
         }
     }
@@ -489,6 +529,58 @@ final class SodiumTests
             switchShaders(ctx, false);
             schematicDrawn(ctx, "with shaders switched off again", "sodium-shaders-back-off.png");
             noFeatureOff(ctx, "after shaders were switched on and off");
+        });
+
+        tests.add("sodium/shader-switch-while-building", () -> {
+            needs(ctx, "sodium");
+            needs(ctx, "iris");
+            Class<?> buffers;
+
+            try
+            {
+                buffers = ctx.turbo("IrisBlockBuffers");
+            }
+            catch (ClassNotFoundException e)
+            {
+                throw SelfTest.skip("this render era makes no buffer builders Iris extends");
+            }
+
+            freshStart(ctx);
+            Fixture f = WorldTests.fixture(ctx);
+            Ctx.call(core(ctx, "BuildErrors"), "resetForTest");
+            int missingBefore = missingElementLines();
+
+            try
+            {
+                for (int round = 0; round < 3; ++round)
+                {
+                    setShaders(ctx, true);
+                    f.reload();
+                    ctx.ticks(2);
+                    // Iris's flag changes between a layer's pipeline answering and the builder being made, as it does on a
+                    // build thread; the chunks are building right now
+                    String problems = (String) ctx.onMain(() -> Ctx.call(buffers, "selfCheck", 200));
+                    SelfTest.check(problems.isEmpty(), "round " + round + ": " + problems);
+                    setShaders(ctx, false);
+                    f.reload();
+                    ctx.ticks(3);
+                }
+
+                switchShaders(ctx, true);
+                SelfTest.check((Integer) Ctx.call(ctx.turbo("IrisBuilders"), "races") > 0, "the check never reached the state where the pipeline's format and the builder disagree");
+                int dropped = (Integer) Ctx.call(core(ctx, "BuildErrors"), "dropped");
+                SelfTest.check(dropped == 0, dropped + " chunk build(s) were dropped after an error while shaders were switched; the log has the details");
+                SelfTest.check(missingElementLines() == missingBefore, "the game log has a new 'Missing elements in vertex' error");
+                noFeatureOff(ctx, "after shaders were switched while chunks were building");
+                schematicDrawn(ctx, "after shaders were switched while building", "sodium-shaders-switched-building.png");
+            }
+            finally
+            {
+                if (shadersInUse(ctx))
+                {
+                    switchShaders(ctx, false);
+                }
+            }
         });
     }
 }

@@ -46,6 +46,8 @@ final class MoveTests
     }
 
     static Fixture f;
+    /** Where a turned or mirrored placement's 32 x 32 footprint starts, from its origin (it turns around the origin, so it reaches back from it). */
+    private static int[] footprintShift = {0, 0};
     static Object placement;
 
     static boolean ghostActive(Ctx ctx) throws Exception
@@ -151,6 +153,7 @@ final class MoveTests
 
     private static void restore(Ctx ctx) throws Exception
     {
+        footprintShift = new int[] {0, 0};
         Object config = Ctx.call(f.configClass, "get");
         Ctx.setField(config, "ghostMove", true);
         Ctx.setField(config, "ghostSettleMs", 250);
@@ -259,7 +262,7 @@ final class MoveTests
 
         if (r.removed == false)
         {
-            settle(ctx, f.chunksAt(r.finalOrigin[0], r.finalOrigin[2]));
+            settle(ctx, f.chunksAt(r.finalOrigin[0] + footprintShift[0], r.finalOrigin[2] + footprintShift[1]));
         }
 
         r.activeAfterSettle = ghostActive(ctx);
@@ -730,17 +733,19 @@ final class MoveTests
         // {name, setter, constant}, the step before the turn, where the marker block ends up from the turned origin. A placement
         // turns around its origin: each step makes the turned placement end on the blocks of the plain move by 8, in front
         // of the player whatever the window's shape (turned after a move by 8 it reached two chunks to the side or behind)
-        Object[][] turns = {{new String[] {"rotated", "setRotation", "CLOCKWISE_90"}, new int[] {39, 0, 0}, new int[] {-3, 2, 3}},
-                            {new String[] {"mirrored", "setMirror", "LEFT_RIGHT"}, new int[] {8, 0, 31}, new int[] {3, 2, -3}}};
+        Object[][] turns = {{new String[] {"rotated", "setRotation", "CLOCKWISE_90"}, new int[] {39, 0, 0}, new int[] {-3, 2, 3}, new int[] {-31, 0}},
+                            {new String[] {"mirrored", "setMirror", "LEFT_RIGHT"}, new int[] {8, 0, 31}, new int[] {3, 2, -3}, new int[] {0, -31}}};
 
         for (Object[] t : turns)
         {
             String[] turn = (String[]) t[0];
             int[] step = (int[]) t[1];
             int[] marker = (int[]) t[2];
+            int[] footprint = (int[]) t[3];
             tests.add("move/" + turn[0] + "-while-moving-same-as-stock", () -> {
                 f = WorldTests.fixture(ctx);
                 guarded(ctx, () -> {
+                    footprintShift = footprint;
                     inView(ctx, turn[1], turn[2], step, marker);
                     Extra turnIt = run -> {
                         PlaceTests.turn(ctx, placement, turn[1], turn[2]);

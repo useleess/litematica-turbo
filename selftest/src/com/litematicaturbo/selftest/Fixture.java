@@ -56,14 +56,14 @@ final class Fixture
         private static final java.util.regex.Pattern OVERLAY_COUNT = java.util.regex.Pattern.compile("(?i).*overlay[^=]*=.*[0-9].*|.*overlay.*primitiveCenters.*|.*[.](generation|capacity)=-?[0-9]+$|.*this[$]0[.].*");
 
         /**
-         * With an Iris shader pack on, the vertex format of a block buffer (plain, or Iris's extended one with mc_Entity ...)
+         * Only where Turbo does not make it (before 1.21.10, no IrisBlockBuffers): with an Iris shader pack on, the vertex format of a block buffer (plain, or Iris's extended one with mc_Entity ...)
          * depends on whether the build happened inside Iris's world-render phase. Seen in two runs, in opposite directions:
          * plain Litematica itself had the plain format in one and the extended one in the other. The geometry is still compared.
          */
         private static final java.util.regex.Pattern BUFFER_FORMAT = java.util.regex.Pattern.compile(".*drawParameters[.]format=.*");
 
-        /** Set while the test shader pack is on (SodiumTests.withShaders). */
-        static volatile boolean shaderPackOn;
+        /** Set while the test shader pack is on in a render era where nothing makes the buffers' format follow it (SodiumTests.withShaders). */
+        static volatile boolean ignoreBufferFormat;
 
         Sig(List<String> all)
         {
@@ -71,7 +71,7 @@ final class Fixture
 
             for (String l : all)
             {
-                if (OVERLAY_COUNT.matcher(l).matches() == false && (shaderPackOn == false || BUFFER_FORMAT.matcher(l).matches() == false))
+                if (OVERLAY_COUNT.matcher(l).matches() == false && (ignoreBufferFormat == false || BUFFER_FORMAT.matcher(l).matches() == false))
                 {
                     lines.add(l);
                 }

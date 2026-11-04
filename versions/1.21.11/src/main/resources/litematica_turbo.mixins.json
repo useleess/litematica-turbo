@@ -6,6 +6,7 @@
   "compatibilityLevel": "JAVA_21",
   "client": [
     "BlockModelRendererSchematicMixin",
+    "BufferBuilderCacheIrisMixin",
     "ChunkCacheSchematicAccessor",
     "ChunkRenderDispatcherLitematicaInvoker",
     "ChunkRenderDispatcherLitematicaMixin",

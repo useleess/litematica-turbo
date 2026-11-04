@@ -16,6 +16,7 @@
     "ChunkRenderUploadCallbackMixin",
     "ChunkRenderWorkerInvoker",
     "GpuBufferCacheAccessor",
+    "BufferBuilderCacheIrisMixin",
     "ChunkRendererSchematicVboClearMixin",
     "ChunkRendererSchematicVboInvoker",
     "ChunkRendererSchematicVboGpuMixin",

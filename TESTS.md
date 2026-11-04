@@ -72,7 +72,10 @@ calls on batch eras, the game's own screenshot full of colour), each speed-up pa
 no GL error line in the game log, no Turbo feature switched itself off (state and chat), screenshots (`sodium.png`,
 `sodium-iris-shaders.png`, brought back in `test-shots/`), shaders on and off again, switching shaders mid-game does to
 the schematic exactly what it does to plain Litematica (`shaders-toggle-like-stock`), and batch drawing pausing while
-shaders are on (`shaders-pause-batch-drawing`, batch eras).
+shaders are on (`shaders-pause-batch-drawing`, batch eras), and switching shaders on and off while chunks are building
+(`shader-switch-while-building`, 1.21.10 and later: Iris's flag that decides a buffer builder's format is flipped between the layer's
+pipeline and the builder 200 times, the builders Turbo makes must always fill what their format asks for; the same state
+breaks a stock builder, which the log line "Iris builder check" counts; no build may be dropped, no "Missing elements in vertex" line).
 
 Every version in the table runs at release (one box run per version). Where Iris itself cannot run in the dev game the
 table names no Iris and the run skips the 7 shader tests (Sodium's 8 still run): 1.16.5 and 1.17.1 (MaLiLib, and so
