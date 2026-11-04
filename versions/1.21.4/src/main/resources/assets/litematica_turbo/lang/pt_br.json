@@ -19,5 +19,6 @@
   "litematica_turbo.message.batch_paused": "[Litematica Turbo] O desenho em lote está pausado enquanto os shaders de %s estão ativados, pois eles desenham o esquema de outra forma. O esquema é desenhado peça por peça, como no Litematica normal, e o desenho em lote volta quando os shaders forem desativados.",
   "litematica_turbo.message.copy_off": "[Litematica Turbo] A cópia rápida de colocações teve um erro (%s) e está desativada nesta sessão. As colocações são copiadas do jeito normal do Litematica.",
   "litematica_turbo.message.far_off": "[Litematica Turbo] O recurso de menos detalhe ao longe teve um erro (%s) e está desativado nesta sessão. Todos os contornos são desenhados, como no Litematica normal.",
+  "litematica_turbo.message.build_dropped": "[Litematica Turbo] Não foi possível construir um chunk do esquema (%s). Essa construção foi descartada e o chunk será construído novamente; os detalhes estão no log do jogo.",
   "litematica_turbo.message.complete_off": "[Litematica Turbo] A cópia completa ao mover teve um erro (%s) e está desativada nesta sessão. Uma colocação movida mostra as peças antigas normais, como antes."
 }

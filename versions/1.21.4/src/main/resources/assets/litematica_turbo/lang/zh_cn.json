@@ -19,5 +19,6 @@
   "litematica_turbo.message.batch_paused": "[Litematica Turbo] 当 %s 的着色器开启时，批量绘制已暂停，因为它们绘制投影的方式不同。投影将像普通 Litematica 一样逐块绘制，着色器关闭后批量绘制会恢复。",
   "litematica_turbo.message.copy_off": "[Litematica Turbo] 快速放置复制出现错误（%s），本次游戏会话中已关闭。放置内容将以 Litematica 的常规方式复制。",
   "litematica_turbo.message.far_off": "[Litematica Turbo] 远处减少细节出现错误（%s），本次游戏会话中已关闭。所有轮廓都将像普通 Litematica 一样绘制。",
+  "litematica_turbo.message.build_dropped": "[Litematica Turbo] 无法构建一个投影区块（%s）。该次构建已被丢弃，区块将重新构建；详细信息请查看游戏日志。",
   "litematica_turbo.message.complete_off": "[Litematica Turbo] 移动时完整复制出现错误（%s），本次游戏会话中已关闭。移动后的放置将像以前一样显示普通的旧方块。"
 }

@@ -19,5 +19,6 @@
   "litematica_turbo.message.batch_paused": "[Litematica Turbo] Batchritning är pausad medan shaders från %s är på, eftersom de ritar schemat på ett annat sätt. Schemat ritas bit för bit, som i vanlig Litematica, och batchritning återkommer när shaders är av.",
   "litematica_turbo.message.copy_off": "[Litematica Turbo] Snabb kopiering av placeringar fick ett fel (%s) och är avstängd under den här sessionen. Placeringar kopieras på vanligt Litematica-sätt.",
   "litematica_turbo.message.far_off": "[Litematica Turbo] Mindre detaljer på avstånd fick ett fel (%s) och är avstängd under den här sessionen. Alla konturer ritas, som i vanlig Litematica.",
+  "litematica_turbo.message.build_dropped": "[Litematica Turbo] En schemachunk kunde inte byggas (%s). Bygget avbröts och chunken byggs om; detaljerna finns i spelloggen.",
   "litematica_turbo.message.complete_off": "[Litematica Turbo] Komplett kopia under förflyttning fick ett fel (%s) och är avstängd under den här sessionen. En förflyttad placering visar de vanliga gamla bitarna, som tidigare."
 }

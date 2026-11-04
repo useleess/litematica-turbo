@@ -19,5 +19,6 @@
   "litematica_turbo.message.batch_paused": "[Litematica Turbo] 开启 %s 的光影时批量绘制已暂停，因为它们绘制投影的方式不同。投影将像普通 Litematica 一样逐块绘制，关闭光影后批量绘制会恢复。",
   "litematica_turbo.message.copy_off": "[Litematica Turbo] 快速放置复制出错（%s），本次会话已关闭。放置将按 Litematica 的常规方式复制。",
   "litematica_turbo.message.far_off": "[Litematica Turbo] 远处减少细节出错（%s），本次会话已关闭。所有轮廓都会绘制，与普通 Litematica 相同。",
+  "litematica_turbo.message.build_dropped": "[Litematica Turbo] 无法建造一个投影区块（%s）。该次建造已被丢弃，区块将重新建造；详细信息请查看游戏日志。",
   "litematica_turbo.message.complete_off": "[Litematica Turbo] 移动时完整复制出错（%s），本次会话已关闭。移动后的放置将像以前一样显示普通的旧方块。"
 }

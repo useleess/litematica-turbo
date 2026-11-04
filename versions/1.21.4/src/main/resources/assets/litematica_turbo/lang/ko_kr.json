@@ -19,5 +19,6 @@
   "litematica_turbo.message.batch_paused": "[Litematica Turbo] %s의 셰이더가 켜져 있는 동안 일괄 그리기가 일시 중지됩니다. 셰이더는 설계도를 다르게 그리기 때문입니다. 설계도는 평소 Litematica처럼 한 조각씩 그려지며, 셰이더를 끄면 일괄 그리기가 다시 적용됩니다.",
   "litematica_turbo.message.copy_off": "[Litematica Turbo] 빠른 배치 복사에 오류(%s)가 발생하여 이번 세션 동안 꺼졌습니다. 배치는 평소 Litematica 방식으로 복사됩니다.",
   "litematica_turbo.message.far_off": "[Litematica Turbo] 먼 곳 세부 묘사 줄이기에 오류(%s)가 발생하여 이번 세션 동안 꺼졌습니다. 모든 윤곽선이 평소 Litematica처럼 그려집니다.",
+  "litematica_turbo.message.build_dropped": "[Litematica Turbo] 스키매틱 청크를 빌드할 수 없습니다 (%s). 해당 빌드는 취소되었고 청크를 다시 빌드합니다. 자세한 내용은 게임 로그에 있습니다.",
   "litematica_turbo.message.complete_off": "[Litematica Turbo] 이동 중 완전 복사에 오류(%s)가 발생하여 이번 세션 동안 꺼졌습니다. 이동된 배치는 이전처럼 평소의 기존 조각들을 보여줍니다."
 }

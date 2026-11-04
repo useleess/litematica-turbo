@@ -19,5 +19,6 @@
   "litematica_turbo.message.batch_paused": "[Litematica Turbo] Das stapelweise Zeichnen ist pausiert, solange Shader von %s aktiv sind, da sie die Schematic anders zeichnen. Die Schematic wird wie bei normalem Litematica Stück für Stück gezeichnet, und das stapelweise Zeichnen kehrt zurück, sobald die Shader aus sind.",
   "litematica_turbo.message.copy_off": "[Litematica Turbo] Das schnelle Kopieren der Platzierungen hat einen Fehler (%s) verursacht und ist für diese Sitzung ausgeschaltet. Platzierungen werden auf die übliche Litematica-Weise kopiert.",
   "litematica_turbo.message.far_off": "[Litematica Turbo] Weniger Details in der Ferne hat einen Fehler (%s) verursacht und ist für diese Sitzung ausgeschaltet. Jeder Umriss wird wie bei normalem Litematica gezeichnet.",
+  "litematica_turbo.message.build_dropped": "[Litematica Turbo] Ein Schematic-Chunk konnte nicht gebaut werden (%s). Dieser Bauvorgang wurde verworfen, und der Chunk wird neu gebaut; die Details stehen im Spiel-Log.",
   "litematica_turbo.message.complete_off": "[Litematica Turbo] Die vollständige Kopie beim Verschieben hat einen Fehler (%s) verursacht und ist für diese Sitzung ausgeschaltet. Eine verschobene Platzierung zeigt wie zuvor die normalen alten Teile."
 }

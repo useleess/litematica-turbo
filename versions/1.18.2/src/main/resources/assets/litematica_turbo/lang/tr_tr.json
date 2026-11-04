@@ -19,5 +19,6 @@
   "litematica_turbo.message.batch_paused": "[Litematica Turbo] %s gölgelendiricileri açık olduğundan toplu çizim duraklatıldı, çünkü şemayı farklı çizerler. Şema, normal Litematica'da olduğu gibi parça parça çiziliyor ve gölgelendiriciler kapatıldığında toplu çizim geri döner.",
   "litematica_turbo.message.copy_off": "[Litematica Turbo] Hızlı yerleştirme kopyalama bir hatayla karşılaştı (%s) ve bu oturum için kapatıldı. Yerleştirmeler normal Litematica yöntemiyle kopyalanıyor.",
   "litematica_turbo.message.far_off": "[Litematica Turbo] Uzaktayken daha az ayrıntı bir hatayla karşılaştı (%s) ve bu oturum için kapatıldı. Her ana hat, normal Litematica'da olduğu gibi çiziliyor.",
+  "litematica_turbo.message.build_dropped": "[Litematica Turbo] Bir şematik parçası oluşturulamadı (%s). Bu yapım iptal edildi ve parça yeniden oluşturuluyor; ayrıntılar oyun günlüğünde.",
   "litematica_turbo.message.complete_off": "[Litematica Turbo] Taşırken tam kopya bir hatayla karşılaştı (%s) ve bu oturum için kapatıldı. Taşınan bir yerleştirme, daha önce olduğu gibi normal eski parçaları gösteriyor."
 }

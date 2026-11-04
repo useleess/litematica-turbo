@@ -19,5 +19,6 @@
   "litematica_turbo.message.batch_paused": "[Litematica Turbo] Il disegno a lotti è in pausa mentre sono attivi gli shader di %s, perché disegnano lo schematico in modo diverso. Lo schematico viene disegnato pezzo per pezzo, come nel normale Litematica, e il disegno a lotti torna quando gli shader sono disattivati.",
   "litematica_turbo.message.copy_off": "[Litematica Turbo] La copia veloce del piazzamento ha generato un errore (%s) ed è disattivata per questa sessione. I piazzamenti sono copiati nel modo normale di Litematica.",
   "litematica_turbo.message.far_off": "[Litematica Turbo] Il meno dettaglio da lontano ha generato un errore (%s) ed è disattivato per questa sessione. Ogni contorno viene disegnato, come nel normale Litematica.",
+  "litematica_turbo.message.build_dropped": "[Litematica Turbo] Impossibile costruire un blocco dello schematico (%s). Quella costruzione è stata scartata e il blocco viene ricostruito; i dettagli sono nel registro di gioco.",
   "litematica_turbo.message.complete_off": "[Litematica Turbo] La copia completa durante lo spostamento ha generato un errore (%s) ed è disattivata per questa sessione. Un piazzamento spostato mostra i normali pezzi vecchi, come prima."
 }

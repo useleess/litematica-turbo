@@ -19,5 +19,6 @@
   "litematica_turbo.message.batch_paused": "[Litematica Turbo] %s のシェーダーが有効な間は、スキーマティックの描画方法が異なるため、一括描画は一時停止しています。スキーマティックは通常のLitematicaと同じく、部分ごとに描画されます。シェーダーを無効にすると一括描画は再開されます。",
   "litematica_turbo.message.copy_off": "[Litematica Turbo] 高速な設置コピーでエラー (%s) が発生したため、このセッションでは無効になっています。設置はLitematicaの通常の方法でコピーされます。",
   "litematica_turbo.message.far_off": "[Litematica Turbo] 遠くの詳細を減らす機能でエラー (%s) が発生したため、このセッションでは無効になっています。すべての輪郭線が、通常のLitematicaと同じく描画されます。",
+  "litematica_turbo.message.build_dropped": "[Litematica Turbo] 投影のチャンク（%s）を建築できませんでした。その建築は破棄され、チャンクは再度建築されます。詳細はゲームのログに記録されています。",
   "litematica_turbo.message.complete_off": "[Litematica Turbo] 移動中の完全コピーでエラー (%s) が発生したため、このセッションでは無効になっています。移動した設置は、以前と同じく通常の古い部分で表示されます。"
 }

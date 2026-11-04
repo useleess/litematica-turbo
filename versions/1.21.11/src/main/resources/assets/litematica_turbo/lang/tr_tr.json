@@ -19,5 +19,6 @@
   "litematica_turbo.message.batch_paused": "[Litematica Turbo] Şematikleri farklı çizdikleri için %s shader'ları açıkken toplu çizim duraklatıldı. Şematik, normal Litematica'da olduğu gibi parça parça çizilir ve shader'lar kapatılınca toplu çizim geri döner.",
   "litematica_turbo.message.copy_off": "[Litematica Turbo] Hızlı yerleştirme kopyalama bir hatayla karşılaştı (%s) ve bu oturum için kapatıldı. Yerleştirmeler normal Litematica yöntemiyle kopyalanır.",
   "litematica_turbo.message.far_off": "[Litematica Turbo] Uzaktayken daha az ayrıntı bir hatayla karşılaştı (%s) ve bu oturum için kapatıldı. Her ana hat, normal Litematica'da olduğu gibi çizilir.",
+  "litematica_turbo.message.build_dropped": "[Litematica Turbo] Bir şematik chunk'ı inşa edilemedi (%s). Bu inşa iptal edildi ve chunk yeniden inşa ediliyor; ayrıntılar oyun günlüğünde.",
   "litematica_turbo.message.complete_off": "[Litematica Turbo] Taşırken tam kopyalama bir hatayla karşılaştı (%s) ve bu oturum için kapatıldı. Taşınan bir yerleştirme, daha önceki gibi normal eski parçaları gösterir."
 }
