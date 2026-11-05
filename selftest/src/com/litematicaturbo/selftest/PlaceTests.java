@@ -241,9 +241,35 @@ final class PlaceTests
         }
 
         f.awaitQuiet("both placements are in the schematic world");
-        List<String> d = dump(ctx, o);
+        List<String> d = settledDump(ctx, o);
         DUMPS.put(key, d);
         return d;
+    }
+
+    /**
+     * The schematic world once it stopped changing. Litematica's background jobs can pause longer than awaitQuiet's
+     * second on a busy box (26.2: plain Litematica read 202 of 379 blocks short), so two reads apart must match; a block
+     * that is really missing stays missing and still fails the comparison.
+     */
+    private static List<String> settledDump(Ctx ctx, int[] o) throws Exception
+    {
+        List<String> d = dump(ctx, o);
+
+        for (int i = 0; i < 20; i++)
+        {
+            Thread.sleep(1500);
+            f.awaitQuiet("the placement is in the schematic world");
+            List<String> again = dump(ctx, o);
+
+            if (again.equals(d))
+            {
+                return d;
+            }
+
+            d = again;
+        }
+
+        throw new SelfTest.Fail("the schematic world was still changing after a minute");
     }
 
     interface Body
@@ -296,7 +322,7 @@ final class PlaceTests
 
                 List<String> first = DUMPS.get("same-as-stock-plain/stock");
                 String note = first == null ? "" : "; the first placement alone gives '" + first.get(firstIndex(stock, turbo)) + "' there";
-                throw new SelfTest.Fail("the placed blocks differ from plain Litematica: " + firstDifference(stock, turbo) + " (" + differing + " cells differ)" + note);
+                throw new SelfTest.Fail("the placed blocks differ from plain Litematica: " + firstDifference(stock, turbo) + " (" + differing + " cells differ, plain " + (stock.size() - air(stock)) + " blocks, Turbo " + (turbo.size() - air(turbo)) + ")" + note);
             }
         }));
     }
