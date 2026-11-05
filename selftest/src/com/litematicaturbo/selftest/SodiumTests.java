@@ -430,7 +430,7 @@ final class SodiumTests
 
         for (Object description : descriptions.values())
         {
-            ids.add((Integer) Ctx.call(description, "id"));
+            ids.add(description instanceof Integer ? (Integer) description : (Integer) Ctx.call(description, "id")); // newer Sodium lists the id itself
         }
 
         SelfTest.check(ids.size() == descriptions.size() && ids.last() == descriptions.size() - 1,
