@@ -19,6 +19,7 @@ import fi.dy.masa.litematica.render.schematic.ChunkRenderTaskSchematic;
 import fi.dy.masa.litematica.render.schematic.ChunkRenderWorkerLitematica;
 
 import com.litematicaturbo.core.BuildThreads;
+import com.litematicaturbo.shared.BuildFormats;
 import com.litematicaturbo.shared.BuildWorkers;
 import com.litematicaturbo.shared.TurboDispatcher;
 
@@ -48,6 +49,7 @@ public abstract class ChunkRenderDispatcherLitematicaMixin implements TurboDispa
     private void turbo$startWorkers(CallbackInfo ci)
     {
         ChunkRenderDispatcherLitematica self = (ChunkRenderDispatcherLitematica) (Object) this;
+        BuildFormats.meetBeforeThreads();
         BuildThreads.start(() -> BuildWorkers.create(self), this.listThreadedWorkers, this.listWorkerThreads);
     }
 

@@ -407,6 +407,36 @@ final class SodiumTests
         }
     }
 
+    /**
+     * Sodium 0.5's list of vertex formats gives a new format the list's size as id and does not check again under its lock:
+     * two threads meeting a format at once register it twice, ids then repeat, and its converter cache (keyed by ids) hands
+     * block quads the converter of another format. Sound means the ids are exactly 0 .. size - 1.
+     */
+    private static void formatIdsSound(Ctx ctx) throws Exception
+    {
+        Object registry;
+
+        try
+        {
+            registry = Ctx.call(ctx.cls("net.caffeinemc.mods.sodium.api.vertex.format.VertexFormatRegistry"), "instance");
+        }
+        catch (ClassNotFoundException noRegistry)
+        {
+            throw SelfTest.skip("this Sodium has no list of vertex formats");
+        }
+
+        java.util.TreeSet<Integer> ids = new java.util.TreeSet<>();
+        java.util.Map<?, ?> descriptions = (java.util.Map<?, ?>) Ctx.getField(registry, "descriptions");
+
+        for (Object description : descriptions.values())
+        {
+            ids.add((Integer) Ctx.call(description, "id"));
+        }
+
+        SelfTest.check(ids.size() == descriptions.size() && ids.last() == descriptions.size() - 1,
+                       "Sodium's vertex formats were registered twice by threads at once: " + descriptions.size() + " formats with the ids " + ids);
+    }
+
     static void register(Ctx ctx, SelfTest.Tests tests)
     {
         tests.add("sodium/mods-loaded", () -> {
@@ -415,6 +445,13 @@ final class SodiumTests
             WorldTests.fixture(ctx);
             SelfTest.check(loaded(ctx, "litematica_turbo"), "Turbo is not loaded next to Sodium");
             noFeatureOff(ctx, "at the start");
+        });
+
+        tests.add("sodium/format-ids-sound", () -> {
+            needs(ctx, "sodium");
+            freshStart(ctx);
+            WorldTests.fixture(ctx);
+            formatIdsSound(ctx);
         });
 
         tests.add("sodium/schematic-drawn", () -> {

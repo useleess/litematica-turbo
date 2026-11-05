@@ -81,6 +81,35 @@ final class Fixture
             this.hash = Integer.toHexString(lines.hashCode());
         }
 
+        private static int differing(List<String> a, List<String> b)
+        {
+            int count = Math.abs(a.size() - b.size());
+
+            for (int i = 0; i < Math.min(a.size(), b.size()); i++)
+            {
+                if (a.get(i).equals(b.get(i)) == false)
+                {
+                    ++count;
+                }
+            }
+
+            return count;
+        }
+
+        /** Two lines from the end of their field path on: the block layer in front of it is long enough to hide the difference in a cut message. */
+        private static String difference(String a, String b)
+        {
+            int same = 0;
+
+            while (same < a.length() && same < b.length() && a.charAt(same) == b.charAt(same))
+            {
+                ++same;
+            }
+
+            int from = Math.max(0, same - 60);
+            return "'..." + a.substring(from) + "' vs '..." + b.substring(from) + "'";
+        }
+
         /** Why two descriptions differ: the first line that is not the same. */
         String diff(Sig other)
         {
@@ -90,14 +119,14 @@ final class Fixture
             {
                 if (this.lines.get(i).equals(other.lines.get(i)) == false)
                 {
-                    StringBuilder all = new StringBuilder("'" + this.lines.get(i) + "' vs '" + other.lines.get(i) + "'");
+                    StringBuilder all = new StringBuilder(differing(this.lines, other.lines) + " lines differ: " + difference(this.lines.get(i), other.lines.get(i)));
                     int shown = 1;
 
                     for (int j = i + 1; j < n && shown < 5; j++)
                     {
                         if (this.lines.get(j).equals(other.lines.get(j)) == false)
                         {
-                            all.append(" | '").append(this.lines.get(j)).append("' vs '").append(other.lines.get(j)).append("'");
+                            all.append(" | ").append(difference(this.lines.get(j), other.lines.get(j)));
                             ++shown;
                         }
                     }

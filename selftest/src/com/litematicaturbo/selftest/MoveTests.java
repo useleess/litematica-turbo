@@ -519,6 +519,8 @@ final class MoveTests
             f = WorldTests.fixture(ctx);
             guarded(ctx, () -> {
                 int[][] steps = {{1, 0, 0}, {2, 0, 0}, {3, 0, 0}, {4, 0, 0}, {5, 0, 0}, {6, 0, 0}};
+                // the complete copy's pieces count as builds and land whenever the build threads get to them (it has its own tests)
+                Ctx.setField(Ctx.call(f.configClass, "get"), "completeCopy", false);
                 Run turbo = run(ctx, true, 20, steps, null);
                 Run stock = run(ctx, false, 20, steps, null);
                 String trace = " (builds after each step: Turbo" + turbo.buildsAfterStep + ", plain Litematica" + stock.buildsAfterStep + ")";
