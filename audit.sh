@@ -7,6 +7,7 @@ T="$(cd ../.. && pwd)/toolchain"
 export GRADLE_USER_HOME="$T/gradle-home"
 # tags Gradle's build process with this copy's folder (see gradle-run-tag.sh); its temp folder goes at the end
 . ./gradle-run-tag.sh
+. ./no-early-window.sh
 
 # Forge / NeoForge targets (<mc>-forge, <mc>-neoforge) are built by forge/ (Architectury Loom)
 gradle_for()
@@ -33,6 +34,7 @@ mute()
 for v in "$@"; do
     log="versions/$v/audit.log"
     mute "$v"
+    no_early_window "$v" "versions/$v/run"
     gradle_for "$v"
     # a build that dies without an AUDIT line (seen on the busy test box: a Gradle daemon or download that
     # breaks off) is tried again, up to 3 times; a real patch failure still ends with its AUDIT line

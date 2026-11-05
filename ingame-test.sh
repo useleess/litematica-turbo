@@ -26,6 +26,7 @@ T="$(cd ../.. && pwd)/toolchain"
 export GRADLE_USER_HOME="$T/gradle-home"
 # tags Gradle's build process with this copy's folder (see gradle-run-tag.sh); its temp folder goes at the end
 . ./gradle-run-tag.sh
+. ./no-early-window.sh
 JDK25="$T/jdk25/jdk-25.0.4.1+1"
 JDK8="$(ls -d "$T"/jdk8/*/ | head -n 1)"
 [ "$1" = client ] && shift
@@ -107,11 +108,7 @@ run_version()
         case "$v" in
             *-neoforge) printf 'enableB3DValidationLayer = false\n' >> "$run/config/neoforge-client.toml" ;;
         esac
-        # NeoForge's early loading window crashed twice in a row on the busy test box (1.20.4: its memory bar drew a
-        # null text) before the game even loaded: the test games start without it
-        case "$v" in
-            *-neoforge) printf 'earlyWindowControl = false\n' > "$run/config/fml.toml" ;;
-        esac
+        no_early_window "$v" "$run"
         : > "$log"
         echo "== $v: building and starting the game client (attempt $attempt, log: $dir/selftest.log)"
         # shellcheck disable=SC2086

@@ -118,6 +118,7 @@ builds get the same code through their `fabric_source` folder.
 
 ## Scripts (repo root)
 
+- `no-early-window.sh` - starts NeoForge test games without the early loading window (used by both scripts below).
 - `ingame-test.sh` - in-game client tests per version (the release tester runs it); `audit.sh` - loads every patched
   class per version; `gradle-run-tag.sh` - helper both use.
 - `bench.sh`, `make-bench-world.sh`, `final-check.sh` - dev benchmark (stock vs Turbo); `range-check.py` - audits
