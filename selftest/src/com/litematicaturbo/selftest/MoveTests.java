@@ -26,6 +26,7 @@ final class MoveTests
     /** What one run of a scenario saw. */
     private static final class Run
     {
+        String camera = "?";
         Fixture.Capture finalView;
         Fixture.Capture reloadedView;
         long builds0;
@@ -48,6 +49,8 @@ final class MoveTests
     static Fixture f;
     /** Where a turned or mirrored placement's 32 x 32 footprint starts, from its origin (it turns around the origin, so it reaches back from it). */
     private static int[] footprintShift = {0, 0};
+    /** The chunks the camera sees where a turned placement ends (inView); null in the other scenarios. */
+    private static Set<Long> wantedInView;
     static Object placement;
 
     static boolean ghostActive(Ctx ctx) throws Exception
@@ -154,6 +157,7 @@ final class MoveTests
     private static void restore(Ctx ctx) throws Exception
     {
         footprintShift = new int[] {0, 0};
+        wantedInView = null;
         Object config = Ctx.call(f.configClass, "get");
         Ctx.setField(config, "ghostMove", true);
         Ctx.setField(config, "ghostSettleMs", 250);
@@ -262,6 +266,7 @@ final class MoveTests
 
         if (r.removed == false)
         {
+            awaitWantedInView();
             settle(ctx, f.chunksAt(r.finalOrigin[0] + footprintShift[0], r.finalOrigin[2] + footprintShift[1]));
         }
 
@@ -269,6 +274,7 @@ final class MoveTests
         r.buildsInTotal = f.stats("totalBuilds") - builds0;
         r.finalView = new Fixture.Capture(turbo ? "turbo-moved" : "stock-moved");
         Set<Long> keys = f.renderedKeys();
+        r.camera = f.cameraAngles();
         // uploads to the graphics card finish a little after the builds: describe until two looks in a row agree
         java.util.Map<Long, Fixture.Sig> look = stableDescription(keys);
 
@@ -370,12 +376,25 @@ final class MoveTests
         }
     }
 
+    private static String chunkNames(Set<Long> keys)
+    {
+        StringBuilder out = new StringBuilder();
+
+        for (Long k : keys)
+        {
+            out.append(' ').append(Fixture.keyX(k)).append(',').append(Fixture.keyZ(k));
+        }
+
+        return out.toString();
+    }
+
     private static void sameFinal(Run stock, Run turbo)
     {
         SelfTest.check(java.util.Arrays.equals(stock.finalOrigin, turbo.finalOrigin), "the placement ended at different places");
         Set<Long> common = new LinkedHashSet<>(stock.finalView.sigs.keySet());
         common.retainAll(turbo.finalView.sigs.keySet());
-        SelfTest.check(common.size() >= 4, "only " + common.size() + " chunks in view in both runs");
+        SelfTest.check(common.size() >= 4, "only " + common.size() + " chunks in view in both runs (plain Litematica" + chunkNames(stock.finalView.sigs.keySet()) + ", camera " + stock.camera
+                                           + "; Turbo" + chunkNames(turbo.finalView.sigs.keySet()) + ", camera " + turbo.camera + ")");
         SelfTest.equal(stock.worldHash, turbo.worldHash, "the blocks of the placement in the schematic world after the move");
         if (stock.reloadedView != null && turbo.reloadedView != null)
         {
@@ -416,6 +435,19 @@ final class MoveTests
         seen.retainAll(f.renderedKeys());
         SelfTest.check(seen.size() >= 4, "TEST ENVIRONMENT: only " + seen.size() + " of the " + area.size()
                                          + " chunks the turned placement ends on are in the camera's view (game window shape / field of view), not a mod problem");
+        wantedInView = seen;
+    }
+
+    /** On a busy test box the renderers of the final view come late, or the camera has been turned (Fixture.aim): the view is judged once it is there. */
+    private static void awaitWantedInView() throws Exception
+    {
+        long deadline = System.currentTimeMillis() + 30_000L;
+
+        while (wantedInView != null && f.renderedKeys().containsAll(wantedInView) == false && System.currentTimeMillis() < deadline)
+        {
+            f.aim();
+            Thread.sleep(50);
+        }
     }
 
     private static void scenario(Ctx ctx, SelfTest.Tests tests, String name, int stepMs, int[]... steps)

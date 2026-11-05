@@ -368,6 +368,31 @@ final class Fixture
         }
     }
 
+    /** The player's yaw / pitch, for failure messages: other windows on the test box can turn a grabbed camera (see aim). */
+    String cameraAngles() throws Exception
+    {
+        Object player = this.game.player();
+        return angle(player, "yaw", "yRot") + " / " + angle(player, "pitch", "xRot");
+    }
+
+    /** The field of the player, by the name it has in this version (as in aim). */
+    private static float angle(Object player, String... names) throws ReflectiveOperationException
+    {
+        for (String name : names)
+        {
+            try
+            {
+                return Ctx.field(player.getClass(), name).getFloat(player);
+            }
+            catch (NoSuchFieldException otherName)
+            {
+                // the next name
+            }
+        }
+
+        throw new NoSuchFieldException(String.join(" / ", names));
+    }
+
     /** Switches the drawing (and collecting) of the schematic's block entities, Litematica's "render tile entities" option. */
     void drawBlockEntities(boolean on) throws Exception
     {
