@@ -133,7 +133,10 @@ final class Ctx
                     started = getField(configBase, "callback") != null;
                 }
 
-                if (client != null && screen != null && started && screen.get(holder) != null && (overlay == null || overlay.get(holder) == null))
+                // the game shows its "Loading Minecraft" message a moment before the loading overlay goes up: on a busy box that
+                // gap passed for ready, the world opened too early and the title screen after loading dropped its prompt
+                if (client != null && screen != null && started && screen.get(holder) != null && (overlay == null || overlay.get(holder) == null)
+                    && screen.get(holder).getClass().getSimpleName().contains("MessageScreen") == false)
                 {
                     if (++stable >= 3)
                     {
