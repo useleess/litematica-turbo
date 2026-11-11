@@ -767,7 +767,7 @@ final class Fixture
 
     /**
      * Switches every placement of the standard test zones on or off. Turbo moves a placement the cheap way only
-     * while it is the only enabled one, so the move tests switch the zones off and use a lone placement.
+     * while no other enabled placement shares its chunk columns, so the move tests switch the zones off and use a lone placement.
      */
     void zonesEnabled(boolean enabled, String... only) throws Exception
     {
@@ -976,6 +976,12 @@ final class Fixture
      */
     private boolean stoodInForGhost;
     private boolean ghostBefore = true;
+
+    /** A test put the settings back itself (ghost move included): the stand-in's saved value no longer applies. */
+    void settingsRestored()
+    {
+        this.stoodInForGhost = false;
+    }
 
     boolean plainHasNoWorkers()
     {

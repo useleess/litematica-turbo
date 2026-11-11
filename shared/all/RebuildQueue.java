@@ -104,6 +104,12 @@ public final class RebuildQueue
         this.deferred.clear();
     }
 
+    /** Forgets the waiting rebuilds of these renderers (taken out for a ghost move). */
+    public void forget(Set<ChunkRendererSchematicVbo> renderers)
+    {
+        this.deferred.removeAll(renderers);
+    }
+
     /** True when no schematic chunk is waiting to be built or uploaded. */
     public boolean isIdle(ChunkRenderDispatcherLitematica dispatcher, Set<ChunkRendererSchematicVbo> chunksToUpdate,
                           List<ChunkRendererSchematicVbo> renderInfos)

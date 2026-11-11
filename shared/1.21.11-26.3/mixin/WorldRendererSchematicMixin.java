@@ -1,6 +1,7 @@
 package com.litematicaturbo.shared.mixin;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,7 +100,7 @@ public abstract class WorldRendererSchematicMixin implements TurboWorldRenderer
     }
 
     @Override
-    public Map<ChunkRendererSchematicVbo, ChunkRenderGpuUploader> turbo$detachChunkRenderers()
+    public Map<ChunkRendererSchematicVbo, ChunkRenderGpuUploader> turbo$detachChunkRenderers(Set<Long> columns)
     {
         if (this.chunkRendererDispatcher == null || this.chunkRendererGpuDispatcher == null)
         {
@@ -113,13 +114,19 @@ public abstract class WorldRendererSchematicMixin implements TurboWorldRenderer
         for (ChunkRendererSchematicVbo renderer : new ArrayList<>(renderers.values()))
         {
             ChunkPos pos = ((ChunkRendererSchematicVboInvoker) renderer).turbo$getChunkPos();
-            detached.put(renderer, uploaders.remove(ChunkKeys.of(pos)));
+
+            if (columns.contains(ChunkKeys.of(pos)))
+            {
+                renderers.values().remove(renderer);
+                detached.put(renderer, uploaders.remove(ChunkKeys.of(pos)));
+            }
         }
 
-        renderers.clear();
-        this.renderInfos.clear();
-        this.chunksToUpdate.clear();
-        this.turbo$rebuilds.clear();
+        Set<ChunkRendererSchematicVbo> gone = Collections.newSetFromMap(new IdentityHashMap<>());
+        gone.addAll(detached.keySet());
+        this.renderInfos.removeAll(gone);
+        this.chunksToUpdate.removeAll(gone);
+        this.turbo$rebuilds.forget(gone);
         this.displayListEntitiesDirty = true;
         return detached;
     }
@@ -131,7 +138,7 @@ public abstract class WorldRendererSchematicMixin implements TurboWorldRenderer
     @Inject(method = "prepareBlockLayers", at = @At("HEAD"))
     private void turbo$ghostsForLayers(CallbackInfoReturnable<Integer> cir)
     {
-        this.turbo$swapInGhosts(GhostMove.blockRenderers());
+        this.turbo$swapInGhosts(GhostMove.blockRenderers(this.renderInfos));
     }
 
     @Inject(method = "prepareBlockLayers", at = @At("RETURN"))
@@ -143,7 +150,7 @@ public abstract class WorldRendererSchematicMixin implements TurboWorldRenderer
     @Inject(method = "renderBlockOverlay", at = @At("HEAD"))
     private void turbo$ghostsForOverlay(CallbackInfo ci)
     {
-        this.turbo$swapInGhosts(GhostMove.renderers());
+        this.turbo$swapInGhosts(GhostMove.overlayRenderers(this.renderInfos));
     }
 
     @Inject(method = "renderBlockOverlay", at = @At("RETURN"))

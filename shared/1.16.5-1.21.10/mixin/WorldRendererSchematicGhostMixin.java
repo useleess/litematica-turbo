@@ -33,13 +33,13 @@ public abstract class WorldRendererSchematicGhostMixin
     private double turbo$savedSortX, turbo$savedSortY, turbo$savedSortZ;
 
     // While a placement is moved, the block layers and the overlay draw the shifted ghosts
-    // instead of the real chunks (which are not rebuilt yet). Translucent re-sorting is paused
+    // instead of its real chunks (which are not rebuilt yet), next to the other placements' real chunks. Translucent re-sorting is paused
     // for that time (NaN never passes its distance check).
 
     @Inject(method = BlockLayers.METHOD, at = @At("HEAD"))
     private void turbo$ghostsForLayer(CallbackInfoReturnable<Integer> cir)
     {
-        this.turbo$swapInGhosts(GhostMove.blockRenderers());
+        this.turbo$swapInGhosts(GhostMove.blockRenderers(this.renderInfos));
     }
 
     @Inject(method = BlockLayers.METHOD, at = @At("RETURN"))
@@ -51,7 +51,7 @@ public abstract class WorldRendererSchematicGhostMixin
     @Inject(method = "renderBlockOverlay", at = @At("HEAD"))
     private void turbo$ghostsForOverlay(CallbackInfo ci)
     {
-        this.turbo$swapInGhosts(GhostMove.renderers());
+        this.turbo$swapInGhosts(GhostMove.overlayRenderers(this.renderInfos));
     }
 
     @Inject(method = "renderBlockOverlay", at = @At("RETURN"))

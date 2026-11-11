@@ -1,6 +1,7 @@
 package com.litematicaturbo.shared;
 
 import java.util.Map;
+import java.util.Set;
 import javax.annotation.Nullable;
 
 import fi.dy.masa.litematica.render.schematic.ChunkRenderGpuUploader;
@@ -13,9 +14,9 @@ public interface TurboWorldRenderer
     boolean turbo$isIdle();
 
     /**
-     * Takes all chunk renderers out of the renderer, together with the GPU uploaders that hold
-     * their buffers (key: the renderer). New ones get created on demand.
+     * Takes the chunk renderers of these chunk columns (GhostRenderers.column keys) out of the renderer, together with the
+     * GPU uploaders that hold their buffers (key: the renderer). New ones get created on demand.
      */
     @Nullable
-    Map<ChunkRendererSchematicVbo, ChunkRenderGpuUploader> turbo$detachChunkRenderers();
+    Map<ChunkRendererSchematicVbo, ChunkRenderGpuUploader> turbo$detachChunkRenderers(Set<Long> columns);
 }

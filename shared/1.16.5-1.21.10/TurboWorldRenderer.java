@@ -1,6 +1,7 @@
 package com.litematicaturbo.shared;
 
 import java.util.List;
+import java.util.Set;
 import javax.annotation.Nullable;
 
 import fi.dy.masa.litematica.render.schematic.ChunkRendererSchematicVbo;
@@ -14,7 +15,10 @@ public interface TurboWorldRenderer
     /** Turbo's rebuild scheduling of this world renderer. */
     RebuildQueue turbo$rebuilds();
 
-    /** Takes all chunk renderers out of the renderer (they keep their buffers); new ones get created on demand. */
+    /**
+     * Takes the chunk renderers of these chunk columns (GhostRenderers.column keys) out of the renderer (they keep their
+     * buffers); new ones get created on demand.
+     */
     @Nullable
-    List<ChunkRendererSchematicVbo> turbo$detachChunkRenderers();
+    List<ChunkRendererSchematicVbo> turbo$detachChunkRenderers(Set<Long> columns);
 }

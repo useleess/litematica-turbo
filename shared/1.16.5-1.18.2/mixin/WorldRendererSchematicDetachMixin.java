@@ -1,6 +1,8 @@
 package com.litematicaturbo.shared.mixin;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
 import org.spongepowered.asm.mixin.Final;
@@ -16,6 +18,7 @@ import fi.dy.masa.litematica.render.schematic.IChunkRendererFactory;
 import fi.dy.masa.litematica.render.schematic.WorldRendererSchematic;
 import fi.dy.masa.litematica.world.WorldSchematic;
 
+import com.litematicaturbo.shared.GhostRenderers;
 import com.litematicaturbo.shared.TurboWorldRenderer;
 
 /** Ghost move: takes the built chunk renderers out of the world renderer. */
@@ -32,9 +35,9 @@ public abstract class WorldRendererSchematicDetachMixin
     /** TurboWorldRenderer.turbo$detachChunkRenderers (that interface is added by WorldRendererSchematicMixin). */
     /**
      * Litematica 0.11 keeps its chunk renderers in a fixed array (one 16-high slice each). Every
-     * slice that has built buffers is taken out and replaced by a fresh renderer at the same spot.
+     * slice of these columns that has built buffers is taken out and replaced by a fresh renderer at the same spot.
      */
-    public List<ChunkRendererSchematicVbo> turbo$detachChunkRenderers()
+    public List<ChunkRendererSchematicVbo> turbo$detachChunkRenderers(Set<Long> columns)
     {
         if (this.chunkRendererDispatcher == null || this.world == null)
         {
@@ -48,7 +51,7 @@ public abstract class WorldRendererSchematicDetachMixin
         {
             ChunkRendererSchematicVbo old = renderers[i];
 
-            if (old.getChunkRenderData() != ChunkRenderDataSchematic.EMPTY)
+            if (old.getChunkRenderData() != ChunkRenderDataSchematic.EMPTY && columns.contains(GhostRenderers.column(old)))
             {
                 BlockPos origin = old.getOrigin();
                 ChunkRendererSchematicVbo fresh = this.renderChunkFactory.create(this.world, (WorldRendererSchematic) (Object) this);
@@ -58,9 +61,11 @@ public abstract class WorldRendererSchematicDetachMixin
             }
         }
 
-        this.renderInfos.clear();
-        this.chunksToUpdate.clear();
-        ((TurboWorldRenderer) this).turbo$rebuilds().clear();
+        Set<ChunkRendererSchematicVbo> gone = Collections.newSetFromMap(new IdentityHashMap<>());
+        gone.addAll(detached);
+        this.renderInfos.removeAll(gone);
+        this.chunksToUpdate.removeAll(gone);
+        ((TurboWorldRenderer) this).turbo$rebuilds().forget(gone);
         this.displayListEntitiesDirty = true;
         return detached;
     }

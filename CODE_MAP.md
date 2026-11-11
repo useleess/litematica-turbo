@@ -87,14 +87,16 @@ builds get the same code through their `fabric_source` folder.
   proved next to Sodium and Iris by the `sodium/` tests. Newer render eras have no batch drawing, so nothing pauses there.
 - **Iris buffer builders (1.21.10, 1.21.11 and later with Iris):** a block layer's builder gets Iris's extended format only if a flag only the render thread sets (`ImmediateState.isRenderingLevel`) is true both when the layer's pipeline is asked and when the builder is made; Litematica makes it on a build thread, so the two answers could differ ("Missing elements in vertex: mc_midTexCoord, at_tangent" crash, or a plain buffer drawn by an extended shader). `BufferBuilderCacheIrisMixin` (per version: `versions/1.21.10` Yarn, `versions/1.21.11` Mojang) redirects the `new BufferBuilder` of Litematica's `BufferBuilderCache` to `IrisBlockBuffers.create`, which asks `IrisBuilders` (`shared/1.21.10-26.3`, Iris by name): format and Iris's own `extending` field are set from what the shader pack asks for, once. Plain Litematica builds the same way and can hit the same race.
 - **Errors on a build thread (1.21 - 26.3):** `ChunkRenderWorkerLitematicaMixin` rethrows an error on the render thread (stock), swallows it for a finished (cancelled) task, and otherwise `DroppedBuilds.drop` (`shared/1.21-26.3`) cancels the build, `BuildErrors` (core) counts and logs it and the chunk is queued again (at most `MAX_REBUILDS` times a session); each `SettingsTicker` tells the player once (`litematica_turbo.message.build_dropped`).
-- **Moving a placement:** `GhostMove` + `GhostRenderers` keep showing the old chunks shifted until the new ones are built.
+- **Moving a placement:** `GhostMove` + `GhostRenderers` keep showing the old chunks shifted until the new ones are built. Only the moved
+  placement's chunk columns are taken out (`turbo$detachChunkRenderers(columns)`); the other placements' real chunks are
+  drawn next to them, and a placement sharing a column with another one moves the normal way.
 - **Complete copy while moving (every version):** Litematica's pieces leave out blocks that already match the world, so
   the shifted old pieces have holes. `CompleteCopy` (core) holds the rules: the byte limit (the smaller of an eighth of Java's
   memory and a quarter of the graphics memory the card reports), when the copy is skipped or dropped (Java memory low, or less
   than 256 MB graphics memory free), the switch-off after an error (chat line via each `SettingsTicker`) and the counters the
   tests read. `CompletePieces` (`shared/1.16.5-26.3`, with `CompletePiece` and `CompleteWorldRenderer`) is the game side: when `GhostMove` starts a move it plans one complete
   piece per ghost holding part of the placement (the ghost's boxes, nearest first), builds them a few at a time on the build
-  threads and keeps them while they fit the limit; `GhostMove.blockRenderers()` gives the block layers the finished pieces
+  threads and keeps them while they fit the limit; `GhostMove.blockRenderers(live)` gives the block layers the finished pieces
   (moved to where the placement is) plus the ghosts they do not cover yet (the overlay still comes from the ghosts). A kept copy
   stays until the placement is deselected, changed or removed (`GhostMove.endAndDropCopy`) and shows at once on the next move;
   `GhostMove.isHoldingWork` waits up to 3 s for its last builds before the real copy changes the schematic world. A complete

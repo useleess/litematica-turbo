@@ -58,6 +58,36 @@ final class MoveTests
         return ctx.onMain(() -> (Boolean) Ctx.call(ctx.turbo("GhostMove"), "isActive"));
     }
 
+    /** The other enabled placements that share a chunk column with the moved one (names and column counts), for failure messages. */
+    static String sharingColumns(Ctx ctx) throws Exception
+    {
+        return ctx.onMain(() -> {
+            Class<?> ghosts = ctx.turbo("GhostRenderers");
+            java.util.Collection<?> own = (java.util.Collection<?>) Ctx.call(ghosts, "touchedColumns", placement);
+            Object manager = Ctx.call(ctx.cls("fi.dy.masa.litematica.data.DataManager"), "getSchematicPlacementManager");
+            StringBuilder out = new StringBuilder("own " + own.size() + " columns:");
+
+            for (Object other : (java.util.Collection<?>) Ctx.call(manager, "getAllSchematicsPlacements"))
+            {
+                if (other != placement && (Boolean) Ctx.call(other, "isEnabled"))
+                {
+                    Set<Object> shared = new java.util.HashSet<>((java.util.Collection<?>) Ctx.call(ghosts, "touchedColumns", other));
+                    shared.retainAll(own);
+                    out.append(' ').append(Ctx.call(other, "getName")).append('=').append(shared.size());
+                }
+            }
+
+            return out.toString();
+        });
+    }
+
+    /** The chunk column (Fixture.key) of a chunk renderer. */
+    static long columnOf(Object renderer) throws ReflectiveOperationException
+    {
+        Object origin = Ctx.call(renderer, "getOrigin");
+        return Fixture.key(Math.floorDiv((Integer) Ctx.call(origin, "getX"), 16), Math.floorDiv((Integer) Ctx.call(origin, "getZ"), 16));
+    }
+
     /** Moves the placement to this origin the way the game's move command does. */
     static void setOrigin(Ctx ctx, int x, int y, int z) throws Exception
     {
@@ -164,6 +194,7 @@ final class MoveTests
         Ctx.setField(config, "completeCopy", true);
         Ctx.setField(config, "catchUpAuto", true);
         Ctx.setField(config, "catchUpBudgetMs", 8);
+        f.settingsRestored();
     }
 
     /**
@@ -697,17 +728,37 @@ final class MoveTests
             });
         });
 
-        tests.add("move/second-placement-no-ghost", () -> {
-            // the built chunks would also hold the other placement, which must not move along
+        tests.add("move/second-placement-apart-keeps-ghost", () -> {
+            // zone A shares no chunk column with the moved placement: only the moved one's chunks shift, A stays drawn in place
             f = WorldTests.fixture(ctx);
             guarded(ctx, () -> {
                 f.configure(true, 3, true, true);
                 prepare(ctx, true);
                 f.zonesEnabled(true, "A");
-                f.awaitIdle("a second placement shown", f.chunksOf("A"), null);
+                Set<Long> other = f.chunksOf("A");
+                f.awaitIdle("a second placement shown", other, null);
                 int[] o = origin(ctx);
+                String sharing = sharingColumns(ctx);
                 setOrigin(ctx, o[0] + 6, o[1], o[2]);
-                SelfTest.check(ghostActive(ctx) == false, "a placement was moved with a shifted view although another placement is shown");
+                SelfTest.check(ghostActive(ctx), "no shifted view although the other placement is in other chunk columns; placements sharing them: " + sharing);
+                ctx.onMain(() -> {
+                    for (Object renderer : (List<?>) Ctx.call(ctx.turbo("GhostMove"), "renderers"))
+                    {
+                        SelfTest.check(other.contains(columnOf(renderer)) == false, "a chunk of the other placement moves along");
+                    }
+
+                    Object live = Ctx.getField(f.worldRenderer(), "renderInfos");
+                    int drawn = 0;
+
+                    for (Object renderer : (List<?>) Ctx.call(ctx.turbo("GhostMove"), "blockRenderers", live))
+                    {
+                        drawn += other.contains(columnOf(renderer)) ? 1 : 0;
+                    }
+
+                    SelfTest.check(drawn > 0, "the other placement is not drawn while this one moves");
+                    return null;
+                });
+                Game.screenshot(ctx, "turbo-move-second-placement-apart.png");
                 settle(ctx, f.chunksAt(o[0] + 6, o[2]));
                 String arrived = "";
 
@@ -718,6 +769,23 @@ final class MoveTests
                 }
 
                 SelfTest.check(arrived.contains("gold_block"), "the marker block did not arrive: " + arrived);
+            });
+        });
+
+        tests.add("move/second-placement-same-column-no-ghost", () -> {
+            // zone N shares chunk columns with the moved placement: those chunks also hold N, which must not move along
+            f = WorldTests.fixture(ctx);
+            guarded(ctx, () -> {
+                f.configure(true, 3, true, true);
+                prepare(ctx, true);
+                f.zonesEnabled(true, "N");
+                f.awaitIdle("a second placement shown", f.chunksOf("N"), null);
+                int[] o = origin(ctx);
+                setOrigin(ctx, o[0] + 6, o[1], o[2]);
+                SelfTest.check(ghostActive(ctx) == false, "a placement was moved with a shifted view although another placement shares its chunk columns");
+                // the normal path rebuilds the chunks it moved to (the marker spot may hold N's blocks, so no marker check)
+                settle(ctx, f.chunksAt(o[0] + 6, o[2]));
+                SelfTest.check(ghostActive(ctx) == false, "a shifted view started after the move");
             });
         });
 

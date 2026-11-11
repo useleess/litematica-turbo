@@ -18,7 +18,7 @@
   },
   {
    "prefix": "move/",
-   "min": 12,
+   "min": 13,
    "what": "smooth placement moving: shown moved, rebuilt once stopped, swapped in one frame, same final result"
   },
   {

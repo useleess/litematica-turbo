@@ -1,9 +1,12 @@
 package com.litematicaturbo.shared;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 
 import fi.dy.masa.litematica.data.DataManager;
 import fi.dy.masa.litematica.render.LitematicaRenderer;
@@ -40,6 +43,32 @@ public final class GhostRenderers
         return new int[] {origin.getX(), origin.getY(), origin.getZ()};
     }
 
+    /** A chunk column as one number. */
+    static long column(int chunkX, int chunkZ)
+    {
+        return ChunkPos.toLong(chunkX, chunkZ);
+    }
+
+    /** The chunk column of a chunk renderer. */
+    public static long column(ChunkRendererSchematicVbo renderer)
+    {
+        BlockPos origin = renderer.getOrigin();
+        return column(origin.getX() >> 4, origin.getZ() >> 4);
+    }
+
+    /** The chunk columns the placement has blocks in, where it is now. */
+    static Set<Long> touchedColumns(SchematicPlacement placement)
+    {
+        Set<Long> out = new HashSet<>();
+
+        for (ChunkPos pos : placement.getTouchedChunks())
+        {
+            out.add(column(pos.x, pos.z));
+        }
+
+        return out;
+    }
+
     /** The camera's position {x, y, z}; null without a camera. */
     static double[] cameraPos()
     {
@@ -47,10 +76,10 @@ public final class GhostRenderers
         return camera == null ? null : new double[] {camera.getX(), camera.getY(), camera.getZ()};
     }
 
-    /** Takes all chunk renderers out of the world renderer; null when there are none. */
-    static List<ChunkRendererSchematicVbo> detach()
+    /** Takes the chunk renderers of these columns out of the world renderer; null when there are none. */
+    static List<ChunkRendererSchematicVbo> detach(Set<Long> columns)
     {
-        return ((TurboWorldRenderer) LitematicaRenderer.getInstance().getWorldRenderer()).turbo$detachChunkRenderers();
+        return ((TurboWorldRenderer) LitematicaRenderer.getInstance().getWorldRenderer()).turbo$detachChunkRenderers(columns);
     }
 
     static void discard(ChunkRendererSchematicVbo renderer)

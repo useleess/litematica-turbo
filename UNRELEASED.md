@@ -2,4 +2,7 @@
 
 Collected here until the next release, then used as the GitHub / Modrinth notes.
 
-(nothing yet - 0.5.0 pushed 2026-11-05)
+### Fixed
+- Smooth moving and its memory savings now also work while other schematics are shown (#3). Only the moved
+  schematic shifts; the others stay drawn in place. A schematic sharing a 16 x 16 chunk column with another one still
+  moves the normal way (one chunk column holds the blocks of both).

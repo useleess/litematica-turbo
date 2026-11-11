@@ -2,7 +2,9 @@ package com.litematicaturbo.shared;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import fi.dy.masa.litematica.data.DataManager;
 import fi.dy.masa.litematica.render.schematic.ChunkRendererSchematicVbo;
@@ -18,6 +20,10 @@ import com.litematicaturbo.core.TurboConfig;
  * (GhostRenderers: how, on this version). Once the placement has stayed still and everything is
  * built, the view switches over in one frame.
  *
+ * Only the moved placement's chunk columns become ghosts; the other placements stay drawn from their real chunks. A
+ * chunk column's renderer holds the blocks of every placement in it, so a placement sharing a column with another
+ * one moves the normal way.
+ *
  * Render thread only.
  */
 public final class GhostMove
@@ -25,12 +31,16 @@ public final class GhostMove
     private static final List<ChunkRendererSchematicVbo> ghostRenderers = new ArrayList<>();
     /** Where each ghost was built ({x, y, z}), in the order of ghostRenderers. */
     private static final List<int[]> ghostOrigins = new ArrayList<>();
+    /** The chunk columns of the other placements, whose real chunks are drawn during the move. */
+    private static final Set<Long> otherColumns = new HashSet<>();
+    private static final List<ChunkRendererSchematicVbo> drawn = new ArrayList<>();
 
     private static SchematicPlacement placement;
     private static int[] ghostOrigin;
     private static long lastMoveNanos;
     private static boolean inSetOrigin;
     private static int[] originBeforeSet;
+    private static Set<Long> columnsBeforeSet;
 
     private GhostMove()
     {
@@ -70,10 +80,38 @@ public final class GhostMove
         return ghostRenderers;
     }
 
-    /** What the block layers draw: the old pieces, with the complete copy's finished pieces in place of theirs. */
-    public static List<ChunkRendererSchematicVbo> blockRenderers()
+    /**
+     * What the block layers draw: the old pieces, with the complete copy's finished pieces in place of theirs, and the
+     * other placements' chunks among {@code live} (the real visible chunks).
+     */
+    public static List<ChunkRendererSchematicVbo> blockRenderers(List<ChunkRendererSchematicVbo> live)
     {
-        return CompletePieces.drawList(placement, ghostOrigin, ghostRenderers, ghostOrigins);
+        return withOthers(CompletePieces.drawList(placement, ghostOrigin, ghostRenderers, ghostOrigins), live);
+    }
+
+    /** What the overlay draws: the old pieces and the other placements' chunks among {@code live}. */
+    public static List<ChunkRendererSchematicVbo> overlayRenderers(List<ChunkRendererSchematicVbo> live)
+    {
+        return withOthers(ghostRenderers, live);
+    }
+
+    private static List<ChunkRendererSchematicVbo> withOthers(List<ChunkRendererSchematicVbo> moved, List<ChunkRendererSchematicVbo> live)
+    {
+        drawn.clear();
+        drawn.addAll(moved);
+
+        if (otherColumns.isEmpty() == false)
+        {
+            for (ChunkRendererSchematicVbo renderer : live)
+            {
+                if (otherColumns.contains(GhostRenderers.column(renderer)))
+                {
+                    drawn.add(renderer);
+                }
+            }
+        }
+
+        return drawn;
     }
 
     public static boolean isInSetOrigin()
@@ -86,6 +124,7 @@ public final class GhostMove
     {
         inSetOrigin = true;
         originBeforeSet = GhostRenderers.origin(target);
+        columnsBeforeSet = isActive() && placement == target ? null : GhostRenderers.touchedColumns(target);
     }
 
     /** Called when SchematicPlacement.setOrigin returns. */
@@ -94,7 +133,9 @@ public final class GhostMove
         inSetOrigin = false;
         int[] before = originBeforeSet;
         int[] after = GhostRenderers.origin(target);
+        Set<Long> columnsBefore = columnsBeforeSet;
         originBeforeSet = null;
+        columnsBeforeSet = null;
 
         if (before == null || Arrays.equals(before, after))
         {
@@ -108,7 +149,7 @@ public final class GhostMove
 
         if (isActive() == false)
         {
-            if (eligible(target) == false || start(target, before) == false)
+            if (usable(target) == false || columnsBefore == null || start(target, before, columnsBefore) == false)
             {
                 return;
             }
@@ -118,28 +159,41 @@ public final class GhostMove
         applyOffset(after[0] - ghostOrigin[0], after[1] - ghostOrigin[1], after[2] - ghostOrigin[2]);
     }
 
-    /** Only a lone placement: the built chunks then contain nothing else that would move along with it. */
-    private static boolean eligible(SchematicPlacement target)
+    private static boolean usable(SchematicPlacement target)
     {
-        if (TurboConfig.get().ghostMoveEnabled() == false || target.isEnabled() == false || target.isRenderingEnabled() == false)
-        {
-            return false;
-        }
+        return TurboConfig.get().ghostMoveEnabled() && target.isEnabled() && target.isRenderingEnabled();
+    }
+
+    /** The chunk columns of the other enabled placements. */
+    private static Set<Long> columnsOfOthers(SchematicPlacement target)
+    {
+        Set<Long> out = new HashSet<>();
 
         for (SchematicPlacement other : DataManager.getSchematicPlacementManager().getAllSchematicsPlacements())
         {
             if (other != target && other.isEnabled())
             {
+                out.addAll(GhostRenderers.touchedColumns(other));
+            }
+        }
+
+        return out;
+    }
+
+    /** Starts the ghosts of the placement's own columns (where it was); not when another placement has blocks in one of them. */
+    private static boolean start(SchematicPlacement target, int[] originBefore, Set<Long> columnsBefore)
+    {
+        Set<Long> others = columnsOfOthers(target);
+
+        for (Long column : columnsBefore)
+        {
+            if (others.contains(column))
+            {
                 return false;
             }
         }
 
-        return true;
-    }
-
-    private static boolean start(SchematicPlacement target, int[] originBefore)
-    {
-        List<ChunkRendererSchematicVbo> detached = GhostRenderers.detach();
+        List<ChunkRendererSchematicVbo> detached = GhostRenderers.detach(columnsBefore);
 
         if (detached == null)
         {
@@ -156,6 +210,7 @@ public final class GhostMove
 
         placement = target;
         ghostOrigin = originBefore;
+        otherColumns.addAll(others);
         CompletePieces.onMoveStart(target, ghostRenderers, ghostOrigins, originBefore);
         return true;
     }
@@ -191,6 +246,8 @@ public final class GhostMove
 
         ghostRenderers.clear();
         ghostOrigins.clear();
+        otherColumns.clear();
+        drawn.clear();
         GhostRenderers.clear();
         placement = null;
         ghostOrigin = null;

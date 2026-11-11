@@ -2,9 +2,11 @@ package com.litematicaturbo.shared;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
@@ -57,6 +59,32 @@ public final class GhostRenderers
         return new int[] {origin.getX(), origin.getY(), origin.getZ()};
     }
 
+    /** A chunk column as one number. */
+    static long column(int chunkX, int chunkZ)
+    {
+        return ChunkKeys.of(chunkX, chunkZ);
+    }
+
+    /** The chunk column of a chunk renderer. */
+    public static long column(ChunkRendererSchematicVbo renderer)
+    {
+        BlockPos origin = renderer.getOrigin();
+        return column(origin.getX() >> 4, origin.getZ() >> 4);
+    }
+
+    /** The chunk columns the placement has blocks in, where it is now. */
+    static Set<Long> touchedColumns(SchematicPlacement placement)
+    {
+        Set<Long> out = new HashSet<>();
+
+        for (ChunkPos pos : placement.getTouchedChunks())
+        {
+            out.add(ChunkKeys.of(pos));
+        }
+
+        return out;
+    }
+
     /** The camera's position {x, y, z}; null without a camera. */
     static double[] cameraPos()
     {
@@ -64,11 +92,11 @@ public final class GhostRenderers
         return camera == null ? null : new double[] {camera.getX(), camera.getY(), camera.getZ()};
     }
 
-    /** Takes all chunk renderers (and their uploaders) out of the world renderer; null when there are none. */
-    static List<ChunkRendererSchematicVbo> detach()
+    /** Takes the chunk renderers (and their uploaders) of these columns out of the world renderer; null when there are none. */
+    static List<ChunkRendererSchematicVbo> detach(Set<Long> columns)
     {
         Map<ChunkRendererSchematicVbo, ChunkRenderGpuUploader> detached =
-                ((TurboWorldRenderer) LitematicaRenderer.getInstance().getWorldRenderer()).turbo$detachChunkRenderers();
+                ((TurboWorldRenderer) LitematicaRenderer.getInstance().getWorldRenderer()).turbo$detachChunkRenderers(columns);
 
         if (detached == null)
         {
