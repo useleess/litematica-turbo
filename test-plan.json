@@ -80,6 +80,11 @@
    "prefix": "far/",
    "min": 5,
    "what": "less detail far away: far pieces draw no outline lines with the setting on and some with it off, near pieces draw the same, low memory and an error (with a chat line) bring every outline back"
+  },
+  {
+   "prefix": "sortcopy/",
+   "min": 4,
+   "what": "only pieces near the camera keep see-through re-sort copies: far ones dropped, near ones kept, rebuilt sorted when the player comes near, off after an error"
   }
  ]
 }

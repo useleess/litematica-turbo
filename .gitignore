@@ -22,3 +22,5 @@ build-selftest/
 # written by range-check.py
 range-check.txt
 test-shots/
+# game logs the tester brings back from a failed run
+_out/

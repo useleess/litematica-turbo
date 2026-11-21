@@ -34,6 +34,7 @@ import com.litematicaturbo.shared.ChunkKeys;
 import com.litematicaturbo.shared.CompleteUploads;
 import com.litematicaturbo.shared.GhostRenderers;
 import com.litematicaturbo.shared.RebuildQueue;
+import com.litematicaturbo.shared.SortCopySweep;
 import com.litematicaturbo.shared.TurboDispatcher;
 import com.litematicaturbo.shared.TurboWorldRenderer;
 
@@ -89,6 +90,7 @@ public abstract class WorldRendererSchematicMixin implements TurboWorldRenderer
     private void turbo$requeueDeferred(long finishTimeNano, ProfilerFiller profiler, CallbackInfo ci)
     {
         GhostRenderers.tick(this);
+        SortCopySweep.tick(this);
         this.turbo$rebuilds.requeue(this.chunksToUpdate);
     }
 
@@ -97,6 +99,13 @@ public abstract class WorldRendererSchematicMixin implements TurboWorldRenderer
     {
         this.turbo$rebuilds.clear();
         GhostMove.reset();
+    }
+
+    @Override
+    public List<ChunkRendererSchematicVbo> turbo$chunkRenderers()
+    {
+        return this.chunkRendererDispatcher == null ? new ArrayList<>()
+            : new ArrayList<>(((ChunkRenderDispatcherSchematicAccessor) this.chunkRendererDispatcher).turbo$getChunkRenderers().values());
     }
 
     @Override

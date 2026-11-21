@@ -44,6 +44,8 @@ final class MoveTests
         String markerOld = "";
         List<int[]> shownOrigins = new ArrayList<>();
         List<int[]> before = new ArrayList<>();
+        /** The moved placement's own chunk columns before the move (GhostRenderers.column keys). */
+        java.util.Collection<?> ownColumns = new ArrayList<>();
     }
 
     static Fixture f;
@@ -79,6 +81,12 @@ final class MoveTests
 
             return out.toString();
         });
+    }
+
+    /** A chunk column as the game numbers it (ChunkPos.toLong), the key GhostRenderers.touchedColumns uses. */
+    static long gameColumn(int chunkX, int chunkZ)
+    {
+        return (chunkX & 0xFFFFFFFFL) | (chunkZ & 0xFFFFFFFFL) << 32;
     }
 
     /** The chunk column (Fixture.key) of a chunk renderer. */
@@ -233,6 +241,7 @@ final class MoveTests
         Run r = new Run();
         int[] start = prepare(ctx, turbo);
         r.before = f.renderOrigins();
+        r.ownColumns = ctx.onMain(() -> (java.util.Collection<?>) Ctx.call(ctx.turbo("GhostRenderers"), "touchedColumns", placement));
         long builds0 = f.stats("totalBuilds");
         r.builds0 = builds0;
 
@@ -561,8 +570,17 @@ final class MoveTests
                                    "a shown chunk at " + shown[0] + "," + shown[1] + "," + shown[2] + " is not a chunk of the grid shifted by 5,2,-3");
                 }
 
+                List<String> missing = new ArrayList<>();
+
+                // only the moved placement's own chunk columns become ghosts (#3); a column of a placement switched off for
+                // the test may still be listed in view on some versions
                 for (int[] b : r.before)
                 {
+                    if (r.ownColumns.contains(gameColumn(b[0] >> 4, b[2] >> 4)) == false)
+                    {
+                        continue;
+                    }
+
                     boolean found = false;
 
                     for (int[] shown : r.shownOrigins)
@@ -570,11 +588,20 @@ final class MoveTests
                         found |= b[0] + 5 == shown[0] && b[1] + 2 == shown[1] && b[2] - 3 == shown[2];
                     }
 
-                    SelfTest.check(found, "the chunk at " + b[0] + "," + b[1] + "," + b[2] + " from before the move is not shown shifted by 5,2,-3");
-                    ++matched;
+                    if (found)
+                    {
+                        ++matched;
+                    }
+                    else
+                    {
+                        missing.add(b[0] + "," + b[1] + "," + b[2]);
+                    }
                 }
 
-                SelfTest.check(matched == r.before.size() && matched > 0, "chunks from before the move shown shifted: " + matched);
+                SelfTest.check(missing.isEmpty(), "of the placement's chunks from before the move, these are not shown shifted by 5,2,-3: "
+                               + missing + " (" + r.shownOrigins.size() + " shown; " + sharingColumns(ctx) + ")");
+
+                SelfTest.check(matched > 0, "no chunk of the placement from before the move is shown shifted (" + r.ownColumns.size() + " own columns)");
             });
         });
 

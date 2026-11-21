@@ -12,6 +12,9 @@ public interface TurboWorldRenderer
     /** True when no schematic chunk is waiting to be built or uploaded. */
     boolean turbo$isIdle();
 
+    /** Every chunk renderer the world renderer holds now, in view or not (a copy of the list). */
+    List<ChunkRendererSchematicVbo> turbo$chunkRenderers();
+
     /** Turbo's rebuild scheduling of this world renderer. */
     RebuildQueue turbo$rebuilds();
 

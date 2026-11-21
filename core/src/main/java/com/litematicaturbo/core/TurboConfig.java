@@ -43,6 +43,8 @@ public final class TurboConfig
     public boolean farDetail = true;
     /** While a placement moves, show a complete copy of it (every block) instead of the old pieces with holes (see CompleteCopy). */
     public boolean completeCopy = true;
+    /** Only pieces near the camera keep Litematica's copies for sorting see-through blocks again (see SortCopies). */
+    public boolean sortCopies = true;
 
     private static Path configDir;
 
@@ -125,6 +127,11 @@ public final class TurboConfig
         return this.enabled && this.farDetail;
     }
 
+    public boolean sortCopiesEnabled()
+    {
+        return this.enabled && this.sortCopies;
+    }
+
     public boolean completeCopyEnabled()
     {
         return this.ghostMoveEnabled() && this.completeCopy;
@@ -198,6 +205,7 @@ public final class TurboConfig
         this.batchDraw = bool(props, "batchDraw", this.batchDraw);
         this.farDetail = bool(props, "farDetail", this.farDetail);
         this.completeCopy = bool(props, "completeCopy", this.completeCopy);
+        this.sortCopies = bool(props, "sortCopies", this.sortCopies);
     }
 
     /** Writes the settings back to the file they were loaded from. */
@@ -237,7 +245,9 @@ public final class TurboConfig
                     + "# farDetail: leave out the outline lines of schematic pieces far away (only a blur there); off by itself while memory is low\n"
                     + "farDetail=" + this.farDetail + "\n"
                     + "# completeCopy: while a placement moves, show a complete copy of it (every block) instead of the old pieces with holes where the world matched; needs ghostMove\n"
-                    + "completeCopy=" + this.completeCopy + "\n";
+                    + "completeCopy=" + this.completeCopy + "\n"
+                    + "# sortCopies: only schematic pieces near you keep the copy Litematica sorts see-through blocks from (less memory with big schematics)\n"
+                    + "sortCopies=" + this.sortCopies + "\n";
 
         try
         {

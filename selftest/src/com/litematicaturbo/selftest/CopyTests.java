@@ -62,7 +62,8 @@ final class CopyTests
     /** The renderers the block layers draw right now, and the old pieces (ghosts). */
     private static List<?> blockRenderers(Ctx ctx) throws Exception
     {
-        return ctx.onMain(() -> new java.util.ArrayList<Object>((List<?>) Ctx.call(ctx.turbo("GhostMove"), "blockRenderers")));
+        return ctx.onMain(() -> new java.util.ArrayList<Object>((List<?>) Ctx.call(ctx.turbo("GhostMove"), "blockRenderers",
+                                                                                   Ctx.getField(StatsTests.renderer(ctx), "renderInfos"))));
     }
 
     private static List<?> ghosts(Ctx ctx) throws Exception

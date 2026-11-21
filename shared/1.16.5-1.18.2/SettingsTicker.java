@@ -11,6 +11,7 @@ import com.litematicaturbo.core.BatchDrawing;
 import com.litematicaturbo.core.CompactStorage;
 import com.litematicaturbo.core.CompleteCopy;
 import com.litematicaturbo.core.FarDetail;
+import com.litematicaturbo.core.SortCopies;
 
 /** The settings tab's work on each client tick (see TurboSettingsTab), and the chat warnings of a switched-off Turbo. */
 final class SettingsTicker implements IClientTickHandler
@@ -64,6 +65,13 @@ final class SettingsTicker implements IClientTickHandler
         if (farFailure != null)
         {
             mc.inGameHud.getChatHud().addMessage(new TranslatableText("litematica_turbo.message.far_off", farFailure).formatted(Formatting.GOLD));
+        }
+
+        String sortFailure = SortCopies.takeFailureWarning(mc.player != null);
+
+        if (sortFailure != null)
+        {
+            mc.inGameHud.getChatHud().addMessage(new TranslatableText("litematica_turbo.message.sortcopy_off", sortFailure).formatted(Formatting.GOLD));
         }
 
         String completeFailure = CompleteCopy.takeFailureWarning(mc.player != null);

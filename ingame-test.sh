@@ -134,6 +134,8 @@ run_version()
         cp "$png" "$HERE/test-shots/$v-$(basename "$png")"
     done
     rm -rf "$run"
+    # the game log goes to _out/ too: the tester brings it back from a failed run (mods.json "logs")
+    mkdir -p "$HERE/_out" && cp "$log" "$HERE/_out/$v${WITH:+-$WITH}-selftest.log"
     secs=$(( $(date +%s) - start ))
     summary=$(sed -n 's/.*SCOPE TESTS: \([0-9]*\) passed, \([0-9]*\) failed, \([0-9]*\) skipped.*/\1 \2 \3/p' "$log" | tail -n 1)
     if [ -z "$summary" ]; then

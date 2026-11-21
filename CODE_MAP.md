@@ -80,6 +80,21 @@ builds get the same code through their `fabric_source` folder.
   only because Litematica moved the overlay type: nested in `ChunkRendererSchematicVbo` (`shared/1.16.5-1.20.4`), its own
   class from 1.21 (`shared/1.21-26.3`). Camera and render distance come from Litematica's own fields (`lastCameraX/Z`,
   `renderDistanceChunks`). Setting: "Less detail far away" (`TurboConfig.farDetail`).
+- **Less memory for see-through sorting (every version):** Litematica keeps, per built piece, a re-sort copy of its
+  translucent layer and overlay sides. `SortCopies` (core) holds the rules (a piece keeps its copies within 48 blocks of the
+  camera, drops them past 64; a sweep when the camera moved 16 blocks, at most once a second while builds land; where
+  re-sorting never happens - 1.16.5 - 1.18.2 with build threads, marked by `ResortOffWithThreads` on
+  `WorldRendererSchematicResortMixin` - every copy is dropped), the setting check, the switch-off after an error (chat line
+  via each `SettingsTicker`) and the counters. `SortCopySweep` (`shared/all`) is the game side written once: each
+  `WorldRendererSchematicMixin` calls it at the start of `updateChunks` (render thread); it walks every piece
+  (`TurboWorldRenderer.turbo$chunkRenderers`), drops a far piece's copies under its `turbo$buildLock` (a piece a build
+  thread holds waits for the next sweep), remembers which build result it dropped them from and asks Litematica to rebuild
+  (`turbo$setNeedsUpdate`) a piece that comes within 48 blocks still without them; switched off (setting or error) every
+  dropped piece is rebuilt. Only `SortCopyData` (where the copies are: `data` / `copies` / `drop`) exists per Litematica
+  shape: `shared/1.16.5-1.20.4` (public BufferBuilder state getters / setters), `shared/1.21-1.21.4`
+  (`ChunkRenderDataSchematicSortAccessor`: one SortState + overlay map), `versions/1.21.10` (its accessor: block, layer and
+  overlay maps), `shared/1.21.11-26.3` (`ChunkMeshDataSchematicSortAccessor` on the mesh data); `SortCopyMaps`
+  (`shared/1.21-26.3`) clears the maps. Setting: "Less memory for see-through sorting" (`TurboConfig.sortCopies`).
 - **Shader packs (Iris):** `ShaderPacks` (`shared/1.16.5-1.21.4`) asks Iris by name (no link at compile time) whether a
   shader pack is in use; `BatchRegions.start` hands the answer to `BatchDrawing.pauseFor` once a frame. While one is on,
   batch drawing is paused (not an error: `failure()` stays null), the tickers print `litematica_turbo.message.batch_paused`

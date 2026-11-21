@@ -21,6 +21,7 @@
     "ChunkRenderWorkerLitematicaMixin",
     "ChunkRendererSchematicVboCompleteMixin",
     "ChunkRendererSchematicVboInvoker",
+    "ChunkMeshDataSchematicSortAccessor",
     "ChunkRendererSchematicVboMixin",
     "GpuBufferCacheAccessor",
     "GuiConfigsMixin",

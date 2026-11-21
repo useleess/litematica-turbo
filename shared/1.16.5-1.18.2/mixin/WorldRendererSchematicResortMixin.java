@@ -9,9 +9,10 @@ import fi.dy.masa.litematica.render.schematic.ChunkRendererSchematicVbo;
 import fi.dy.masa.litematica.render.schematic.WorldRendererSchematic;
 
 import com.litematicaturbo.core.TurboConfig;
+import com.litematicaturbo.shared.ResortOffWithThreads;
 
 @Mixin(value = WorldRendererSchematic.class, remap = false)
-public abstract class WorldRendererSchematicResortMixin
+public abstract class WorldRendererSchematicResortMixin implements ResortOffWithThreads
 {
     /**
      * Before 1.19 a translucency re-sort reuses whatever vertex data is left in the buffer cache it

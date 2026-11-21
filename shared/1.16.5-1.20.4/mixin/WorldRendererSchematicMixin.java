@@ -18,6 +18,7 @@ import fi.dy.masa.litematica.render.schematic.WorldRendererSchematic;
 import com.litematicaturbo.shared.GhostMove;
 import com.litematicaturbo.shared.GhostRenderers;
 import com.litematicaturbo.shared.RebuildQueue;
+import com.litematicaturbo.shared.SortCopySweep;
 import com.litematicaturbo.shared.TurboWorldRenderer;
 
 @Mixin(value = WorldRendererSchematic.class, remap = false)
@@ -52,6 +53,7 @@ public abstract class WorldRendererSchematicMixin implements TurboWorldRenderer
     private void turbo$requeueDeferred(long finishTimeNano, CallbackInfo ci)
     {
         GhostRenderers.tick(this);
+        SortCopySweep.tick(this);
         this.turbo$rebuilds.requeue(this.chunksToUpdate);
     }
 

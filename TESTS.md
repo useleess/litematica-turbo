@@ -221,6 +221,15 @@ How a run goes (`Fixture`, built once on first use, the same for every version):
   `error-switches-off-and-draws-every-outline` (a fault in the check: off for the session, chat line, every outline
   drawn), `messages-translated`. The test world's zones B, F and E (9 - 11 chunks ahead, render distance 12) are far,
   zone N is near.
+- `sortcopy/` - less memory for see-through sorting, every version. Plain Litematica (the setting off) builds first and the
+  re-sort copies of every piece are counted (number and size) through the world renderer's own list; then the setting is
+  switched on in the same game: `far-pieces-hold-no-copy` (no piece over 64 blocks away holds a copy, the total is at most
+  half of plain Litematica's), `near-pieces-keep-copy` (next to zone T every piece within 48 blocks that held a copy still
+  does), `rebuilt-when-near` (zone T loses its copies 80 blocks away, gets them back when the player returns, and its build
+  description - sort data included - equals plain Litematica's), `messages-translated`; `safety/sortcopy-off-after-error`
+  (a fault in the sweep: off for the session, chat line, every dropped piece built again like plain Litematica). Before
+  1.19 Litematica never re-sorts with Turbo's build threads, so the near tests run with the threads off there. The
+  build/ captures run with the setting off: they describe the sort data too.
 - `copy/` - the complete copy while a placement moves, every version.
   Counted, never timed, on the lone test placement with a long settle time and a world that matches every second block of it:
   `drawn-pieces-hold-every-block` (the blocks of the pieces the block layers draw = the schematic's non-air blocks, no old
@@ -269,6 +278,7 @@ test id prefixes that show it works. All of them run on every version in `versio
 | Huge, mostly empty schematics in little memory, a message for a file that cannot fit | `memory/` |
 | Batch drawing: far fewer draw calls, the same picture, a failing batch switches itself off (1.16.5 - 1.21.4; newer versions skip) | `draw/` |
 | Less detail far away: far pieces drawn without outline lines, near ones unchanged, off while memory is low, a failing check switches off | `far/` |
+| Less memory for see-through sorting: far pieces drop their re-sort copies, near ones keep them, rebuilt sorted when near, a failing sweep switches off | `sortcopy/` |
 | Complete copy while moving: no holes in the moved view, kept within the memory limits, freed when deselected, a failing copy switches off | `copy/` |
 | Smooth placement moving: ghost shifted, rebuilt once stopped, swapped in one frame, same end result | `move/` |
 | F3 `[Litematica]` line with Turbo numbers, can be switched off | `stats/` |

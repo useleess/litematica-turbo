@@ -1,6 +1,7 @@
 package com.litematicaturbo.shared.mixin;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -32,7 +33,13 @@ public abstract class WorldRendererSchematicDetachMixin
     @Shadow @Final private IChunkRendererFactory renderChunkFactory;
     @Shadow private WorldSchematic world;
 
-    /** TurboWorldRenderer.turbo$detachChunkRenderers (that interface is added by WorldRendererSchematicMixin). */
+    /** TurboWorldRenderer.turbo$chunkRenderers (that interface is added by WorldRendererSchematicMixin). */
+    public List<ChunkRendererSchematicVbo> turbo$chunkRenderers()
+    {
+        return this.chunkRendererDispatcher == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(this.chunkRendererDispatcher.renderers));
+    }
+
+    /** TurboWorldRenderer.turbo$detachChunkRenderers. */
     /**
      * Litematica 0.11 keeps its chunk renderers in a fixed array (one 16-high slice each). Every
      * slice of these columns that has built buffers is taken out and replaced by a fresh renderer at the same spot.

@@ -1015,6 +1015,9 @@ final class Fixture
         }
 
         Ctx.setField(this.config, "enabled", enabled);
+        // a capture describes the see-through sort data too, which "less memory for see-through sorting" drops on far
+        // pieces by design; the sortcopy/ tests switch it on
+        Ctx.setField(this.config, "sortCopies", false);
         Ctx.setField(this.config, "buildThreads", threads);
         Ctx.setField(this.config, "skipEmptySections", skipEmpty);
         Ctx.setField(this.config, "asyncNearRebuilds", asyncNear);

@@ -12,6 +12,7 @@ import fi.dy.masa.litematica.render.schematic.ChunkRendererSchematicVbo;
 
 import com.litematicaturbo.core.BuildStats;
 import com.litematicaturbo.shared.CompletePiece;
+import com.litematicaturbo.shared.SortCopySweep;
 import com.litematicaturbo.shared.TurboRenderer;
 
 /**
@@ -64,6 +65,14 @@ public abstract class ChunkRenderWorkerLitematicaMixin
 
         try
         {
+            // A piece whose re-sort copies were dropped (SortCopySweep) has nothing to sort from: Litematica would then
+            // upload a buffer it never filled and crash. The re-sort is called off; the piece stays sorted as built.
+            if (SortCopySweep.copies(renderer).isEmpty())
+            {
+                task.finish();
+                return;
+            }
+
             renderer.resortTransparency(task);
         }
         finally

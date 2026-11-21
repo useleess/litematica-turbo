@@ -19,6 +19,7 @@
     "BufferBuilderCacheIrisMixin",
     "ChunkRendererSchematicVboClearMixin",
     "ChunkRendererSchematicVboInvoker",
+    "ChunkRenderDataSchematicSortAccessor",
     "ChunkRendererSchematicVboGpuMixin",
     "GuiConfigsMixin",
     "GuiConfigsTabListenerMixin",

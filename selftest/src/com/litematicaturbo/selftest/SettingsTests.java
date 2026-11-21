@@ -49,6 +49,7 @@ final class SettingsTests
         new Option("COMPACT_STORAGE", "compactStorage", false),
         new Option("BATCH_DRAW", "batchDraw", false),
         new Option("FAR_DETAIL", "farDetail", false),
+        new Option("SORT_COPIES", "sortCopies", false),
         new Option("COMPLETE_COPY", "completeCopy", false),
     };
 
