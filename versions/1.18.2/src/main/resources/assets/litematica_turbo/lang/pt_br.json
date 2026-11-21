@@ -11,6 +11,7 @@
   "config.name.turbocompactstorage": "Armazenamento compacto para esquemas enormes",
   "config.name.turbobatchdraw": "Desenho em lote",
   "config.name.turbofardetail": "Menos detalhes à distância",
+  "config.name.turbosortcopies": "Menos memória para ordenação transparente",
   "config.name.turbocompletecopy": "Cópia completa ao mover",
   "litematica_turbo.gui.button.config_gui.turbo": "Turbo",
   "litematica_turbo.message.out_of_memory": "[Litematica Turbo] Este esquema é grande demais para a memória que o Minecraft tem (%s MB), então não foi carregado. Dê mais memória ao Minecraft ou use um esquema menor.",
@@ -19,6 +20,7 @@
   "litematica_turbo.message.batch_paused": "[Litematica Turbo] O desenho em lote está pausado enquanto os shaders de %s estiverem ativados, pois eles desenham o esquema de outro jeito. O esquema é desenhado peça por peça, como no Litematica normal, e o desenho em lote volta quando os shaders forem desativados.",
   "litematica_turbo.message.copy_off": "[Litematica Turbo] A cópia rápida de colocações teve um erro (%s) e está desativada nesta sessão. As colocações são copiadas do jeito normal do Litematica.",
   "litematica_turbo.message.far_off": "[Litematica Turbo] Menos detalhes à distância teve um erro (%s) e está desativado nesta sessão. Todos os contornos são desenhados, como no Litematica normal.",
+  "litematica_turbo.message.sortcopy_off": "[Litematica Turbo] Menos memória para ordenação transparente encontrou um erro (%s) e ficou desativado nesta sessão. Cada peça do esquema volta a manter sua cópia de ordenação transparente, como no Litematica normal.",
   "litematica_turbo.message.build_dropped": "[Litematica Turbo] Não foi possível construir um chunk do esquema (%s). Essa construção foi descartada e o chunk está sendo construído novamente; os detalhes estão no log do jogo.",
   "litematica_turbo.message.complete_off": "[Litematica Turbo] A cópia completa ao mover teve um erro (%s) e está desativada nesta sessão. Uma colocação movida mostra as peças antigas normais, como antes."
 }

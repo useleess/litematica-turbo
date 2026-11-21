@@ -11,6 +11,7 @@
   "config.name.turbocompactstorage": "Kompakt lagring för enorma schematics",
   "config.name.turbobatchdraw": "Batchritning",
   "config.name.turbofardetail": "Mindre detaljer på avstånd",
+  "config.name.turbosortcopies": "Mindre minne för genomskinlig sortering",
   "config.name.turbocompletecopy": "Fullständig kopia vid förflyttning",
   "litematica_turbo.gui.button.config_gui.turbo": "Turbo",
   "litematica_turbo.message.out_of_memory": "[Litematica Turbo] Detta schematic är för stort för det minne Minecraft har (%s MB), så det laddades inte. Ge Minecraft mer minne eller använd ett mindre schematic.",
@@ -19,6 +20,7 @@
   "litematica_turbo.message.batch_paused": "[Litematica Turbo] Batchritning är pausad medan shaders från %s är på, eftersom de ritar schematicet på ett annat sätt. Schematicet ritas bit för bit, som i vanlig Litematica, och batchritning återgår när shaders är av.",
   "litematica_turbo.message.copy_off": "[Litematica Turbo] Snabb kopiering av placeringar stötte på ett fel (%s) och är avstängd för den här sessionen. Placeringar kopieras på det vanliga Litematica-sättet.",
   "litematica_turbo.message.far_off": "[Litematica Turbo] Mindre detaljer på avstånd stötte på ett fel (%s) och är avstängd för den här sessionen. Varje kontur ritas, som i vanlig Litematica.",
+  "litematica_turbo.message.sortcopy_off": "[Litematica Turbo] Mindre minne för genomskinlig sortering fick ett fel (%s) och är avstängd för den här sessionen. Varje schematikdel får åter sin genomskinliga sorteringskopia, precis som i vanlig Litematica.",
   "litematica_turbo.message.build_dropped": "[Litematica Turbo] En schematic-chunk kunde inte byggas (%s). Bygget avbröts och chunken byggs om; detaljerna finns i spelloggen.",
   "litematica_turbo.message.complete_off": "[Litematica Turbo] Fullständig kopia vid förflyttning stötte på ett fel (%s) och är avstängd för den här sessionen. En förflyttad placering visar de vanliga gamla delarna, som förut."
 }

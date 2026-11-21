@@ -11,6 +11,7 @@
   "config.name.turbocompactstorage": "Almacenamiento compacto para esquemas enormes",
   "config.name.turbobatchdraw": "Dibujado por lotes",
   "config.name.turbofardetail": "Menos detalle a distancia",
+  "config.name.turbosortcopies": "Menos memoria para la ordenación transparente",
   "config.name.turbocompletecopy": "Copia completa mientras se mueve",
   "litematica_turbo.gui.button.config_gui.turbo": "Turbo",
   "litematica_turbo.message.out_of_memory": "[Litematica Turbo] Este esquema es demasiado grande para la memoria que tiene Minecraft (%s MB), así que no se ha cargado. Asigna más memoria a Minecraft o usa un esquema más pequeño.",
@@ -19,6 +20,7 @@
   "litematica_turbo.message.batch_paused": "[Litematica Turbo] El dibujado por lotes está en pausa mientras los shaders de %s estén activados, porque dibujan el esquema de otra forma. El esquema se dibuja pieza a pieza, como en Litematica normal, y el dibujado por lotes vuelve cuando los shaders se desactiven.",
   "litematica_turbo.message.copy_off": "[Litematica Turbo] La copia rápida de colocaciones ha dado un error (%s) y está desactivada en esta sesión. Las colocaciones se copian de la forma normal de Litematica.",
   "litematica_turbo.message.far_off": "[Litematica Turbo] El menor detalle a distancia ha dado un error (%s) y está desactivado en esta sesión. Se dibujan todos los contornos, como en Litematica normal.",
+  "litematica_turbo.message.sortcopy_off": "[Litematica Turbo] Menos memoria para la ordenación transparente ha dado un error (%s) y está desactivado durante esta sesión. Cada pieza del esquema vuelve a tener su copia de ordenación transparente, como en Litematica normal.",
   "litematica_turbo.message.build_dropped": "[Litematica Turbo] No se pudo construir un fragmento del esquema (%s). Esa construcción se descartó y el fragmento se vuelve a construir; los detalles están en el registro del juego.",
   "litematica_turbo.message.complete_off": "[Litematica Turbo] La copia completa mientras se mueve ha dado un error (%s) y está desactivada en esta sesión. Una colocación movida muestra las piezas antiguas normales, como antes."
 }

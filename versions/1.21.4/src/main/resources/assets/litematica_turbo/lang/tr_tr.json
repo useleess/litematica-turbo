@@ -11,6 +11,7 @@
   "config.name.turbocompactstorage": "Çok büyük şemalar için kompakt depolama",
   "config.name.turbobatchdraw": "Toplu çizim",
   "config.name.turbofardetail": "Uzaktayken daha az ayrıntı",
+  "config.name.turbosortcopies": "Şeffaf sıralama için daha az bellek",
   "config.name.turbocompletecopy": "Taşırken tam kopya",
   "litematica_turbo.gui.button.config_gui.turbo": "Turbo",
   "litematica_turbo.message.out_of_memory": "[Litematica Turbo] Bu şema, Minecraft'ın sahip olduğu bellek (%s MB) için çok büyük, bu yüzden yüklenmedi. Minecraft'a daha fazla bellek verin veya daha küçük bir şema kullanın.",
@@ -19,6 +20,7 @@
   "litematica_turbo.message.batch_paused": "[Litematica Turbo] %s shader'ları açıkken şemayı farklı çizdikleri için toplu çizim duraklatıldı. Şema, normal Litematica'da olduğu gibi parça parça çiziliyor ve shader'lar kapandığında toplu çizim geri gelir.",
   "litematica_turbo.message.copy_off": "[Litematica Turbo] Hızlı yerleştirme kopyalama bir hatayla karşılaştı (%s) ve bu oturum için kapalı. Yerleştirmeler normal Litematica yöntemiyle kopyalanıyor.",
   "litematica_turbo.message.far_off": "[Litematica Turbo] Uzaktayken daha az ayrıntı bir hatayla karşılaştı (%s) ve bu oturum için kapalı. Her kontur, normal Litematica'da olduğu gibi çiziliyor.",
+  "litematica_turbo.message.sortcopy_off": "[Litematica Turbo] Şeffaf sıralama için daha az bellek bir hataya (%s) takıldı ve bu oturum için kapalı. Her şematik parçası, normal Litematica'da olduğu gibi şeffaf sıralama kopyasını yeniden tutar.",
   "litematica_turbo.message.build_dropped": "[Litematica Turbo] Bir şematik chunk'ı inşa edilemedi (%s). Bu inşa iptal edildi ve chunk yeniden inşa ediliyor; ayrıntılar oyun günlüğünde.",
   "litematica_turbo.message.complete_off": "[Litematica Turbo] Taşırken tam kopya bir hatayla karşılaştı (%s) ve bu oturum için kapalı. Taşınan bir yerleştirme, daha önceki gibi normal eski parçaları gösteriyor."
 }

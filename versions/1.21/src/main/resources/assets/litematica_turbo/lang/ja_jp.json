@@ -11,6 +11,7 @@
   "config.name.turbocompactstorage": "巨大なスキーマティックの省メモリ保存",
   "config.name.turbobatchdraw": "一括描画",
   "config.name.turbofardetail": "遠くの詳細を減らす",
+  "config.name.turbosortcopies": "透視ソート用のメモリ削減",
   "config.name.turbocompletecopy": "移動中も完全にコピー",
   "litematica_turbo.gui.button.config_gui.turbo": "ターボ",
   "litematica_turbo.message.out_of_memory": "[Litematica Turbo] このスキーマティックは、Minecraftに割り当てられたメモリ (%s MB) には大きすぎるため、読み込まれませんでした。Minecraftのメモリを増やすか、より小さいスキーマティックを使用してください。",
@@ -19,6 +20,7 @@
   "litematica_turbo.message.batch_paused": "[Litematica Turbo] %s のシェーダーが有効な間は、スキーマティックの描画方法が異なるため、一括描画は一時停止しています。スキーマティックは通常のLitematicaと同じく、部分ごとに描画されます。シェーダーを無効にすると一括描画は再開されます。",
   "litematica_turbo.message.copy_off": "[Litematica Turbo] 高速な設置コピーでエラー (%s) が発生したため、このセッションでは無効になっています。設置はLitematicaの通常の方法でコピーされます。",
   "litematica_turbo.message.far_off": "[Litematica Turbo] 遠くの詳細を減らす機能でエラー (%s) が発生したため、このセッションでは無効になっています。すべての輪郭線が、通常のLitematicaと同じく描画されます。",
+  "litematica_turbo.message.sortcopy_off": "[Litematica Turbo] 透視ソート用のメモリ削減でエラー（%s）が発生したため、このセッションでは無効になりました。設計図の各パーツは、通常の Litematica と同じように透視ソート用のコピーを再び保持します。",
   "litematica_turbo.message.build_dropped": "[Litematica Turbo] 投影のチャンク（%s）を建築できませんでした。その建築は破棄され、チャンクは再度建築されます。詳細はゲームのログに記録されています。",
   "litematica_turbo.message.complete_off": "[Litematica Turbo] 移動中の完全コピーでエラー (%s) が発生したため、このセッションでは無効になっています。移動した設置は、以前と同じく通常の古い部分で表示されます。"
 }

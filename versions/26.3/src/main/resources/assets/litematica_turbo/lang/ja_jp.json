@@ -11,6 +11,7 @@
   "config.name.turbocompactstorage": "巨大なスキーマティックの省メモリ保存",
   "config.name.turbobatchdraw": "一括描画",
   "config.name.turbofardetail": "遠くの詳細度を下げる",
+  "config.name.turbosortcopies": "透過表示の並べ替えでメモリを節約",
   "config.name.turbocompletecopy": "移動中も完全なコピーを表示",
   "litematica_turbo.gui.button.config_gui.turbo": "ターボ",
   "litematica_turbo.message.out_of_memory": "[Litematica Turbo] このスキーマティックは、Minecraftに割り当てられたメモリ（%s MB）では大きすぎるため、読み込まれませんでした。Minecraftに多くのメモリを割り当てるか、より小さいスキーマティックを使用してください。",
@@ -19,6 +20,7 @@
   "litematica_turbo.message.batch_paused": "[Litematica Turbo] %s のシェーダーが有効な間は、描画方法が異なるため一括描画を一時停止しています。スキーマティックは通常のLitematicaと同じように、部分ごとに描画されます。シェーダーを無効にすると一括描画は再開されます。",
   "litematica_turbo.message.copy_off": "[Litematica Turbo] 高速設置コピーでエラー（%s）が発生したため、このセッションでは無効になりました。設置は通常のLitematicaの方法でコピーされます。",
   "litematica_turbo.message.far_off": "[Litematica Turbo] 遠くの詳細度を下げる機能でエラー（%s）が発生したため、このセッションでは無効になりました。すべての輪郭が、通常のLitematicaと同じように描画されます。",
+  "litematica_turbo.message.sortcopy_off": "[Litematica Turbo] 透過表示の並べ替えでメモリを節約する機能でエラー（%s）が発生したため、このセッションではオフになりました。各スキーマティックの部品は、通常の Litematica と同じように、再び透過表示の並べ替え用コピーを保持します。",
   "litematica_turbo.message.build_dropped": "[Litematica Turbo] スキーマティックのチャンクを建築できませんでした（%s）。その建築処理は破棄され、チャンクは再度建築されます。詳細はゲームログに記録されています。",
   "litematica_turbo.message.complete_off": "[Litematica Turbo] 移動中の完全コピーでエラー（%s）が発生したため、このセッションでは無効になりました。移動した設置は、以前と同じく通常の古いパーツとして表示されます。"
 }

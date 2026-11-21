@@ -11,6 +11,7 @@
   "config.name.turbocompactstorage": "巨型投影使用精簡儲存",
   "config.name.turbobatchdraw": "批次繪製",
   "config.name.turbofardetail": "遠處減少細節",
+  "config.name.turbosortcopies": "減少透視排序的記憶體用量",
   "config.name.turbocompletecopy": "移動時完整複製",
   "litematica_turbo.gui.button.config_gui.turbo": "Turbo",
   "litematica_turbo.message.out_of_memory": "[Litematica Turbo] 此投影對 Minecraft 的記憶體（%s MB）來說太大，因此未載入。請為 Minecraft 分配更多記憶體，或改用較小的投影。",
@@ -19,6 +20,7 @@
   "litematica_turbo.message.batch_paused": "[Litematica Turbo] 開啟 %s 光影時，批次繪製已暫停，因為它們繪製投影的方式不同。投影將像一般 Litematica 一樣逐塊繪製，關閉光影後批次繪製會恢復。",
   "litematica_turbo.message.copy_off": "[Litematica Turbo] 快速放置複製發生錯誤（%s），本次工作階段已關閉。放置內容將以一般 Litematica 的方式複製。",
   "litematica_turbo.message.far_off": "[Litematica Turbo] 遠處減少細節發生錯誤（%s），本次工作階段已關閉。每個輪廓都會繪製，與一般 Litematica 相同。",
+  "litematica_turbo.message.sortcopy_off": "[Litematica Turbo] 減少透視排序的記憶體用量功能發生錯誤（%s），本次遊戲期間已關閉。每個投影區塊會重新保留透視排序副本，與一般 Litematica 相同。",
   "litematica_turbo.message.build_dropped": "[Litematica Turbo] 無法建造投影檔的一個區塊（%s）。該次建造已捨棄，區塊會重新建造；詳細資訊請見遊戲日誌。",
   "litematica_turbo.message.complete_off": "[Litematica Turbo] 移動時完整複製發生錯誤（%s），本次工作階段已關閉。移動後的放置將顯示一般的舊區塊，與之前相同。"
 }

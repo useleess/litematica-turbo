@@ -11,6 +11,7 @@
   "config.name.turbocompactstorage": "Компактне зберігання для великих схем",
   "config.name.turbobatchdraw": "Пакетне малювання",
   "config.name.turbofardetail": "Менше деталей здалеку",
+  "config.name.turbosortcopies": "Менше пам’яті для сортування прозорості",
   "config.name.turbocompletecopy": "Повне копіювання під час переміщення",
   "litematica_turbo.gui.button.config_gui.turbo": "Турбо",
   "litematica_turbo.message.out_of_memory": "[Litematica Turbo] Ця схема занадто велика для пам'яті, яка є у Minecraft (%s МБ), тому її не завантажено. Виділіть Minecraft більше пам'яті або використайте меншу схему.",
@@ -19,6 +20,7 @@
   "litematica_turbo.message.batch_paused": "[Litematica Turbo] Пакетне малювання призупинено, поки увімкнені шейдери з %s, бо вони малюють схему інакше. Схема малюється частинами, як у звичайній Litematica, а пакетне малювання повернеться, коли шейдери вимкнуть.",
   "litematica_turbo.message.copy_off": "[Litematica Turbo] Швидке копіювання розміщень видало помилку (%s) і вимкнене на цей сеанс. Розміщення копіюються звичайним способом Litematica.",
   "litematica_turbo.message.far_off": "[Litematica Turbo] Менше деталей здалеку видало помилку (%s) і вимкнене на цей сеанс. Малюється кожен контур, як у звичайній Litematica.",
+  "litematica_turbo.message.sortcopy_off": "[Litematica Turbo] Менше пам’яті для сортування прозорості дала помилку (%s) і вимкнена на цей сеанс. Кожна частина схеми знову отримує власну копію для сортування прозорості, як у звичайній Litematica.",
   "litematica_turbo.message.build_dropped": "[Litematica Turbo] Не вдалося побудувати чанк схеми (%s). Цю побудову скасовано, а чанк побудовано знову; подробиці — у журналі гри.",
   "litematica_turbo.message.complete_off": "[Litematica Turbo] Повне копіювання під час переміщення видало помилку (%s) і вимкнене на цей сеанс. Переміщене розміщення показує звичайні старі частини, як раніше."
 }
