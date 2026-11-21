@@ -26,7 +26,14 @@ public abstract class WorldRendererSchematicDetachMixin
     @Shadow private ChunkRenderDispatcherSchematic chunkRendererDispatcher;
     @Shadow private boolean displayListEntitiesDirty;
 
-    /** TurboWorldRenderer.turbo$detachChunkRenderers (that interface is added by WorldRendererSchematicMixin). */
+    /** TurboWorldRenderer.turbo$chunkRenderers (that interface is added by WorldRendererSchematicMixin). */
+    public List<ChunkRendererSchematicVbo> turbo$chunkRenderers()
+    {
+        return this.chunkRendererDispatcher == null ? new ArrayList<>()
+            : new ArrayList<>(((ChunkRenderDispatcherSchematicAccessor) this.chunkRendererDispatcher).turbo$getChunkRenderers().values());
+    }
+
+    /** TurboWorldRenderer.turbo$detachChunkRenderers. */
     public List<ChunkRendererSchematicVbo> turbo$detachChunkRenderers(Set<Long> columns)
     {
         if (this.chunkRendererDispatcher == null)
